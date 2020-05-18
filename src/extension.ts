@@ -137,6 +137,87 @@ function buildIndentedCompletion(completion: StaticCompletion,
   return snippet;
 }
 
+// For example an input of `\some.function{x}:on{A}to{B}`
+// will return `\some.function{${1:x}}:on{${2:A}}to{${3:B}}`
+function getVariableAnnotatedVersion(id: string): string {
+  const trimmed = id.trim();
+
+  const lhsExec = /^[a-zA-Z]+/.exec(trimmed);
+  const lhs = !!lhsExec ? lhsExec[0] : '';
+
+  const rhsExec = / [a-zA-Z]+$/.exec(trimmed);
+  const rhs = !!rhsExec ? rhsExec[0].trim() : '';
+
+  let count = 1;
+
+  let result = '';
+
+  // Don't include the left-hand-side of an infix operator
+  // so that if a known infix operator is `a \in b` and the
+  // user types `x \i` the autocomplete fills in `x \in b`
+  // with the `b` highlighted for the user to modify.
+  /*
+  if (lhs) {
+    result += '${' + (count++) + ':' + lhs + '}';
+    result += ' ';
+  }
+  */
+
+  const inner = trimmed.substring(lhs.length, trimmed.length - rhs.length).trim();
+  let bracesCount = 0;
+  let i = 0;
+  while (i < inner.length) {
+    const c = inner[i++];
+    if (c === '{' || c === '(' || c === '[') {
+      bracesCount++;
+      result += c;
+    } else if (c === '}' || c === ')' || c === ']') {
+      bracesCount--;
+      result += c;
+    } else if (/[a-zA-Z]/.test(c) && bracesCount > 0) {
+      let varName = c;
+      while (i < inner.length && /[a-zA-Z]/.test(inner[i])) {
+        varName += inner[i++];
+      }
+
+      result += '${' + (count++) + ':' + varName + '}';
+    } else {
+      result += c;
+    }
+  }
+
+  if (rhs) {
+    result += ' ';
+    result += '${' + (count++) + ':' + rhs + '}';
+  }
+
+  return result;
+}
+
+function getDynamicIdCompletions(text: string): vscode.CompletionItem[] {
+  const result: vscode.CompletionItem[] = [];
+
+  for (const line of text.split('\n')) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+      const id = trimmed.substring(1, trimmed.length - 1).trim();
+
+      const snippet = new vscode.CompletionItem(id);
+      // replace the first \ character from the text to insert.
+      // Otherwise, for the text `\som` the autocomplete will
+      // replace it with `\\something' with two \ characters.
+      let toInsert = getVariableAnnotatedVersion(id).replace(/\\/, '');
+      snippet.insertText = new vscode.SnippetString(toInsert);
+      snippet.keepWhitespace = true;
+      snippet.commitCharacters = ['\\'];
+
+      result.push(snippet);
+    }
+  }
+
+  return result;
+}
+
 export function activate(context: vscode.ExtensionContext) {
 
   const staticCompletionProvider = vscode.languages.registerCompletionItemProvider('mathlingua', {
@@ -144,9 +225,13 @@ export function activate(context: vscode.ExtensionContext) {
                            position: vscode.Position,
                            token: vscode.CancellationToken,
                            context: vscode.CompletionContext) {
-      return STATIC_COMPLETIONS.map(it =>
+      const staticCompletions = STATIC_COMPLETIONS.map(it =>
         buildIndentedCompletion(it, document, position))
           .filter(it => !!it) as vscode.CompletionItem[];
+
+      const dynamicCompletions = getDynamicIdCompletions(document.getText());
+
+      return staticCompletions.concat(dynamicCompletions);
     }
   });
 
