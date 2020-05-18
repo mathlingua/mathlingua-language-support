@@ -1,0 +1,1 @@
+The file (./syntaxes/mathlingua.tmLanguage.json) is based on the file [extensions/yaml/syntaxes/yaml.tmLanguage.json](https://github.com/microsoft/vscode/blob/master/extensions/yaml/syntaxes/yaml.tmLanguage.json) from the [VSCode](https://github.com/microsoft/vscode) codebase (licensed under the MIT license).

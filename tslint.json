@@ -1,0 +1,15 @@
+{
+	"rules": {
+		"indent": [true, "spaces", 2],
+		"semicolon": [true, "always"],
+		"max-line-length": [
+			true,
+			{
+			  "limit": 120,
+			  "ignore-pattern": "^import |^export {(.*?)}",
+			  "check-strings": true,
+			  "check-regex": true
+			}
+		  ]
+	}
+}
