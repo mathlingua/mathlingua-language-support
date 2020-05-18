@@ -8,6 +8,10 @@ Syntax highlighting and autocompletion of mathematical structures are supported.
 
 ## Release Notes
 
+### 0.1.1 (2020-05-17)
+#### Added
+- Included more keywords to identify the extension
+
 ### 0.1.0 (2020-05-17)
 #### Added
 - Introduced syntax highlighting support
