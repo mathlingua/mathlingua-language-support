@@ -4,9 +4,12 @@ This is the official Visual Studio Code extension to provide language support fo
 
 ## Features
 
-Syntax highlighting and autocompletion of mathematical structures are supported.  The current version does not support autocompletion within statements (text within single quotes).
+Syntax highlighting, auto-analysis on save, and autocomplete within the current file.
 
 ## Release Notes
+
+### 0.3.0 (2020-05-19)
+- Parse errors are now displayed within the editor on save.
 
 ### 0.2.0 (2020-05-18)
 #### Added

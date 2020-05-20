@@ -16,6 +16,8 @@
 
 import * as vscode from 'vscode';
 
+import {MathlinguaProvider} from './mathlingua_provider';
+
 interface StaticCompletion {
   name: string;
   documentation: string;
@@ -219,6 +221,10 @@ function getDynamicIdCompletions(text: string): vscode.CompletionItem[] {
 }
 
 export function activate(context: vscode.ExtensionContext) {
+
+  const mathlinguaProvider = new MathlinguaProvider();
+  mathlinguaProvider.activate(context.subscriptions);
+  vscode.languages.registerCodeActionsProvider('mathlingua', mathlinguaProvider);
 
   const staticCompletionProvider = vscode.languages.registerCompletionItemProvider('mathlingua', {
     provideCompletionItems(document: vscode.TextDocument,

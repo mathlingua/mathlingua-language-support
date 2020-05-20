@@ -2,7 +2,7 @@
     "name": "mathlingua-language-support",
     "displayName": "Mathlingua Language Support",
     "description": "Visual Studio Code language support for the Mathlingua language",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "publisher": "dominickramer",
     "author": {
         "name": "Dominic Kramer"
@@ -53,8 +53,7 @@
     ],
     "main": "./out/extension.js",
     "scripts": {
-        "publish": "vsce publish",
-        "vscode:prepublish": "npm run compile",
+        "publish": "rm -Rf node_modules && rm -Rf out && rm -f *.vsix && npm install && npm run compile && vsce login dominickramer && vsce package && vsce publish",
         "compile": "tsc -p ./",
         "lint": "tslint -p ./",
         "fix": "tslint --fix -p ./",
@@ -65,5 +64,8 @@
         "tslint": "^5.19.0",
         "typescript": "^3.8.3",
         "vscode": "^1.1.37"
+    },
+    "dependencies": {
+        "kotlin": "^1.3.72"
     }
 }

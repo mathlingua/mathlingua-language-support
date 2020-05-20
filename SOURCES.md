@@ -1,1 +1,3 @@
-The file (./syntaxes/mathlingua.tmLanguage.json) is based on the file [extensions/yaml/syntaxes/yaml.tmLanguage.json](https://github.com/microsoft/vscode/blob/master/extensions/yaml/syntaxes/yaml.tmLanguage.json) from the [VSCode](https://github.com/microsoft/vscode) codebase (licensed under the MIT license).
+The file ./syntaxes/mathlingua.tmLanguage.json is based on the file [extensions/yaml/syntaxes/yaml.tmLanguage.json](https://github.com/microsoft/vscode/blob/master/extensions/yaml/syntaxes/yaml.tmLanguage.json) from the [VSCode](https://github.com/microsoft/vscode) codebase (licensed under the MIT license).
+
+The file ./src/mathlingua_provider.ts is based on the file [hlintProvider.ts](https://github.com/hoovercj/vscode-extension-tutorial/blob/master/src/features/hlintProvider.ts) from [vscode-extension-tutorial](https://github.com/hoovercj/vscode-extension-tutorial) codebase (licensed under the MIT license).
