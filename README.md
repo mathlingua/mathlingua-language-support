@@ -4,9 +4,12 @@ This is the official Visual Studio Code extension to provide language support fo
 
 ## Features
 
-Syntax highlighting, auto-analysis on save, and autocomplete within the current file.
+Supports syntax highlighting, auto-analysis, and autocomplete within the current file.  Any parse errors are displayed within the current file on save, and any signatures that are used but have not been defined are marked with a warning.
 
 ## Release Notes
+
+### 0.4.0 (2020-05-20)
+- Warnings are displayed for signatures that are used but have not been defined.
 
 ### 0.3.0 (2020-05-19)
 - Parse errors are now displayed within the editor on save.

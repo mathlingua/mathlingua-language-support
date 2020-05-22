@@ -3,13 +3,14 @@
 		"module": "commonjs",
 		"target": "es2019",
 		"lib": ["ES2019"],
-		"outDir": "out",
+		"outDir": "./out",
 		"sourceMap": true,
 		"strict": true,
-		"rootDir": "src",
+		"rootDir": "./src",
 		"allowJs": true
 	},
 	"exclude": [
+		"**/out/**",
 		"node_modules",
 		".vscode-test"
 	]

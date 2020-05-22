@@ -2,9 +2,11 @@
   'use strict';
   var Kind_CLASS = Kotlin.Kind.CLASS;
   var toList = Kotlin.kotlin.collections.toList_7wnvza$;
+  var emptyList = Kotlin.kotlin.collections.emptyList_287e2$;
   var throwCCE = Kotlin.throwCCE;
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
+  var LinkedHashSet_init = Kotlin.kotlin.collections.LinkedHashSet_init_287e2$;
   var RuntimeException_init = Kotlin.kotlin.RuntimeException_init_pdl1vj$;
   var RuntimeException = Kotlin.kotlin.RuntimeException;
   var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
@@ -34,7 +36,6 @@
   var last = Kotlin.kotlin.collections.last_2p1efm$;
   var IllegalArgumentException_init = Kotlin.kotlin.IllegalArgumentException_init_pdl1vj$;
   var first = Kotlin.kotlin.collections.first_2p1efm$;
-  var LinkedHashSet_init = Kotlin.kotlin.collections.LinkedHashSet_init_287e2$;
   var sortedWith = Kotlin.kotlin.collections.sortedWith_eknfly$;
   var wrapFunction = Kotlin.wrapFunction;
   var Comparator = Kotlin.kotlin.Comparator;
@@ -44,7 +45,6 @@
   var mapOf = Kotlin.kotlin.collections.mapOf_qfcya0$;
   var mutableListOf = Kotlin.kotlin.collections.mutableListOf_i5x0yv$;
   var copyToArray = Kotlin.kotlin.collections.copyToArray;
-  var emptyList = Kotlin.kotlin.collections.emptyList_287e2$;
   var filterNotNull = Kotlin.kotlin.collections.filterNotNull_emfgvx$;
   var Iterable = Kotlin.kotlin.collections.Iterable;
   var StringBuilder = Kotlin.kotlin.text.StringBuilder;
@@ -142,6 +142,36 @@
   Parse.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.document, other.document) && Kotlin.equals(this.tracker, other.tracker)))));
   };
+  function Signature(form, location) {
+    this.form = form;
+    this.location = location;
+  }
+  Signature.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Signature',
+    interfaces: []
+  };
+  Signature.prototype.component1 = function () {
+    return this.form;
+  };
+  Signature.prototype.component2 = function () {
+    return this.location;
+  };
+  Signature.prototype.copy_8hmx8e$ = function (form, location) {
+    return new Signature(form === void 0 ? this.form : form, location === void 0 ? this.location : location);
+  };
+  Signature.prototype.toString = function () {
+    return 'Signature(form=' + Kotlin.toString(this.form) + (', location=' + Kotlin.toString(this.location)) + ')';
+  };
+  Signature.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.form) | 0;
+    result = result * 31 + Kotlin.hashCode(this.location) | 0;
+    return result;
+  };
+  Signature.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.form, other.form) && Kotlin.equals(this.location, other.location)))));
+  };
   function MathLingua() {
     MathLingua_instance = this;
   }
@@ -195,14 +225,80 @@
   MathLingua.prototype.signatureOf_mwzhn3$ = function (command) {
     return getCommandSignature(command);
   };
-  MathLingua.prototype.findAllSignatures_2v05ti$ = function (node) {
-    return toList(locateAllSignatures(node));
+  MathLingua.prototype.findAllSignatures_capiq$ = function (node, locationTracker) {
+    return toList(locateAllSignatures(node, locationTracker));
   };
   MathLingua.prototype.flattenSignature_61zpoe$ = function (signature) {
     return flattenSignature(signature);
   };
   MathLingua.prototype.findAllCommands_2v05ti$ = function (node) {
     return toList(locateAllCommands(node));
+  };
+  MathLingua.prototype.findUndefinedSignatures_kwv3np$ = function (input, supplemental) {
+    var tmp$, tmp$_0, tmp$_1;
+    var definedSignatures = LinkedHashSet_init();
+    definedSignatures.addAll_brywnq$(this.getAllDefinedSignatures_0(input));
+    tmp$ = supplemental.iterator();
+    while (tmp$.hasNext()) {
+      var sup = tmp$.next();
+      definedSignatures.addAll_brywnq$(this.getAllDefinedSignatures_0(sup));
+    }
+    var validation = this.parseWithLocations_61zpoe$(input);
+    if (Kotlin.isType(validation, ValidationSuccess)) {
+      var result = ArrayList_init();
+      var signatures = this.findAllSignatures_capiq$(validation.value.document, validation.value.tracker);
+      tmp$_0 = signatures.iterator();
+      while (tmp$_0.hasNext()) {
+        var sig = tmp$_0.next();
+        if (!definedSignatures.contains_11rb$(sig.form)) {
+          result.add_11rb$(sig);
+        }
+      }
+      tmp$_1 = result;
+    }
+     else if (Kotlin.isType(validation, ValidationFailure))
+      tmp$_1 = emptyList();
+    else
+      tmp$_1 = Kotlin.noWhenBranchMatched();
+    return tmp$_1;
+  };
+  MathLingua.prototype.getAllDefinedSignatures_0 = function (input) {
+    var tmp$;
+    var validation = this.parse_61zpoe$(input);
+    if (Kotlin.isType(validation, ValidationSuccess)) {
+      var result = ArrayList_init();
+      var document = validation.value;
+      var $receiver = document.defines;
+      var destination = ArrayList_init();
+      var tmp$_0;
+      tmp$_0 = $receiver.iterator();
+      while (tmp$_0.hasNext()) {
+        var element = tmp$_0.next();
+        var tmp$_0_0;
+        if ((tmp$_0_0 = element.signature) != null) {
+          destination.add_11rb$(tmp$_0_0);
+        }
+      }
+      result.addAll_brywnq$(destination);
+      var $receiver_0 = document.represents;
+      var destination_0 = ArrayList_init();
+      var tmp$_1;
+      tmp$_1 = $receiver_0.iterator();
+      while (tmp$_1.hasNext()) {
+        var element_0 = tmp$_1.next();
+        var tmp$_0_1;
+        if ((tmp$_0_1 = element_0.signature) != null) {
+          destination_0.add_11rb$(tmp$_0_1);
+        }
+      }
+      result.addAll_brywnq$(destination_0);
+      tmp$ = result;
+    }
+     else if (Kotlin.isType(validation, ValidationFailure))
+      tmp$ = emptyList();
+    else
+      tmp$ = Kotlin.noWhenBranchMatched();
+    return tmp$;
   };
   MathLingua.prototype.expandAtPosition_ilrjst$ = function (text, row, column, defines, represents) {
     var tmp$;
@@ -6562,15 +6658,15 @@
     return tmp$_1;
   }
   function validateDefinesLikeGroup(tracker, groupNode, definesLikeSectionName, validateDefinesLikeSection, endSectionName, validateEndSection, buildGroup) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5;
     var errors = ArrayList_init();
     var group = groupNode.resolve();
     var id = null;
     if (group.id != null) {
-      var tmp$_5 = group.id;
-      var rawText = tmp$_5.component1()
-      , row = tmp$_5.component3()
-      , column = tmp$_5.component4();
+      var tmp$_6 = group.id;
+      var rawText = tmp$_6.component1()
+      , row = tmp$_6.component3()
+      , column = tmp$_6.component4();
       var endIndex = rawText.length - 1 | 0;
       var statementText = "'" + rawText.substring(1, endIndex) + "'";
       var stmtToken = new Phase1Token(statementText, ChalkTalkTokenType$Statement_getInstance(), row, column);
@@ -6661,11 +6757,12 @@
         Kotlin.noWhenBranchMatched();
     }
     if (!errors.isEmpty()) {
-      tmp$_4 = validationFailure(errors);
+      tmp$_5 = validationFailure(errors);
     }
-     else
-      tmp$_4 = validationSuccess_0(tracker, groupNode, buildGroup(getSignature_1(ensureNotNull(id).toStatement()), id, ensureNotNull(definesLikeSection), assumingSection, endSections, aliasSection, metaDataSection));
-    return tmp$_4;
+     else {
+      tmp$_5 = validationSuccess_0(tracker, groupNode, buildGroup((tmp$_4 = getSignature_1(ensureNotNull(id).toStatement(), newLocationTracker())) != null ? tmp$_4.form : null, id, ensureNotNull(definesLikeSection), assumingSection, endSections, aliasSection, metaDataSection));
+    }
+    return tmp$_5;
   }
   function Queue() {
   }
@@ -8722,23 +8819,23 @@
     return newCommands;
   }
   function getSignature(group) {
-    var tmp$;
+    var tmp$, tmp$_0, tmp$_1;
     if (Kotlin.isType(group, DefinesGroup))
-      tmp$ = getSignature_0(group.id);
+      tmp$_1 = (tmp$ = getSignature_0(group.id, newLocationTracker())) != null ? tmp$.form : null;
     else if (Kotlin.isType(group, RepresentsGroup))
-      tmp$ = getSignature_0(group.id);
+      tmp$_1 = (tmp$_0 = getSignature_0(group.id, newLocationTracker())) != null ? tmp$_0.form : null;
     else if (Kotlin.isType(group, ProtoGroup))
-      tmp$ = getSignature_2(group.textSection);
+      tmp$_1 = getSignature_2(group.textSection);
     else
-      tmp$ = null;
-    return tmp$;
+      tmp$_1 = null;
+    return tmp$_1;
   }
-  function getSignature_0(id) {
-    return getSignature_1(id.toStatement());
+  function getSignature_0(id, locationTracker) {
+    return getSignature_1(id.toStatement(), locationTracker);
   }
-  function getSignature_1(stmt) {
+  function getSignature_1(stmt, locationTracker) {
     var tmp$;
-    var sigs = findAllStatementSignatures(stmt);
+    var sigs = findAllStatementSignatures(stmt, locationTracker);
     if (sigs.size === 1) {
       tmp$ = first_0(sigs);
     }
@@ -8746,21 +8843,21 @@
       tmp$ = null;
     return tmp$;
   }
-  function findAllStatementSignatures(stmt) {
-    var tmp$, tmp$_0;
+  function findAllStatementSignatures(stmt, locationTracker) {
+    var tmp$, tmp$_0, tmp$_1;
     var gluedStmt = Kotlin.isType(tmp$ = glueCommands(stmt, stmt).root, Statement) ? tmp$ : throwCCE();
     var rootValidation = gluedStmt.texTalkRoot;
     if (Kotlin.isType(rootValidation, ValidationSuccess)) {
       var expressionNode = rootValidation.value;
       var signatures = LinkedHashSet_init();
-      findAllSignaturesImpl_0(expressionNode, signatures);
-      tmp$_0 = signatures;
+      findAllSignaturesImpl_0(expressionNode, signatures, (tmp$_0 = locationTracker.getLocationOf_2v05ti$(stmt)) != null ? tmp$_0 : new Location(-1, -1));
+      tmp$_1 = signatures;
     }
      else if (Kotlin.isType(rootValidation, ValidationFailure))
-      tmp$_0 = emptySet();
+      tmp$_1 = emptySet();
     else
-      tmp$_0 = Kotlin.noWhenBranchMatched();
-    return tmp$_0;
+      tmp$_1 = Kotlin.noWhenBranchMatched();
+    return tmp$_1;
   }
   function getMergedCommandSignature(expressionNode) {
     var tmp$;
@@ -8788,31 +8885,32 @@
     }
     return flattenSignature((new Command(destination)).toCode_6z438g$());
   }
-  function locateAllSignatures(node) {
+  function locateAllSignatures(node, locationTracker) {
     var signatures = LinkedHashSet_init();
-    findAllSignaturesImpl(node, signatures);
+    findAllSignaturesImpl(node, signatures, locationTracker);
     return signatures;
   }
-  function findAllSignaturesImpl$lambda(closure$signatures) {
+  function findAllSignaturesImpl$lambda(closure$signatures, closure$locationTracker) {
     return function (it) {
-      findAllSignaturesImpl(it, closure$signatures);
+      findAllSignaturesImpl(it, closure$signatures, closure$locationTracker);
       return Unit;
     };
   }
-  function findAllSignaturesImpl(node, signatures) {
+  function findAllSignaturesImpl(node, signatures, locationTracker) {
+    var tmp$;
     if (Kotlin.isType(node, Statement)) {
-      signatures.addAll_brywnq$(findAllStatementSignatures(node));
+      signatures.addAll_brywnq$(findAllStatementSignatures(node, locationTracker));
     }
      else if (Kotlin.isType(node, IdStatement)) {
-      findAllSignaturesImpl(node.toStatement(), signatures);
+      findAllSignaturesImpl(node.toStatement(), signatures, locationTracker);
     }
      else if (Kotlin.isType(node, TextSection)) {
       var sig = getSignature_2(node);
       if (sig != null) {
-        signatures.add_11rb$(sig);
+        signatures.add_11rb$(new Signature(sig, (tmp$ = locationTracker.getLocationOf_2v05ti$(node)) != null ? tmp$ : new Location(-1, -1)));
       }
     }
-    node.forEach_s8izwl$(findAllSignaturesImpl$lambda(signatures));
+    node.forEach_s8izwl$(findAllSignaturesImpl$lambda(signatures, locationTracker));
   }
   function getSignature_2(section) {
     var match = Regex_init('\\\\term\\{(.*?)\\}').find_905azu$(section.text);
@@ -8821,13 +8919,13 @@
     }
     return match.groupValues.get_za3lpa$(1);
   }
-  function findAllSignaturesImpl$lambda_0(closure$signatures) {
+  function findAllSignaturesImpl$lambda_0(closure$signatures, closure$location) {
     return function (it) {
-      findAllSignaturesImpl_0(it, closure$signatures);
+      findAllSignaturesImpl_0(it, closure$signatures, closure$location);
       return Unit;
     };
   }
-  function findAllSignaturesImpl_0(texTalkNode, signatures) {
+  function findAllSignaturesImpl_0(texTalkNode, signatures, location) {
     var tmp$;
     if (Kotlin.isType(texTalkNode, IsTexTalkNode)) {
       tmp$ = texTalkNode.rhs.items.iterator();
@@ -8835,16 +8933,16 @@
         var expNode = tmp$.next();
         var sig = getMergedCommandSignature(expNode);
         if (sig != null) {
-          signatures.add_11rb$(sig);
+          signatures.add_11rb$(new Signature(sig, location));
         }
       }
       return;
     }
      else if (Kotlin.isType(texTalkNode, Command)) {
       var sig_0 = getCommandSignature(texTalkNode);
-      signatures.add_11rb$(sig_0);
+      signatures.add_11rb$(new Signature(sig_0, location));
     }
-    texTalkNode.forEach_j2ps96$(findAllSignaturesImpl$lambda_0(signatures));
+    texTalkNode.forEach_j2ps96$(findAllSignaturesImpl$lambda_0(signatures, location));
   }
   function callOrNull(input, fn) {
     if (input == null) {
@@ -9713,6 +9811,7 @@
   var package$mathlingua = _.mathlingua || (_.mathlingua = {});
   var package$common = package$mathlingua.common || (package$mathlingua.common = {});
   package$common.Parse = Parse;
+  package$common.Signature = Signature;
   Object.defineProperty(package$common, 'MathLingua', {
     get: MathLingua_getInstance
   });
@@ -10112,12 +10211,12 @@
   package$transform.glueCommands_wef8g3$ = glueCommands;
   package$transform.glueCommands_f1ync3$ = glueCommands_0;
   package$transform.getSignature_vwc43z$ = getSignature;
-  package$transform.getSignature_9mktjp$ = getSignature_0;
-  package$transform.getSignature_nf7plc$ = getSignature_1;
-  package$transform.findAllStatementSignatures_nf7plc$ = findAllStatementSignatures;
+  package$transform.getSignature_6vedv1$ = getSignature_0;
+  package$transform.getSignature_jeuz20$ = getSignature_1;
+  package$transform.findAllStatementSignatures_jeuz20$ = findAllStatementSignatures;
   package$transform.getMergedCommandSignature_4mpz2e$ = getMergedCommandSignature;
   package$transform.getCommandSignature_1c48ss$ = getCommandSignature;
-  package$transform.locateAllSignatures_g67bbb$ = locateAllSignatures;
+  package$transform.locateAllSignatures_o1cvlb$ = locateAllSignatures;
   package$transform.flattenSignature_y4putb$ = flattenSignature;
   package$transform.getKey_g67bbb$ = getKey;
   package$transform.moveInlineCommandsToIsNode_yx9fjh$ = moveInlineCommandsToIsNode;

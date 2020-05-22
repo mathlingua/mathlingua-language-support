@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
+import * as fs from 'fs';
+import * as path from 'path';
+
 import * as vscode from 'vscode';
+const kotlin = require('kotlin');
 
 const commandId = 'mathlingua.runCodeAction';
 const mlg = require('./mathlingua');
@@ -25,6 +29,34 @@ interface MathlinguaDiagnostic {
   column: number;
 }
 
+interface MathlinguaSignature {
+  form: string;
+  row: number;
+  column: number;
+}
+
+function findUndefinedSignatures(input: string,
+                                 supplemental: string[]): MathlinguaSignature[] {
+  const suppList = kotlin.kotlin.collections.listOf_i5x0yv$(supplemental);
+  const res = mlg.mathlingua.common.MathLingua.findUndefinedSignatures_kwv3np$(input, suppList);
+  const resArray = res.array_hd7ov6$_0;
+  if (!resArray) {
+    return [];
+  }
+
+  const signatures: MathlinguaSignature[] = [];
+  for (let i=0; i<resArray.length; i++) {
+    const sig = resArray[i];
+    const mathSig: MathlinguaSignature = {
+      form: sig.form,
+      row: sig.location.row,
+      column: sig.location.column
+    };
+    signatures.push(mathSig);
+  }
+  return signatures;
+}
+
 function analyze(input: string): MathlinguaDiagnostic[] {
   const validation = mlg.mathlingua.common.MathLingua.parse_61zpoe$(input);
   const errors = validation.errors;
@@ -33,6 +65,10 @@ function analyze(input: string): MathlinguaDiagnostic[] {
   }
 
   const errorArr = errors.array_hd7ov6$_0;
+  if (!errorArr) {
+    return [];
+  }
+
   const res: MathlinguaDiagnostic[] = [];
   for (let i=0; i<errorArr.length; i++) {
     const err = errorArr[i];
@@ -55,18 +91,23 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
   private command!: vscode.Disposable;
   private diagnosticCollection!: vscode.DiagnosticCollection;
 
-  activate(subscriptions: vscode.Disposable[]) {
+  async activate(subscriptions: vscode.Disposable[]) {
     this.command = vscode.commands.registerCommand(commandId, () => {}, this);
     subscriptions.push(this);
     this.diagnosticCollection = vscode.languages.createDiagnosticCollection();
 
-    vscode.workspace.onDidOpenTextDocument(this.doProcess, this, subscriptions);
+    vscode.workspace.onDidSaveTextDocument(this.processAll, this);
+    vscode.workspace.onDidOpenTextDocument(this.processAll, this, subscriptions);
     vscode.workspace.onDidCloseTextDocument(textDocument => {
       this.diagnosticCollection.delete(textDocument.uri);
     }, null, subscriptions);
 
-    vscode.workspace.onDidSaveTextDocument(this.doProcess, this);
     vscode.workspace.textDocuments.forEach(this.doProcess, this);
+
+    const textDoc = vscode.workspace.textDocuments[0];
+    if (textDoc) {
+      await this.doProcessImpl(textDoc, true);
+    }
   }
 
   dispose() {
@@ -75,7 +116,28 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
     this.command.dispose();
   }
 
-  private doProcess(textDocument: vscode.TextDocument) {
+  private async processFileRecusrively(fullPath: string, fileContents: string[]) {
+    const stat = await fs.promises.stat(fullPath);
+    if (stat.isFile() && fullPath.endsWith('.math')) {
+      const content = await fs.promises.readFile(fullPath, 'utf8');
+      fileContents.push(content);
+    } else if (stat.isDirectory()) {
+      const files = await fs.promises.readdir(fullPath);
+      await Promise.all(files.map(it =>
+        this.processFileRecusrively(path.join(fullPath, it), fileContents)));
+    }
+  }
+
+  private processAll() {
+    vscode.workspace.textDocuments.forEach(this.doProcess, this);
+  }
+
+  private async doProcess(textDocument: vscode.TextDocument) {
+    return this.doProcessImpl(textDocument, false);
+  }
+
+  private async doProcessImpl(textDocument: vscode.TextDocument,
+                              readFilesystem: boolean) {
     if (textDocument.languageId !== 'mathlingua') {
       return;
     }
@@ -86,12 +148,33 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
     const diagnostics: vscode.Diagnostic[] = [];
     const analysis = analyze(text);
     for (const diag of analysis) {
-
-      console.log('diag=', diag);
-
       const message = diag.message;
       const row = diag.row;
       const col = diag.column;
+
+      const line = lines[row] || '';
+      const range = new vscode.Range(row, col, row, line.length);
+      const severity = vscode.DiagnosticSeverity.Error;
+
+      diagnostics.push(new vscode.Diagnostic(range, message, severity));
+    }
+
+    let otherDocs: string[];
+    if (readFilesystem) {
+      otherDocs = [];
+      await Promise.all(
+        vscode.workspace.workspaceFolders?.map(it =>
+          this.processFileRecusrively(it.uri.fsPath, otherDocs)) || []);
+    } else {
+      otherDocs = vscode.workspace.textDocuments.filter(it => it.uri !== textDocument.uri)
+                                                .map(it => it.getText());
+    }
+
+    const undefSigs = findUndefinedSignatures(text, otherDocs);
+    for (const sig of undefSigs) {
+      const message = `'${sig.form}' is not defined`;
+      const row = sig.row;
+      const col = sig.column;
 
       const line = lines[row] || '';
       const range = new vscode.Range(row, col, row, line.length);
