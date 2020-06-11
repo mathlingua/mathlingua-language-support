@@ -8,6 +8,12 @@ Supports syntax highlighting, auto-analysis, and autocomplete within the current
 
 ## Release Notes
 
+### 0.5.1 (2020-06-10)
+- Update the README.
+
+### 0.5.0 (2020-06-10)
+- Updated to reflect changes to MathLingua where `Theorem` is used instead of `Result` and `Resource` is used instead of `Source`.
+
 ### 0.4.0 (2020-05-20)
 - Warnings are displayed for signatures that are used but have not been defined.
 

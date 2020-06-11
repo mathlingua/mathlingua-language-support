@@ -2,7 +2,7 @@
     "name": "mathlingua-language-support",
     "displayName": "Mathlingua Language Support",
     "description": "Visual Studio Code language support for the Mathlingua language",
-    "version": "0.5.0",
+    "version": "0.5.1",
     "publisher": "dominickramer",
     "author": {
         "name": "Dominic Kramer"
