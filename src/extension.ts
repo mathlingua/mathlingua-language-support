@@ -26,9 +26,9 @@ interface StaticCompletion {
 
 const STATIC_COMPLETIONS: StaticCompletion[] = [
   {
-    name: 'Source:',
+    name: 'Resource:',
     documentation: 'Describes a mathematical resource (a book, website, article, etc.)',
-    text: '[${1}]\nSource:\n. type: "${2}"\n. name: "${3}"\n. author: "${4}"\n. homepage: "${5}"\n. url: "${6}"\n. offset: "${7}"\nMetadata: ${8}'
+    text: '[${1}]\nResource:\n. type: "${2}"\n. name: "${3}"\n. author: "${4}"\n. homepage: "${5}"\n. url: "${6}"\n. offset: "${7}"\nMetadata: ${8}'
   },
   {
     name: 'Defines:',
@@ -41,9 +41,9 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
     text: '[${1}]\nRepresents:\nassuming: ${2}\nthat: ${3}\nAlias: ${4}\nMetadata: ${5}'
   },
   {
-    name: 'Result:',
+    name: 'Theorem:',
     documentation: 'Describes a proven mathematical result such as a theorem, proposition, corollary, or lemma.',
-    text: 'Result: ${1}\nAlias: ${2}\nMetadata: ${3}'
+    text: 'Theorem: ${1}\nAlias: ${2}\nMetadata: ${3}'
   },
   {
     name: 'Axiom:',
@@ -88,7 +88,7 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
   {
     name: 'Metadata:',
     documentation: 'Specifies additional metadata for a mathematical item.',
-    text: 'Metadata:\n. name: "${1}"\n. reference:\n  . source: "@${2}"\n    page: "${3}"\n. tag: "${4}"'
+    text: 'Metadata:\n. written: "${1}"\n. name: "${2}"\n. reference:\n  . source: "@${3}"\n    page: "${4}"\n. tag: "${5}"'
   },
   {
     name: 'Alias:',

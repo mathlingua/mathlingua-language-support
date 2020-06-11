@@ -4,15 +4,17 @@
   var toList = Kotlin.kotlin.collections.toList_7wnvza$;
   var emptyList = Kotlin.kotlin.collections.emptyList_287e2$;
   var throwCCE = Kotlin.throwCCE;
+  var equals = Kotlin.equals;
+  var removeSurrounding = Kotlin.kotlin.text.removeSurrounding_90ijwr$;
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
   var LinkedHashSet_init = Kotlin.kotlin.collections.LinkedHashSet_init_287e2$;
+  var LinkedHashMap_init = Kotlin.kotlin.collections.LinkedHashMap_init_q3lmfv$;
   var RuntimeException_init = Kotlin.kotlin.RuntimeException_init_pdl1vj$;
   var RuntimeException = Kotlin.kotlin.RuntimeException;
   var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
   var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
   var isBlank = Kotlin.kotlin.text.isBlank_gw00vp$;
-  var LinkedHashMap_init = Kotlin.kotlin.collections.LinkedHashMap_init_q3lmfv$;
   var endsWith = Kotlin.kotlin.text.endsWith_7epoxm$;
   var ensureNotNull = Kotlin.ensureNotNull;
   var toBoxedChar = Kotlin.toBoxedChar;
@@ -26,13 +28,11 @@
   var Unit = Kotlin.kotlin.Unit;
   var Math_0 = Math;
   var replace = Kotlin.kotlin.text.replace_680rmw$;
-  var removeSurrounding = Kotlin.kotlin.text.removeSurrounding_90ijwr$;
   var contains_0 = Kotlin.kotlin.text.contains_li3zpu$;
   var indexOf = Kotlin.kotlin.text.indexOf_l5u8uk$;
   var mutableSetOf = Kotlin.kotlin.collections.mutableSetOf_i5x0yv$;
   var trim = Kotlin.kotlin.text.trim_gw00vp$;
   var reversed = Kotlin.kotlin.collections.reversed_7wnvza$;
-  var equals = Kotlin.equals;
   var last = Kotlin.kotlin.collections.last_2p1efm$;
   var IllegalArgumentException_init = Kotlin.kotlin.IllegalArgumentException_init_pdl1vj$;
   var first = Kotlin.kotlin.collections.first_2p1efm$;
@@ -52,6 +52,8 @@
   var distinct = Kotlin.kotlin.collections.distinct_7wnvza$;
   var Error_init = Kotlin.kotlin.Error_init_pdl1vj$;
   var Collection = Kotlin.kotlin.collections.Collection;
+  var toString = Kotlin.toString;
+  var emptyMap = Kotlin.kotlin.collections.emptyMap_q3lmfv$;
   var first_0 = Kotlin.kotlin.collections.first_7wnvza$;
   var emptySet = Kotlin.kotlin.collections.emptySet_287e2$;
   var filterNotNull_0 = Kotlin.kotlin.collections.filterNotNull_m3lr2h$;
@@ -94,6 +96,8 @@
   SourceItemGroup.prototype.constructor = SourceItemGroup;
   StringSectionGroup.prototype = Object.create(MetaDataItem.prototype);
   StringSectionGroup.prototype.constructor = StringSectionGroup;
+  ResourceSection.prototype = Object.create(SourceSection.prototype);
+  ResourceSection.prototype.constructor = ResourceSection;
   AxiomGroup.prototype = Object.create(TopLevelGroup.prototype);
   AxiomGroup.prototype.constructor = AxiomGroup;
   ConjectureGroup.prototype = Object.create(TopLevelGroup.prototype);
@@ -104,10 +108,10 @@
   ProtoGroup.prototype.constructor = ProtoGroup;
   RepresentsGroup.prototype = Object.create(TopLevelGroup.prototype);
   RepresentsGroup.prototype.constructor = RepresentsGroup;
-  ResultGroup.prototype = Object.create(TopLevelGroup.prototype);
-  ResultGroup.prototype.constructor = ResultGroup;
-  SourceGroup.prototype = Object.create(TopLevelGroup.prototype);
-  SourceGroup.prototype.constructor = SourceGroup;
+  ResourceGroup.prototype = Object.create(TopLevelGroup.prototype);
+  ResourceGroup.prototype.constructor = ResourceGroup;
+  TheoremGroup.prototype = Object.create(TopLevelGroup.prototype);
+  TheoremGroup.prototype.constructor = TheoremGroup;
   TexTalkNodeType.prototype = Object.create(Enum.prototype);
   TexTalkNodeType.prototype.constructor = TexTalkNodeType;
   TexTalkTokenType.prototype = Object.create(Enum.prototype);
@@ -317,6 +321,64 @@
   };
   MathLingua.prototype.expand_pkhkwo$ = function (doc) {
     return fullExpandComplete(doc);
+  };
+  MathLingua.prototype.getPatternsToWrittenAs_g8umse$ = function (defines) {
+    var tmp$, tmp$_0, tmp$_1, tmp$_2;
+    var result = LinkedHashMap_init();
+    tmp$ = defines.iterator();
+    while (tmp$.hasNext()) {
+      var def = tmp$.next();
+      var allItems = (tmp$_0 = def.metaDataSection) != null ? tmp$_0.items : null;
+      var writtenAs = null;
+      if (allItems != null) {
+        tmp$_1 = allItems.iterator();
+        while (tmp$_1.hasNext()) {
+          var item = tmp$_1.next();
+          var tmp$_3 = Kotlin.isType(item, StringSectionGroup) && equals(item.section.name, 'written');
+          if (tmp$_3) {
+            tmp$_3 = !item.section.values.isEmpty();
+          }
+          if (tmp$_3) {
+            writtenAs = removeSurrounding(item.section.values.get_za3lpa$(0), '"', '"');
+            break;
+          }
+        }
+      }
+      if (writtenAs == null) {
+        continue;
+      }
+      var validation = def.id.texTalkRoot;
+      if (Kotlin.isType(validation, ValidationSuccess)) {
+        var exp = validation.value;
+        if (exp.children.size === 1 && Kotlin.isType(exp.children.get_za3lpa$(0), Command)) {
+          var key = Kotlin.isType(tmp$_2 = exp.children.get_za3lpa$(0), Command) ? tmp$_2 : throwCCE();
+          var value = writtenAs;
+          result.put_xwzc9p$(key, value);
+        }
+      }
+    }
+    return result;
+  };
+  function MathLingua$expandWrittenAs$lambda(closure$patternToExpansion) {
+    return function (it) {
+      if (Kotlin.isType(it, Statement)) {
+        var validation = it.texTalkRoot;
+        if (Kotlin.isType(validation, ValidationFailure))
+          return it;
+        else if (Kotlin.isType(validation, ValidationSuccess)) {
+          var texTalkNode = validation.value;
+          var newText = expandAsWritten(texTalkNode, closure$patternToExpansion);
+          return new Statement(newText, validation);
+        }
+         else
+          return Kotlin.noWhenBranchMatched();
+      }
+       else
+        return it;
+    };
+  }
+  MathLingua.prototype.expandWrittenAs_51nw9s$ = function (phase2Node, patternToExpansion) {
+    return phase2Node.transform_ql661s$(MathLingua$expandWrittenAs$lambda(patternToExpansion));
   };
   MathLingua.$metadata$ = {
     kind: Kind_OBJECT,
@@ -2178,11 +2240,12 @@
     simpleName: 'CodeWriter',
     interfaces: []
   };
-  function HtmlCodeWriter() {
+  function HtmlCodeWriter(defines) {
+    this.defines = defines;
     this.builder = StringBuilder_init();
   }
   HtmlCodeWriter.prototype.append_v8axul$ = function (node, hasDot, indent) {
-    this.builder.append_gw00v9$(node.toCode_pc06dk$(hasDot, indent, this.newCodeWriter()).getCode());
+    this.builder.append_gw00v9$(node.toCode_pc06dk$(hasDot, indent, this.newCodeWriter_g8umse$(this.defines)).getCode());
   };
   HtmlCodeWriter.prototype.writeHeader_61zpoe$ = function (header) {
     this.builder.append_gw00v9$("<span class='mathlingua-header'>");
@@ -2238,7 +2301,7 @@
   HtmlCodeWriter.prototype.writeId_uaa61e$ = function (id) {
     this.builder.append_gw00v9$("<span class='mathlingua-id'>");
     this.builder.append_s8itvh$(91);
-    var stmt = id.toCode_pc06dk$(false, 0, new MathLinguaCodeWriter()).getCode();
+    var stmt = id.toStatement().toCode_pc06dk$(false, 0, new MathLinguaCodeWriter(emptyList())).getCode();
     this.builder.append_gw00v9$(removeSurrounding(stmt, "'", "'"));
     this.builder.append_s8itvh$(93);
     this.builder.append_gw00v9$('<\/span>');
@@ -2257,15 +2320,33 @@
       var index = indexOf(stmtText, IS);
       this.builder.append_gw00v9$('\\' + '[' + stmtText.substring(0, index) + '\\' + ']');
       this.writeSpace();
-      this.writeDirect_61zpoe$('is');
+      this.writeDirect_61zpoe$("<span class='mathlingua-is'>is<\/span>");
       this.writeSpace();
       var startIndex = index + IS.length | 0;
       var $receiver = stmtText.substring(startIndex);
       var tmp$;
-      this.writeDirect_61zpoe$(trim(Kotlin.isCharSequence(tmp$ = $receiver) ? tmp$ : throwCCE()).toString());
+      var lhs = trim(Kotlin.isCharSequence(tmp$ = $receiver) ? tmp$ : throwCCE()).toString();
+      var lhsParsed = newTexTalkParser().parse_2mg13h$(newTexTalkLexer(lhs));
+      if (lhsParsed.errors.isEmpty()) {
+        var patternsToWrittenAs = MathLingua_getInstance().getPatternsToWrittenAs_g8umse$(this.defines);
+        this.builder.append_gw00v9$('\\' + '[' + expandAsWritten(lhsParsed.root, patternsToWrittenAs) + '\\' + ']');
+      }
+       else {
+        this.writeDirect_61zpoe$(lhs);
+      }
     }
      else {
-      this.builder.append_gw00v9$('\\' + '[' + stmtText + '\\' + ']');
+      var tmp$_0 = Kotlin.isType(root, ValidationSuccess);
+      if (tmp$_0) {
+        tmp$_0 = !this.defines.isEmpty();
+      }
+      if (tmp$_0) {
+        var patternsToWrittenAs_0 = MathLingua_getInstance().getPatternsToWrittenAs_g8umse$(this.defines);
+        this.builder.append_gw00v9$('\\' + '[' + expandAsWritten(root.value, patternsToWrittenAs_0) + '\\' + ']');
+      }
+       else {
+        this.builder.append_gw00v9$('\\' + '[' + stmtText + '\\' + ']');
+      }
     }
     this.builder.append_gw00v9$('<\/span>');
   };
@@ -2280,8 +2361,14 @@
   HtmlCodeWriter.prototype.writeDirect_61zpoe$ = function (text) {
     this.builder.append_gw00v9$(text);
   };
-  HtmlCodeWriter.prototype.newCodeWriter = function () {
-    return new HtmlCodeWriter();
+  HtmlCodeWriter.prototype.beginTopLevel = function () {
+    this.builder.append_gw00v9$("<span class='mathlingua-top-level'>");
+  };
+  HtmlCodeWriter.prototype.endTopLevel = function () {
+    this.builder.append_gw00v9$('<\/span>');
+  };
+  HtmlCodeWriter.prototype.newCodeWriter_g8umse$ = function (defines) {
+    return new HtmlCodeWriter(defines);
   };
   HtmlCodeWriter.prototype.getCode = function () {
     var $receiver = this.builder.toString();
@@ -2294,11 +2381,12 @@
     simpleName: 'HtmlCodeWriter',
     interfaces: [CodeWriter]
   };
-  function MathLinguaCodeWriter() {
+  function MathLinguaCodeWriter(defines) {
+    this.defines = defines;
     this.builder_0 = StringBuilder_init();
   }
   MathLinguaCodeWriter.prototype.append_v8axul$ = function (node, hasDot, indent) {
-    this.builder_0.append_gw00v9$(node.toCode_pc06dk$(hasDot, indent, this.newCodeWriter()).getCode());
+    this.builder_0.append_gw00v9$(node.toCode_pc06dk$(hasDot, indent, this.newCodeWriter_g8umse$(this.defines)).getCode());
   };
   MathLinguaCodeWriter.prototype.writeHeader_61zpoe$ = function (header) {
     this.builder_0.append_gw00v9$(header);
@@ -2341,7 +2429,7 @@
   };
   MathLinguaCodeWriter.prototype.writeId_uaa61e$ = function (id) {
     this.builder_0.append_s8itvh$(91);
-    var stmt = id.toCode_pc06dk$(false, 0, this.newCodeWriter()).getCode();
+    var stmt = id.toStatement().toCode_pc06dk$(false, 0, this.newCodeWriter_g8umse$(emptyList())).getCode();
     this.builder_0.append_gw00v9$(removeSurrounding(stmt, "'", "'"));
     this.builder_0.append_s8itvh$(93);
   };
@@ -2351,7 +2439,17 @@
     this.builder_0.append_s8itvh$(34);
   };
   MathLinguaCodeWriter.prototype.writeStatement_ytmu5s$ = function (stmtText, root) {
-    this.builder_0.append_gw00v9$("'" + stmtText + "'");
+    var tmp$ = Kotlin.isType(root, ValidationSuccess);
+    if (tmp$) {
+      tmp$ = !this.defines.isEmpty();
+    }
+    if (tmp$) {
+      var patternsToWrittenAs = MathLingua_getInstance().getPatternsToWrittenAs_g8umse$(this.defines);
+      this.builder_0.append_gw00v9$("'" + expandAsWritten(root.value, patternsToWrittenAs) + "'");
+    }
+     else {
+      this.builder_0.append_gw00v9$("'" + stmtText + "'");
+    }
   };
   MathLinguaCodeWriter.prototype.writeIdentifier_ivxn3r$ = function (name, isVarArgs) {
     this.builder_0.append_gw00v9$(name);
@@ -2362,8 +2460,12 @@
   MathLinguaCodeWriter.prototype.writeDirect_61zpoe$ = function (text) {
     this.builder_0.append_gw00v9$(text);
   };
-  MathLinguaCodeWriter.prototype.newCodeWriter = function () {
-    return new MathLinguaCodeWriter();
+  MathLinguaCodeWriter.prototype.beginTopLevel = function () {
+  };
+  MathLinguaCodeWriter.prototype.endTopLevel = function () {
+  };
+  MathLinguaCodeWriter.prototype.newCodeWriter_g8umse$ = function (defines) {
+    return new MathLinguaCodeWriter(defines);
   };
   MathLinguaCodeWriter.prototype.getCode = function () {
     return this.builder_0.toString();
@@ -2508,23 +2610,23 @@
     node.forEach_s8izwl$(hasChild$lambda(found, child));
     return found.v;
   }
-  function Document(defines, represents, results, axioms, conjectures, sources, protoGroups) {
+  function Document(defines, represents, theorems, axioms, conjectures, resources, protoGroups) {
     this.defines = defines;
     this.represents = represents;
-    this.results = results;
+    this.theorems = theorems;
     this.axioms = axioms;
     this.conjectures = conjectures;
-    this.sources = sources;
+    this.resources = resources;
     this.protoGroups = protoGroups;
   }
   Document.prototype.all = function () {
     var result = ArrayList_init();
     result.addAll_brywnq$(this.defines);
     result.addAll_brywnq$(this.represents);
-    result.addAll_brywnq$(this.results);
+    result.addAll_brywnq$(this.theorems);
     result.addAll_brywnq$(this.axioms);
     result.addAll_brywnq$(this.conjectures);
-    result.addAll_brywnq$(this.sources);
+    result.addAll_brywnq$(this.resources);
     result.addAll_brywnq$(this.protoGroups);
     return result;
   };
@@ -2542,7 +2644,7 @@
       fn(element_0);
     }
     var tmp$_1;
-    tmp$_1 = this.results.iterator();
+    tmp$_1 = this.theorems.iterator();
     while (tmp$_1.hasNext()) {
       var element_1 = tmp$_1.next();
       fn(element_1);
@@ -2560,7 +2662,7 @@
       fn(element_3);
     }
     var tmp$_4;
-    tmp$_4 = this.sources.iterator();
+    tmp$_4 = this.resources.iterator();
     while (tmp$_4.hasNext()) {
       var element_4 = tmp$_4.next();
       fn(element_4);
@@ -2598,7 +2700,7 @@
       writer.append_v8axul$(grp_2, false, 0);
       writer.writeNewline_za3lpa$(3);
     }
-    tmp$_3 = this.results.iterator();
+    tmp$_3 = this.theorems.iterator();
     while (tmp$_3.hasNext()) {
       var grp_3 = tmp$_3.next();
       writer.append_v8axul$(grp_3, false, 0);
@@ -2610,7 +2712,7 @@
       writer.append_v8axul$(grp_4, false, 0);
       writer.writeNewline_za3lpa$(3);
     }
-    tmp$_5 = this.sources.iterator();
+    tmp$_5 = this.resources.iterator();
     while (tmp$_5.hasNext()) {
       var src = tmp$_5.next();
       writer.append_v8axul$(src, false, 0);
@@ -2655,23 +2757,23 @@
       var tmp$_6;
       destination_2.add_11rb$(Kotlin.isType(tmp$_6 = item_2.transform_ql661s$(chalkTransformer), RepresentsGroup) ? tmp$_6 : throwCCE());
     }
-    var $receiver_3 = this.results;
+    var $receiver_3 = this.theorems;
     var destination_3 = ArrayList_init_0(collectionSizeOrDefault($receiver_3, 10));
     var tmp$_7;
     tmp$_7 = $receiver_3.iterator();
     while (tmp$_7.hasNext()) {
       var item_3 = tmp$_7.next();
       var tmp$_8;
-      destination_3.add_11rb$(Kotlin.isType(tmp$_8 = item_3.transform_ql661s$(chalkTransformer), ResultGroup) ? tmp$_8 : throwCCE());
+      destination_3.add_11rb$(Kotlin.isType(tmp$_8 = item_3.transform_ql661s$(chalkTransformer), TheoremGroup) ? tmp$_8 : throwCCE());
     }
-    var $receiver_4 = this.sources;
+    var $receiver_4 = this.resources;
     var destination_4 = ArrayList_init_0(collectionSizeOrDefault($receiver_4, 10));
     var tmp$_9;
     tmp$_9 = $receiver_4.iterator();
     while (tmp$_9.hasNext()) {
       var item_4 = tmp$_9.next();
       var tmp$_10;
-      destination_4.add_11rb$(Kotlin.isType(tmp$_10 = item_4.transform_ql661s$(chalkTransformer), SourceGroup) ? tmp$_10 : throwCCE());
+      destination_4.add_11rb$(Kotlin.isType(tmp$_10 = item_4.transform_ql661s$(chalkTransformer), ResourceGroup) ? tmp$_10 : throwCCE());
     }
     var $receiver_5 = this.protoGroups;
     var destination_5 = ArrayList_init_0(collectionSizeOrDefault($receiver_5, 10));
@@ -2696,7 +2798,7 @@
     return this.represents;
   };
   Document.prototype.component3 = function () {
-    return this.results;
+    return this.theorems;
   };
   Document.prototype.component4 = function () {
     return this.axioms;
@@ -2705,30 +2807,30 @@
     return this.conjectures;
   };
   Document.prototype.component6 = function () {
-    return this.sources;
+    return this.resources;
   };
   Document.prototype.component7 = function () {
     return this.protoGroups;
   };
-  Document.prototype.copy_fse8z7$ = function (defines, represents, results, axioms, conjectures, sources, protoGroups) {
-    return new Document(defines === void 0 ? this.defines : defines, represents === void 0 ? this.represents : represents, results === void 0 ? this.results : results, axioms === void 0 ? this.axioms : axioms, conjectures === void 0 ? this.conjectures : conjectures, sources === void 0 ? this.sources : sources, protoGroups === void 0 ? this.protoGroups : protoGroups);
+  Document.prototype.copy_5elj19$ = function (defines, represents, theorems, axioms, conjectures, resources, protoGroups) {
+    return new Document(defines === void 0 ? this.defines : defines, represents === void 0 ? this.represents : represents, theorems === void 0 ? this.theorems : theorems, axioms === void 0 ? this.axioms : axioms, conjectures === void 0 ? this.conjectures : conjectures, resources === void 0 ? this.resources : resources, protoGroups === void 0 ? this.protoGroups : protoGroups);
   };
   Document.prototype.toString = function () {
-    return 'Document(defines=' + Kotlin.toString(this.defines) + (', represents=' + Kotlin.toString(this.represents)) + (', results=' + Kotlin.toString(this.results)) + (', axioms=' + Kotlin.toString(this.axioms)) + (', conjectures=' + Kotlin.toString(this.conjectures)) + (', sources=' + Kotlin.toString(this.sources)) + (', protoGroups=' + Kotlin.toString(this.protoGroups)) + ')';
+    return 'Document(defines=' + Kotlin.toString(this.defines) + (', represents=' + Kotlin.toString(this.represents)) + (', theorems=' + Kotlin.toString(this.theorems)) + (', axioms=' + Kotlin.toString(this.axioms)) + (', conjectures=' + Kotlin.toString(this.conjectures)) + (', resources=' + Kotlin.toString(this.resources)) + (', protoGroups=' + Kotlin.toString(this.protoGroups)) + ')';
   };
   Document.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.defines) | 0;
     result = result * 31 + Kotlin.hashCode(this.represents) | 0;
-    result = result * 31 + Kotlin.hashCode(this.results) | 0;
+    result = result * 31 + Kotlin.hashCode(this.theorems) | 0;
     result = result * 31 + Kotlin.hashCode(this.axioms) | 0;
     result = result * 31 + Kotlin.hashCode(this.conjectures) | 0;
-    result = result * 31 + Kotlin.hashCode(this.sources) | 0;
+    result = result * 31 + Kotlin.hashCode(this.resources) | 0;
     result = result * 31 + Kotlin.hashCode(this.protoGroups) | 0;
     return result;
   };
   Document.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.defines, other.defines) && Kotlin.equals(this.represents, other.represents) && Kotlin.equals(this.results, other.results) && Kotlin.equals(this.axioms, other.axioms) && Kotlin.equals(this.conjectures, other.conjectures) && Kotlin.equals(this.sources, other.sources) && Kotlin.equals(this.protoGroups, other.protoGroups)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.defines, other.defines) && Kotlin.equals(this.represents, other.represents) && Kotlin.equals(this.theorems, other.theorems) && Kotlin.equals(this.axioms, other.axioms) && Kotlin.equals(this.conjectures, other.conjectures) && Kotlin.equals(this.resources, other.resources) && Kotlin.equals(this.protoGroups, other.protoGroups)))));
   };
   function validateDocument(rawNode, tracker) {
     var tmp$, tmp$_0;
@@ -2740,21 +2842,30 @@
     }
     var defines = ArrayList_init();
     var represents = ArrayList_init();
-    var results = ArrayList_init();
+    var theorems = ArrayList_init();
     var axioms = ArrayList_init();
     var conjectures = ArrayList_init();
     var protoGroups = ArrayList_init();
-    var sources = ArrayList_init();
+    var resources = ArrayList_init();
     var groups = node.component1();
     tmp$ = groups.iterator();
     while (tmp$.hasNext()) {
       var group = tmp$.next();
-      if (isResultGroup(group)) {
-        var resultValidation = validateResultGroup(group, tracker);
+      if (isTheoremGroup(group)) {
+        var resultValidation = validateTheoremGroup(group, tracker);
         if (Kotlin.isType(resultValidation, ValidationSuccess))
-          results.add_11rb$(resultValidation.value);
+          theorems.add_11rb$(resultValidation.value);
         else if (Kotlin.isType(resultValidation, ValidationFailure))
           errors.addAll_brywnq$(resultValidation.errors);
+        else
+          Kotlin.noWhenBranchMatched();
+      }
+       else if (isTheoremGroup(group)) {
+        var resultValidation_0 = validateTheoremGroup(group, tracker);
+        if (Kotlin.isType(resultValidation_0, ValidationSuccess))
+          theorems.add_11rb$(resultValidation_0.value);
+        else if (Kotlin.isType(resultValidation_0, ValidationFailure))
+          errors.addAll_brywnq$(resultValidation_0.errors);
         else
           Kotlin.noWhenBranchMatched();
       }
@@ -2794,12 +2905,12 @@
         else
           Kotlin.noWhenBranchMatched();
       }
-       else if (isSourceGroup(group)) {
-        var sourceValidation = validateSourceGroup(group, tracker);
-        if (Kotlin.isType(sourceValidation, ValidationSuccess))
-          sources.add_11rb$(sourceValidation.value);
-        else if (Kotlin.isType(sourceValidation, ValidationFailure))
-          errors.addAll_brywnq$(sourceValidation.errors);
+       else if (isResourceGroup(group)) {
+        var resourceValidation = validateResourceGroup(group, tracker);
+        if (Kotlin.isType(resourceValidation, ValidationSuccess))
+          resources.add_11rb$(resourceValidation.value);
+        else if (Kotlin.isType(resourceValidation, ValidationFailure))
+          errors.addAll_brywnq$(resourceValidation.errors);
         else
           Kotlin.noWhenBranchMatched();
       }
@@ -2821,8 +2932,8 @@
         else
           Kotlin.noWhenBranchMatched();
       }
-       else if (firstSectionMatchesName(group, 'ProtoAxiom')) {
-        var validation_1 = validateProtoGroup(group, 'ProtoAxiom', tracker);
+       else if (firstSectionMatchesName(group, 'ProtoTheorem')) {
+        var validation_1 = validateProtoGroup(group, 'ProtoTheorem', tracker);
         if (Kotlin.isType(validation_1, ValidationSuccess))
           protoGroups.add_11rb$(validation_1.value);
         else if (Kotlin.isType(validation_1, ValidationFailure))
@@ -2830,12 +2941,48 @@
         else
           Kotlin.noWhenBranchMatched();
       }
-       else if (firstSectionMatchesName(group, 'ProtoConjecture')) {
-        var validation_2 = validateProtoGroup(group, 'ProtoConjecture', tracker);
+       else if (firstSectionMatchesName(group, 'ProtoAxiom')) {
+        var validation_2 = validateProtoGroup(group, 'ProtoAxiom', tracker);
         if (Kotlin.isType(validation_2, ValidationSuccess))
           protoGroups.add_11rb$(validation_2.value);
         else if (Kotlin.isType(validation_2, ValidationFailure))
           errors.addAll_brywnq$(validation_2.errors);
+        else
+          Kotlin.noWhenBranchMatched();
+      }
+       else if (firstSectionMatchesName(group, 'ProtoConjecture')) {
+        var validation_3 = validateProtoGroup(group, 'ProtoConjecture', tracker);
+        if (Kotlin.isType(validation_3, ValidationSuccess))
+          protoGroups.add_11rb$(validation_3.value);
+        else if (Kotlin.isType(validation_3, ValidationFailure))
+          errors.addAll_brywnq$(validation_3.errors);
+        else
+          Kotlin.noWhenBranchMatched();
+      }
+       else if (firstSectionMatchesName(group, 'ProtoNotes')) {
+        var validation_4 = validateProtoGroup(group, 'ProtoNotes', tracker);
+        if (Kotlin.isType(validation_4, ValidationSuccess))
+          protoGroups.add_11rb$(validation_4.value);
+        else if (Kotlin.isType(validation_4, ValidationFailure))
+          errors.addAll_brywnq$(validation_4.errors);
+        else
+          Kotlin.noWhenBranchMatched();
+      }
+       else if (firstSectionMatchesName(group, 'ProtoExample')) {
+        var validation_5 = validateProtoGroup(group, 'ProtoExample', tracker);
+        if (Kotlin.isType(validation_5, ValidationSuccess))
+          protoGroups.add_11rb$(validation_5.value);
+        else if (Kotlin.isType(validation_5, ValidationFailure))
+          errors.addAll_brywnq$(validation_5.errors);
+        else
+          Kotlin.noWhenBranchMatched();
+      }
+       else if (firstSectionMatchesName(group, 'ProtoProblem')) {
+        var validation_6 = validateProtoGroup(group, 'ProtoProblem', tracker);
+        if (Kotlin.isType(validation_6, ValidationSuccess))
+          protoGroups.add_11rb$(validation_6.value);
+        else if (Kotlin.isType(validation_6, ValidationFailure))
+          errors.addAll_brywnq$(validation_6.errors);
         else
           Kotlin.noWhenBranchMatched();
       }
@@ -2847,14 +2994,14 @@
       tmp$_0 = validationFailure(errors);
     }
      else
-      tmp$_0 = validationSuccess_0(tracker, rawNode, new Document(defines, represents, results, axioms, conjectures, sources, protoGroups));
+      tmp$_0 = validationSuccess_0(tracker, rawNode, new Document(defines, represents, theorems, axioms, conjectures, resources, protoGroups));
     return tmp$_0;
   }
   function Phase2Node() {
   }
   Phase2Node.prototype.toCode_pc06dk$ = function (isArg, indent, writer, callback$default) {
     if (writer === void 0)
-      writer = new MathLinguaCodeWriter();
+      writer = new MathLinguaCodeWriter(emptyList());
     return callback$default ? callback$default(isArg, indent, writer) : this.toCode_pc06dk$$default(isArg, indent, writer);
   };
   Phase2Node.$metadata$ = {
@@ -3443,7 +3590,7 @@
   };
   IdStatement.prototype.toCode_pc06dk$$default = function (isArg, indent, writer) {
     writer.writeIndent_eltk6l$(isArg, indent);
-    writer.writeStatement_ytmu5s$(this.text, this.texTalkRoot);
+    writer.writeId_uaa61e$(this);
     return writer;
   };
   IdStatement.prototype.transform_ql661s$ = function (chalkTransformer) {
@@ -4236,7 +4383,7 @@
     }
   };
   SourceItemGroup.prototype.toCode_pc06dk$$default = function (isArg, indent, writer) {
-    return toCode_1(writer, isArg, indent, null, [this.sourceSection, this.pageSection, this.offsetSection, this.contentSection]);
+    return topLevelToCode(writer, isArg, indent, null, [this.sourceSection, this.pageSection, this.offsetSection, this.contentSection]);
   };
   SourceItemGroup.prototype.transform_ql661s$ = function (chalkTransformer) {
     var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5;
@@ -4714,7 +4861,7 @@
     writer.writeHeader_61zpoe$(this.name);
     if (this.values.size === 1) {
       writer.writeSpace();
-      writer.writeDirect_61zpoe$(this.values.get_za3lpa$(0));
+      writer.writeText_61zpoe$(removeSurrounding(this.values.get_za3lpa$(0), '"', '"'));
     }
      else {
       tmp$ = this.values.iterator();
@@ -4722,7 +4869,7 @@
         var value = tmp$.next();
         writer.writeNewline_za3lpa$();
         writer.writeIndent_eltk6l$(true, indent + 2 | 0);
-        writer.writeDirect_61zpoe$(value);
+        writer.writeText_61zpoe$(removeSurrounding(value, '"', '"'));
       }
     }
     return writer;
@@ -5450,51 +5597,100 @@
     }
     return tmp$_0;
   }
-  function ResultSection(clauses) {
-    this.clauses = clauses;
+  function ResourceSection(items) {
+    SourceSection.call(this, items);
+    this.items_5bbp9z$_0 = items;
   }
-  ResultSection.prototype.forEach_s8izwl$ = function (fn) {
-    this.clauses.forEach_s8izwl$(fn);
-  };
-  ResultSection.prototype.toCode_pc06dk$$default = function (isArg, indent, writer) {
-    writer.writeIndent_eltk6l$(isArg, indent);
-    writer.writeHeader_61zpoe$('Result');
-    if (!this.clauses.clauses.isEmpty()) {
-      writer.writeNewline_za3lpa$();
+  Object.defineProperty(ResourceSection.prototype, 'items', {
+    get: function () {
+      return this.items_5bbp9z$_0;
     }
-    writer.append_v8axul$(this.clauses, true, indent + 2 | 0);
+  });
+  ResourceSection.prototype.forEach_s8izwl$ = function (fn) {
+    var tmp$;
+    tmp$ = this.items.iterator();
+    while (tmp$.hasNext()) {
+      var element = tmp$.next();
+      fn(element);
+    }
+  };
+  ResourceSection.prototype.toCode_pc06dk$$default = function (isArg, indent, writer) {
+    var tmp$;
+    writer.writeIndent_eltk6l$(isArg, indent);
+    writer.writeHeader_61zpoe$('Resource');
+    writer.writeNewline_za3lpa$();
+    tmp$ = this.items;
+    for (var i = 0; i !== tmp$.size; ++i) {
+      writer.append_v8axul$(this.items.get_za3lpa$(i), true, indent + 2 | 0);
+      if (i !== (this.items.size - 1 | 0)) {
+        writer.writeNewline_za3lpa$();
+      }
+    }
     return writer;
   };
-  ResultSection.prototype.transform_ql661s$ = function (chalkTransformer) {
-    var tmp$;
-    return chalkTransformer(new ResultSection(Kotlin.isType(tmp$ = this.clauses.transform_ql661s$(chalkTransformer), ClauseListNode) ? tmp$ : throwCCE()));
+  ResourceSection.prototype.transform_ql661s$ = function (chalkTransformer) {
+    return chalkTransformer(this);
   };
-  ResultSection.$metadata$ = {
+  ResourceSection.$metadata$ = {
     kind: Kind_CLASS,
-    simpleName: 'ResultSection',
-    interfaces: [Phase2Node]
+    simpleName: 'ResourceSection',
+    interfaces: [SourceSection]
   };
-  ResultSection.prototype.component1 = function () {
-    return this.clauses;
-  };
-  ResultSection.prototype.copy_bln7jj$ = function (clauses) {
-    return new ResultSection(clauses === void 0 ? this.clauses : clauses);
-  };
-  ResultSection.prototype.toString = function () {
-    return 'ResultSection(clauses=' + Kotlin.toString(this.clauses) + ')';
-  };
-  ResultSection.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.clauses) | 0;
-    return result;
-  };
-  ResultSection.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.clauses, other.clauses))));
-  };
-  function validateResultSection(node, tracker) {
-    return validateClauseList(tracker, node, 'Result', false, getCallableRef('ResultSection', function (clauses) {
-      return new ResultSection(clauses);
-    }));
+  function validateResourceSection(section, tracker) {
+    var tmp$, tmp$_0, tmp$_1, tmp$_2;
+    if (!equals(section.name.text, 'Resource')) {
+      return validationFailure(listOf(new ParseError("Expected a 'Resource' but found '" + section.name.text + "'", getRow(section), getColumn(section))));
+    }
+    var errors = ArrayList_init();
+    var items = ArrayList_init();
+    tmp$ = section.args.iterator();
+    while (tmp$.hasNext()) {
+      var arg = tmp$.next();
+      if (isSingleSectionGroup(arg.chalkTalkTarget)) {
+        var group = Kotlin.isType(tmp$_0 = arg.chalkTalkTarget, Group) ? tmp$_0 : throwCCE();
+        var sect = group.sections.get_za3lpa$(0);
+        var name = sect.name.text;
+        if (SOURCE_ITEM_CONSTRAINTS.containsKey_11rb$(name)) {
+          var expectedCount = ensureNotNull(SOURCE_ITEM_CONSTRAINTS.get_11rb$(name));
+          if (expectedCount >= 0 && sect.args.size !== expectedCount) {
+            errors.add_11rb$(new ParseError('Expected ' + expectedCount + ' arguments for ' + ('section ' + name + ' but found ' + sect.args.size), getRow(sect), getColumn(sect)));
+          }
+           else if (expectedCount < 0 && sect.args.size < (-expectedCount | 0)) {
+            errors.add_11rb$(new ParseError('Expected at least ' + (-expectedCount | 0) + ' arguments for ' + ('section ' + name + ' but found ' + sect.args.size), getRow(sect), getColumn(sect)));
+          }
+          var values = ArrayList_init();
+          tmp$_1 = sect.args.iterator();
+          while (tmp$_1.hasNext()) {
+            var a = tmp$_1.next();
+            if (Kotlin.isType(a.chalkTalkTarget, Phase1Token) && a.chalkTalkTarget.type === ChalkTalkTokenType$String_getInstance()) {
+              values.add_11rb$(a.chalkTalkTarget.text);
+            }
+             else {
+              errors.add_11rb$(new ParseError('Expected a string but found ' + a.chalkTalkTarget, getRow(a.chalkTalkTarget), getColumn(a.chalkTalkTarget)));
+            }
+          }
+          var location = new Location(getRow(arg), getColumn(arg));
+          var s = new StringSection(name, values);
+          tracker.setLocationOf_y4beru$(s, location);
+          var res = new StringSectionGroup(s);
+          tracker.setLocationOf_y4beru$(res, location);
+          items.add_11rb$(res);
+        }
+         else {
+          errors.add_11rb$(new ParseError('Expected a section with one of ' + ('the names ' + SOURCE_ITEM_CONSTRAINTS.keys), getRow(arg), getColumn(arg)));
+        }
+      }
+       else {
+        errors.add_11rb$(new ParseError("Unexpected item '" + arg.toCode() + "'", getRow(arg), getColumn(arg)));
+      }
+    }
+    if (!errors.isEmpty()) {
+      tmp$_2 = validationFailure(errors);
+    }
+     else {
+      tmp$_2 = validationSuccess_0(tracker, section, new ResourceSection(items));
+    }
+    return tmp$_2;
   }
   function identifySections(sections, expected) {
     var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3;
@@ -5609,8 +5805,13 @@
   }
   var SOURCE_ITEM_CONSTRAINTS;
   function SourceSection(items) {
-    this.items = items;
+    this.items_yghldw$_0 = items;
   }
+  Object.defineProperty(SourceSection.prototype, 'items', {
+    get: function () {
+      return this.items_yghldw$_0;
+    }
+  });
   SourceSection.prototype.forEach_s8izwl$ = function (fn) {
     var tmp$;
     tmp$ = this.items.iterator();
@@ -5640,23 +5841,6 @@
     kind: Kind_CLASS,
     simpleName: 'SourceSection',
     interfaces: [Phase2Node]
-  };
-  SourceSection.prototype.component1 = function () {
-    return this.items;
-  };
-  SourceSection.prototype.copy_r1d4yb$ = function (items) {
-    return new SourceSection(items === void 0 ? this.items : items);
-  };
-  SourceSection.prototype.toString = function () {
-    return 'SourceSection(items=' + Kotlin.toString(this.items) + ')';
-  };
-  SourceSection.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.items) | 0;
-    return result;
-  };
-  SourceSection.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.items, other.items))));
   };
   function validateSourceSection(section, tracker) {
     var tmp$, tmp$_0, tmp$_1, tmp$_2;
@@ -5924,6 +6108,52 @@
       return new ThenSection(clauses);
     }));
   }
+  function TheoremSection(clauses) {
+    this.clauses = clauses;
+  }
+  TheoremSection.prototype.forEach_s8izwl$ = function (fn) {
+    this.clauses.forEach_s8izwl$(fn);
+  };
+  TheoremSection.prototype.toCode_pc06dk$$default = function (isArg, indent, writer) {
+    writer.writeIndent_eltk6l$(isArg, indent);
+    writer.writeHeader_61zpoe$('Theorem');
+    if (!this.clauses.clauses.isEmpty()) {
+      writer.writeNewline_za3lpa$();
+    }
+    writer.append_v8axul$(this.clauses, true, indent + 2 | 0);
+    return writer;
+  };
+  TheoremSection.prototype.transform_ql661s$ = function (chalkTransformer) {
+    var tmp$;
+    return chalkTransformer(new TheoremSection(Kotlin.isType(tmp$ = this.clauses.transform_ql661s$(chalkTransformer), ClauseListNode) ? tmp$ : throwCCE()));
+  };
+  TheoremSection.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'TheoremSection',
+    interfaces: [Phase2Node]
+  };
+  TheoremSection.prototype.component1 = function () {
+    return this.clauses;
+  };
+  TheoremSection.prototype.copy_bln7jj$ = function (clauses) {
+    return new TheoremSection(clauses === void 0 ? this.clauses : clauses);
+  };
+  TheoremSection.prototype.toString = function () {
+    return 'TheoremSection(clauses=' + Kotlin.toString(this.clauses) + ')';
+  };
+  TheoremSection.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.clauses) | 0;
+    return result;
+  };
+  TheoremSection.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.clauses, other.clauses))));
+  };
+  function validateTheoremSection(node, tracker) {
+    return validateClauseList(tracker, node, 'Theorem', false, getCallableRef('TheoremSection', function (clauses) {
+      return new TheoremSection(clauses);
+    }));
+  }
   function WhereSection(clauses) {
     this.clauses = clauses;
   }
@@ -5988,7 +6218,7 @@
     }
   };
   AxiomGroup.prototype.toCode_pc06dk$$default = function (isArg, indent, writer) {
-    return toCode_1(writer, isArg, indent, null, [this.axiomSection, this.metaDataSection]);
+    return topLevelToCode(writer, isArg, indent, null, [this.axiomSection, this.metaDataSection]);
   };
   AxiomGroup.prototype.transform_ql661s$ = function (chalkTransformer) {
     var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3;
@@ -6052,7 +6282,7 @@
     }
   };
   ConjectureGroup.prototype.toCode_pc06dk$$default = function (isArg, indent, writer) {
-    return toCode_1(writer, isArg, indent, null, [this.conjectureSection, this.metaDataSection]);
+    return topLevelToCode(writer, isArg, indent, null, [this.conjectureSection, this.metaDataSection]);
   };
   ConjectureGroup.prototype.transform_ql661s$ = function (chalkTransformer) {
     var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3;
@@ -6133,7 +6363,7 @@
     var sections = mutableListOf([this.definesSection, this.assumingSection]);
     sections.addAll_brywnq$(this.meansSections);
     sections.add_11rb$(this.metaDataSection);
-    return toCode_1(writer, isArg, indent, this.id, copyToArray(sections).slice());
+    return topLevelToCode(writer, isArg, indent, this.id, copyToArray(sections).slice());
   };
   DefinesGroup.prototype.transform_ql661s$ = function (chalkTransformer) {
     var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6, tmp$_7, tmp$_8, tmp$_9, tmp$_10;
@@ -6227,7 +6457,7 @@
     }
   };
   ProtoGroup.prototype.toCode_pc06dk$$default = function (isArg, indent, writer) {
-    return toCode_1(writer, isArg, indent, null, [this.textSection, this.metaDataSection]);
+    return topLevelToCode(writer, isArg, indent, null, [this.textSection, this.metaDataSection]);
   };
   ProtoGroup.prototype.transform_ql661s$ = function (chalkTransformer) {
     var tmp$, tmp$_0, tmp$_1;
@@ -6324,7 +6554,7 @@
     var sections = mutableListOf([this.representsSection, this.assumingSection]);
     sections.addAll_brywnq$(this.thatSections);
     sections.add_11rb$(this.metaDataSection);
-    return toCode_1(writer, isArg, indent, this.id, copyToArray(sections).slice());
+    return topLevelToCode(writer, isArg, indent, this.id, copyToArray(sections).slice());
   };
   RepresentsGroup.prototype.transform_ql661s$ = function (chalkTransformer) {
     var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6, tmp$_7, tmp$_8, tmp$_9, tmp$_10;
@@ -6401,150 +6631,84 @@
       return new RepresentsGroup(signature, id, representsSection, assumingSection, thatSections, aliasSection, metaDataSection);
     }));
   }
-  function ResultGroup(resultSection, aliasSection, metaDataSection) {
-    TopLevelGroup.call(this, metaDataSection);
-    this.resultSection = resultSection;
-    this.aliasSection = aliasSection;
-    this.metaDataSection_n4oidu$_0 = metaDataSection;
-  }
-  Object.defineProperty(ResultGroup.prototype, 'metaDataSection', {
-    get: function () {
-      return this.metaDataSection_n4oidu$_0;
-    }
-  });
-  ResultGroup.prototype.forEach_s8izwl$ = function (fn) {
-    fn(this.resultSection);
-    if (this.metaDataSection != null) {
-      fn(this.metaDataSection);
-    }
-  };
-  ResultGroup.prototype.toCode_pc06dk$$default = function (isArg, indent, writer) {
-    return toCode_1(writer, isArg, indent, null, [this.resultSection, this.metaDataSection]);
-  };
-  ResultGroup.prototype.transform_ql661s$ = function (chalkTransformer) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5;
-    tmp$_0 = Kotlin.isType(tmp$ = this.resultSection.transform_ql661s$(chalkTransformer), ResultSection) ? tmp$ : throwCCE();
-    tmp$_3 = (tmp$_2 = (tmp$_1 = this.metaDataSection) != null ? tmp$_1.transform_ql661s$(chalkTransformer) : null) == null || Kotlin.isType(tmp$_2, MetaDataSection) ? tmp$_2 : throwCCE();
-    return chalkTransformer(new ResultGroup(tmp$_0, (tmp$_5 = (tmp$_4 = this.aliasSection) != null ? tmp$_4.transform_ql661s$(chalkTransformer) : null) == null || Kotlin.isType(tmp$_5, AliasSection) ? tmp$_5 : throwCCE(), tmp$_3));
-  };
-  ResultGroup.$metadata$ = {
-    kind: Kind_CLASS,
-    simpleName: 'ResultGroup',
-    interfaces: [TopLevelGroup]
-  };
-  ResultGroup.prototype.component1 = function () {
-    return this.resultSection;
-  };
-  ResultGroup.prototype.component2 = function () {
-    return this.aliasSection;
-  };
-  ResultGroup.prototype.component3 = function () {
-    return this.metaDataSection;
-  };
-  ResultGroup.prototype.copy_kfpauq$ = function (resultSection, aliasSection, metaDataSection) {
-    return new ResultGroup(resultSection === void 0 ? this.resultSection : resultSection, aliasSection === void 0 ? this.aliasSection : aliasSection, metaDataSection === void 0 ? this.metaDataSection : metaDataSection);
-  };
-  ResultGroup.prototype.toString = function () {
-    return 'ResultGroup(resultSection=' + Kotlin.toString(this.resultSection) + (', aliasSection=' + Kotlin.toString(this.aliasSection)) + (', metaDataSection=' + Kotlin.toString(this.metaDataSection)) + ')';
-  };
-  ResultGroup.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.resultSection) | 0;
-    result = result * 31 + Kotlin.hashCode(this.aliasSection) | 0;
-    result = result * 31 + Kotlin.hashCode(this.metaDataSection) | 0;
-    return result;
-  };
-  ResultGroup.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.resultSection, other.resultSection) && Kotlin.equals(this.aliasSection, other.aliasSection) && Kotlin.equals(this.metaDataSection, other.metaDataSection)))));
-  };
-  function isResultGroup(node) {
-    return firstSectionMatchesName(node, 'Result');
-  }
-  function validateResultGroup(groupNode, tracker) {
-    return validateResultLikeGroup(tracker, groupNode, 'Result', getCallableRef('validateResultSection', function (node, tracker) {
-      return validateResultSection(node, tracker);
-    }), getCallableRef('ResultGroup', function (resultSection, aliasSection, metaDataSection) {
-      return new ResultGroup(resultSection, aliasSection, metaDataSection);
-    }));
-  }
-  function SourceGroup(id, sourceSection, metaDataSection) {
+  function ResourceGroup(id, sourceSection, metaDataSection) {
     TopLevelGroup.call(this, metaDataSection);
     this.id = id;
     this.sourceSection = sourceSection;
-    this.metaDataSection_gs5my8$_0 = metaDataSection;
+    this.metaDataSection_396bb7$_0 = metaDataSection;
   }
-  Object.defineProperty(SourceGroup.prototype, 'metaDataSection', {
+  Object.defineProperty(ResourceGroup.prototype, 'metaDataSection', {
     get: function () {
-      return this.metaDataSection_gs5my8$_0;
+      return this.metaDataSection_396bb7$_0;
     }
   });
-  SourceGroup.prototype.forEach_s8izwl$ = function (fn) {
+  ResourceGroup.prototype.forEach_s8izwl$ = function (fn) {
     fn(this.sourceSection);
     if (this.metaDataSection != null) {
       fn(this.metaDataSection);
     }
   };
-  SourceGroup.prototype.toCode_pc06dk$$default = function (isArg, indent, writer) {
-    return toCode_1(writer, isArg, indent, new IdStatement(this.id, validationFailure(emptyList())), [this.sourceSection, this.metaDataSection]);
+  ResourceGroup.prototype.toCode_pc06dk$$default = function (isArg, indent, writer) {
+    return topLevelToCode(writer, isArg, indent, new IdStatement(this.id, validationFailure(emptyList())), [this.sourceSection, this.metaDataSection]);
   };
-  SourceGroup.prototype.transform_ql661s$ = function (chalkTransformer) {
+  ResourceGroup.prototype.transform_ql661s$ = function (chalkTransformer) {
     var tmp$, tmp$_0, tmp$_1;
-    return chalkTransformer(new SourceGroup(this.id, Kotlin.isType(tmp$ = this.sourceSection.transform_ql661s$(chalkTransformer), SourceSection) ? tmp$ : throwCCE(), Kotlin.isType(tmp$_1 = (tmp$_0 = this.metaDataSection) != null ? tmp$_0.transform_ql661s$(chalkTransformer) : null, MetaDataSection) ? tmp$_1 : null));
+    return chalkTransformer(new ResourceGroup(this.id, Kotlin.isType(tmp$ = this.sourceSection.transform_ql661s$(chalkTransformer), ResourceSection) ? tmp$ : throwCCE(), Kotlin.isType(tmp$_1 = (tmp$_0 = this.metaDataSection) != null ? tmp$_0.transform_ql661s$(chalkTransformer) : null, MetaDataSection) ? tmp$_1 : null));
   };
-  SourceGroup.$metadata$ = {
+  ResourceGroup.$metadata$ = {
     kind: Kind_CLASS,
-    simpleName: 'SourceGroup',
+    simpleName: 'ResourceGroup',
     interfaces: [TopLevelGroup]
   };
-  SourceGroup.prototype.component1 = function () {
+  ResourceGroup.prototype.component1 = function () {
     return this.id;
   };
-  SourceGroup.prototype.component2 = function () {
+  ResourceGroup.prototype.component2 = function () {
     return this.sourceSection;
   };
-  SourceGroup.prototype.component3 = function () {
+  ResourceGroup.prototype.component3 = function () {
     return this.metaDataSection;
   };
-  SourceGroup.prototype.copy_tddelq$ = function (id, sourceSection, metaDataSection) {
-    return new SourceGroup(id === void 0 ? this.id : id, sourceSection === void 0 ? this.sourceSection : sourceSection, metaDataSection === void 0 ? this.metaDataSection : metaDataSection);
+  ResourceGroup.prototype.copy_qt568v$ = function (id, sourceSection, metaDataSection) {
+    return new ResourceGroup(id === void 0 ? this.id : id, sourceSection === void 0 ? this.sourceSection : sourceSection, metaDataSection === void 0 ? this.metaDataSection : metaDataSection);
   };
-  SourceGroup.prototype.toString = function () {
-    return 'SourceGroup(id=' + Kotlin.toString(this.id) + (', sourceSection=' + Kotlin.toString(this.sourceSection)) + (', metaDataSection=' + Kotlin.toString(this.metaDataSection)) + ')';
+  ResourceGroup.prototype.toString = function () {
+    return 'ResourceGroup(id=' + Kotlin.toString(this.id) + (', sourceSection=' + Kotlin.toString(this.sourceSection)) + (', metaDataSection=' + Kotlin.toString(this.metaDataSection)) + ')';
   };
-  SourceGroup.prototype.hashCode = function () {
+  ResourceGroup.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.id) | 0;
     result = result * 31 + Kotlin.hashCode(this.sourceSection) | 0;
     result = result * 31 + Kotlin.hashCode(this.metaDataSection) | 0;
     return result;
   };
-  SourceGroup.prototype.equals = function (other) {
+  ResourceGroup.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.id, other.id) && Kotlin.equals(this.sourceSection, other.sourceSection) && Kotlin.equals(this.metaDataSection, other.metaDataSection)))));
   };
-  function isSourceGroup(node) {
-    return firstSectionMatchesName(node, 'Source');
+  function isResourceGroup(node) {
+    return firstSectionMatchesName(node, 'Resource');
   }
-  function validateSourceGroup(groupNode, tracker) {
+  function validateResourceGroup(groupNode, tracker) {
     var tmp$, tmp$_0;
     var id = groupNode.id;
     if (id == null) {
-      return validationFailure(listOf(new ParseError('A Source group must have an id', getRow(groupNode), getColumn(groupNode))));
+      return validationFailure(listOf(new ParseError('A Resource group must have an id', getRow(groupNode), getColumn(groupNode))));
     }
     var $receiver = id.text;
     var endIndex = id.text.length - 1 | 0;
     var idText = $receiver.substring(1, endIndex);
     var errors = ArrayList_init();
     if (!Regex_init('[a-zA-Z0-9]+').matches_6bul2c$(idText)) {
-      errors.add_11rb$(new ParseError('A source id can only contain numbers and letters', getRow(groupNode), getColumn(groupNode)));
+      errors.add_11rb$(new ParseError('A resource id can only contain numbers and letters', getRow(groupNode), getColumn(groupNode)));
     }
     var sections = groupNode.sections;
     if (sections.isEmpty()) {
-      errors.add_11rb$(new ParseError('Expected a Source section', getRow(groupNode), getColumn(groupNode)));
+      errors.add_11rb$(new ParseError('Expected a resource section', getRow(groupNode), getColumn(groupNode)));
     }
-    var sourceSection = sections.get_za3lpa$(0);
-    var sourceValidation = validateSourceSection(sourceSection, tracker);
-    if (Kotlin.isType(sourceValidation, ValidationFailure)) {
-      errors.addAll_brywnq$(sourceValidation.errors);
+    var resourceSection = sections.get_za3lpa$(0);
+    var resourceValidation = validateResourceSection(resourceSection, tracker);
+    if (Kotlin.isType(resourceValidation, ValidationFailure)) {
+      errors.addAll_brywnq$(resourceValidation.errors);
     }
     var metaDataSection = null;
     if (sections.size >= 2) {
@@ -6565,7 +6729,73 @@
     if (!errors.isEmpty()) {
       return validationFailure(errors);
     }
-    return validationSuccess_0(tracker, groupNode, new SourceGroup(idText, (Kotlin.isType(tmp$_0 = sourceValidation, ValidationSuccess) ? tmp$_0 : throwCCE()).value, metaDataSection));
+    return validationSuccess_0(tracker, groupNode, new ResourceGroup(idText, (Kotlin.isType(tmp$_0 = resourceValidation, ValidationSuccess) ? tmp$_0 : throwCCE()).value, metaDataSection));
+  }
+  function TheoremGroup(theoremSection, aliasSection, metaDataSection) {
+    TopLevelGroup.call(this, metaDataSection);
+    this.theoremSection = theoremSection;
+    this.aliasSection = aliasSection;
+    this.metaDataSection_i69i7h$_0 = metaDataSection;
+  }
+  Object.defineProperty(TheoremGroup.prototype, 'metaDataSection', {
+    get: function () {
+      return this.metaDataSection_i69i7h$_0;
+    }
+  });
+  TheoremGroup.prototype.forEach_s8izwl$ = function (fn) {
+    fn(this.theoremSection);
+    if (this.metaDataSection != null) {
+      fn(this.metaDataSection);
+    }
+  };
+  TheoremGroup.prototype.toCode_pc06dk$$default = function (isArg, indent, writer) {
+    return topLevelToCode(writer, isArg, indent, null, [this.theoremSection, this.metaDataSection]);
+  };
+  TheoremGroup.prototype.transform_ql661s$ = function (chalkTransformer) {
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5;
+    tmp$_0 = Kotlin.isType(tmp$ = this.theoremSection.transform_ql661s$(chalkTransformer), TheoremSection) ? tmp$ : throwCCE();
+    tmp$_3 = (tmp$_2 = (tmp$_1 = this.metaDataSection) != null ? tmp$_1.transform_ql661s$(chalkTransformer) : null) == null || Kotlin.isType(tmp$_2, MetaDataSection) ? tmp$_2 : throwCCE();
+    return chalkTransformer(new TheoremGroup(tmp$_0, (tmp$_5 = (tmp$_4 = this.aliasSection) != null ? tmp$_4.transform_ql661s$(chalkTransformer) : null) == null || Kotlin.isType(tmp$_5, AliasSection) ? tmp$_5 : throwCCE(), tmp$_3));
+  };
+  TheoremGroup.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'TheoremGroup',
+    interfaces: [TopLevelGroup]
+  };
+  TheoremGroup.prototype.component1 = function () {
+    return this.theoremSection;
+  };
+  TheoremGroup.prototype.component2 = function () {
+    return this.aliasSection;
+  };
+  TheoremGroup.prototype.component3 = function () {
+    return this.metaDataSection;
+  };
+  TheoremGroup.prototype.copy_1c0w1$ = function (theoremSection, aliasSection, metaDataSection) {
+    return new TheoremGroup(theoremSection === void 0 ? this.theoremSection : theoremSection, aliasSection === void 0 ? this.aliasSection : aliasSection, metaDataSection === void 0 ? this.metaDataSection : metaDataSection);
+  };
+  TheoremGroup.prototype.toString = function () {
+    return 'TheoremGroup(theoremSection=' + Kotlin.toString(this.theoremSection) + (', aliasSection=' + Kotlin.toString(this.aliasSection)) + (', metaDataSection=' + Kotlin.toString(this.metaDataSection)) + ')';
+  };
+  TheoremGroup.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.theoremSection) | 0;
+    result = result * 31 + Kotlin.hashCode(this.aliasSection) | 0;
+    result = result * 31 + Kotlin.hashCode(this.metaDataSection) | 0;
+    return result;
+  };
+  TheoremGroup.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.theoremSection, other.theoremSection) && Kotlin.equals(this.aliasSection, other.aliasSection) && Kotlin.equals(this.metaDataSection, other.metaDataSection)))));
+  };
+  function isTheoremGroup(node) {
+    return firstSectionMatchesName(node, 'Theorem');
+  }
+  function validateTheoremGroup(groupNode, tracker) {
+    return validateResultLikeGroup(tracker, groupNode, 'Theorem', getCallableRef('validateTheoremSection', function (node, tracker) {
+      return validateTheoremSection(node, tracker);
+    }), getCallableRef('TheoremGroup', function (theoremSection, aliasSection, metaDataSection) {
+      return new TheoremGroup(theoremSection, aliasSection, metaDataSection);
+    }));
   }
   function TopLevelGroup(metaDataSection) {
     this.metaDataSection_39sa8s$_0 = metaDataSection;
@@ -6580,7 +6810,8 @@
     simpleName: 'TopLevelGroup',
     interfaces: [Phase2Node]
   };
-  function toCode_1(writer, isArg, indent, id, sections) {
+  function topLevelToCode(writer, isArg, indent, id, sections) {
+    writer.beginTopLevel();
     var useAsArg = isArg;
     if (id != null) {
       writer.writeIndent_eltk6l$(isArg, indent);
@@ -6597,6 +6828,7 @@
         writer.writeNewline_za3lpa$();
       }
     }
+    writer.endTopLevel();
     return writer;
   }
   function validateResultLikeGroup(tracker, groupNode, resultLikeName, validateResultLikeSection, buildGroup) {
@@ -8818,6 +9050,403 @@
     }
     return newCommands;
   }
+  function signature($receiver) {
+    var tmp$;
+    var builder = StringBuilder_init();
+    builder.append_gw00v9$($receiver.name.text);
+    tmp$ = $receiver.namedGroups.iterator();
+    while (tmp$.hasNext()) {
+      var grp = tmp$.next();
+      builder.append_s8itvh$(58);
+      builder.append_gw00v9$(grp.name.text);
+    }
+    return builder.toString();
+  }
+  function signature_0($receiver) {
+    var tmp$;
+    var builder = StringBuilder_init();
+    builder.append_s8itvh$(92);
+    tmp$ = $receiver.parts;
+    for (var i = 0; i !== tmp$.size; ++i) {
+      if (i > 0) {
+        builder.append_s8itvh$(46);
+      }
+      builder.append_gw00v9$(signature($receiver.parts.get_za3lpa$(i)));
+    }
+    return builder.toString();
+  }
+  function MutableSubstitutions(doesMatch, substitutions, errors) {
+    this.doesMatch = doesMatch;
+    this.substitutions = substitutions;
+    this.errors = errors;
+  }
+  MutableSubstitutions.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'MutableSubstitutions',
+    interfaces: []
+  };
+  MutableSubstitutions.prototype.component1 = function () {
+    return this.doesMatch;
+  };
+  MutableSubstitutions.prototype.component2 = function () {
+    return this.substitutions;
+  };
+  MutableSubstitutions.prototype.component3 = function () {
+    return this.errors;
+  };
+  MutableSubstitutions.prototype.copy_pgx6c2$ = function (doesMatch, substitutions, errors) {
+    return new MutableSubstitutions(doesMatch === void 0 ? this.doesMatch : doesMatch, substitutions === void 0 ? this.substitutions : substitutions, errors === void 0 ? this.errors : errors);
+  };
+  MutableSubstitutions.prototype.toString = function () {
+    return 'MutableSubstitutions(doesMatch=' + Kotlin.toString(this.doesMatch) + (', substitutions=' + Kotlin.toString(this.substitutions)) + (', errors=' + Kotlin.toString(this.errors)) + ')';
+  };
+  MutableSubstitutions.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.doesMatch) | 0;
+    result = result * 31 + Kotlin.hashCode(this.substitutions) | 0;
+    result = result * 31 + Kotlin.hashCode(this.errors) | 0;
+    return result;
+  };
+  MutableSubstitutions.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.doesMatch, other.doesMatch) && Kotlin.equals(this.substitutions, other.substitutions) && Kotlin.equals(this.errors, other.errors)))));
+  };
+  function Substitutions(doesMatch, substitutions, errors) {
+    this.doesMatch = doesMatch;
+    this.substitutions = substitutions;
+    this.errors = errors;
+  }
+  Substitutions.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Substitutions',
+    interfaces: []
+  };
+  Substitutions.prototype.component1 = function () {
+    return this.doesMatch;
+  };
+  Substitutions.prototype.component2 = function () {
+    return this.substitutions;
+  };
+  Substitutions.prototype.component3 = function () {
+    return this.errors;
+  };
+  Substitutions.prototype.copy_fr15pl$ = function (doesMatch, substitutions, errors) {
+    return new Substitutions(doesMatch === void 0 ? this.doesMatch : doesMatch, substitutions === void 0 ? this.substitutions : substitutions, errors === void 0 ? this.errors : errors);
+  };
+  Substitutions.prototype.toString = function () {
+    return 'Substitutions(doesMatch=' + Kotlin.toString(this.doesMatch) + (', substitutions=' + Kotlin.toString(this.substitutions)) + (', errors=' + Kotlin.toString(this.errors)) + ')';
+  };
+  Substitutions.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.doesMatch) | 0;
+    result = result * 31 + Kotlin.hashCode(this.substitutions) | 0;
+    result = result * 31 + Kotlin.hashCode(this.errors) | 0;
+    return result;
+  };
+  Substitutions.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.doesMatch, other.doesMatch) && Kotlin.equals(this.substitutions, other.substitutions) && Kotlin.equals(this.errors, other.errors)))));
+  };
+  function findSubstitutions(pattern, value, subs) {
+    var tmp$, tmp$_0;
+    if (pattern == null !== (value == null)) {
+      subs.doesMatch = false;
+      if (pattern == null) {
+        subs.errors.add_11rb$("Unexpected group '" + toString(value != null ? value.toCode_6z438g$() : null) + "'");
+      }
+       else {
+        subs.errors.add_11rb$("Unxpected a match for '" + pattern.toCode_6z438g$() + "'");
+      }
+      return;
+    }
+    if (pattern == null || value == null) {
+      return;
+    }
+    var $receiver = pattern.parameters.items;
+    var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
+    var tmp$_1;
+    tmp$_1 = $receiver.iterator();
+    while (tmp$_1.hasNext()) {
+      var item = tmp$_1.next();
+      var tmp$_2;
+      destination.add_11rb$(Kotlin.isType(tmp$_2 = item.children.get_za3lpa$(0), TextTexTalkNode) ? tmp$_2 : throwCCE());
+    }
+    var destination_0 = ArrayList_init_0(collectionSizeOrDefault(destination, 10));
+    var tmp$_3;
+    tmp$_3 = destination.iterator();
+    while (tmp$_3.hasNext()) {
+      var item_0 = tmp$_3.next();
+      destination_0.add_11rb$(item_0.text);
+    }
+    var paramNames = destination_0;
+    var isVariadic = !pattern.parameters.items.isEmpty() && (Kotlin.isType(tmp$ = last(pattern.parameters.items).children.get_za3lpa$(0), TextTexTalkNode) ? tmp$ : throwCCE()).isVarArg;
+    var values = value.parameters.items;
+    if (isVariadic) {
+      var b = paramNames.size - 1 | 0;
+      var numRequired = Math_0.max(0, b);
+      if (values.size < numRequired) {
+        subs.doesMatch = false;
+        subs.errors.add_11rb$('Expected at least ' + numRequired + ' arguments but found ' + values.size + " for '" + value.toCode_6z438g$() + "'");
+        return;
+      }
+      for (var i = 0; i < numRequired; i++) {
+        var exps = mutableListOf([values.get_za3lpa$(i)]);
+        var $receiver_0 = subs.substitutions;
+        var key = paramNames.get_za3lpa$(i);
+        $receiver_0.put_xwzc9p$(key, exps);
+      }
+      var varArgs = ArrayList_init();
+      tmp$_0 = values.size;
+      for (var i_0 = numRequired; i_0 < tmp$_0; i_0++) {
+        varArgs.add_11rb$(values.get_za3lpa$(i_0));
+      }
+      var $receiver_1 = subs.substitutions;
+      var key_0 = last(paramNames);
+      $receiver_1.put_xwzc9p$(key_0, varArgs);
+    }
+     else {
+      var numRequired_0 = paramNames.size;
+      if (values.size !== numRequired_0) {
+        subs.doesMatch = false;
+        subs.errors.add_11rb$('Expected exactly ' + numRequired_0 + ' arguments but found ' + values.size + " for '" + value.toCode_6z438g$() + "'");
+        return;
+      }
+      for (var i_1 = 0; i_1 !== paramNames.size; ++i_1) {
+        var exps_0 = mutableListOf([values.get_za3lpa$(i_1)]);
+        var $receiver_2 = subs.substitutions;
+        var key_1 = paramNames.get_za3lpa$(i_1);
+        $receiver_2.put_xwzc9p$(key_1, exps_0);
+      }
+    }
+  }
+  function findSubstitutions_0(pattern, value, subs) {
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6, tmp$_7, tmp$_8, tmp$_9;
+    if (!((tmp$ = pattern.name) != null ? tmp$.equals(value.name) : null)) {
+      subs.doesMatch = false;
+      subs.errors.add_11rb$('Name mismatch.  Expected ' + pattern.name + ' but found ' + value.name);
+      return;
+    }
+    findSubstitutions(pattern.square, value.square, subs);
+    findSubstitutions((tmp$_0 = pattern.subSup) != null ? tmp$_0.sub : null, (tmp$_1 = value.subSup) != null ? tmp$_1.sub : null, subs);
+    findSubstitutions((tmp$_2 = pattern.subSup) != null ? tmp$_2.sup : null, (tmp$_3 = value.subSup) != null ? tmp$_3.sup : null, subs);
+    var isLastVarArg = !pattern.groups.isEmpty() && last(pattern.groups).isVarArg;
+    if (isLastVarArg) {
+      if (value.groups.size >= pattern.groups.size) {
+        tmp$_4 = pattern.groups;
+        for (var i = 0; i !== tmp$_4.size; ++i) {
+          findSubstitutions(pattern.groups.get_za3lpa$(i), value.groups.get_za3lpa$(i), subs);
+        }
+        var variadicName = (Kotlin.isType(tmp$_5 = last(pattern.groups).parameters.items.get_za3lpa$(0).children.get_za3lpa$(0), TextTexTalkNode) ? tmp$_5 : throwCCE()).text;
+        tmp$_6 = pattern.groups.size;
+        tmp$_7 = value.groups.size;
+        for (var i_0 = tmp$_6; i_0 < tmp$_7; i_0++) {
+          var items = value.groups.get_za3lpa$(i_0).parameters.items;
+          if (items.size !== 1) {
+            subs.doesMatch = false;
+            subs.errors.add_11rb$('A variadic group can only contain a single item but found ' + items.size + " for '" + value.groups.get_za3lpa$(i_0));
+            continue;
+          }
+          if (!subs.substitutions.containsKey_11rb$(variadicName)) {
+            var tmp$_10 = subs.substitutions;
+            var value_0 = ArrayList_init();
+            tmp$_10.put_xwzc9p$(variadicName, value_0);
+          }
+          if (items.size !== 1) {
+            subs.errors.add_11rb$('A variadic group can only contain a single item but found ' + items.size + " for '" + value.groups.get_za3lpa$(i_0).toCode_6z438g$() + "'");
+            subs.doesMatch = false;
+          }
+           else {
+            ensureNotNull(subs.substitutions.get_11rb$(variadicName)).add_11rb$(value.groups.get_za3lpa$(i_0).parameters.items.get_za3lpa$(0));
+          }
+        }
+      }
+       else {
+        subs.doesMatch = false;
+        subs.errors.add_11rb$('Expected at least ' + pattern.groups.size + ' groups but found ' + value.groups.size + " for '" + value.toCode_6z438g$() + "'");
+      }
+    }
+     else {
+      if (value.groups.size === pattern.groups.size) {
+        tmp$_8 = pattern.groups;
+        for (var i_1 = 0; i_1 !== tmp$_8.size; ++i_1) {
+          findSubstitutions(pattern.groups.get_za3lpa$(i_1), value.groups.get_za3lpa$(i_1), subs);
+        }
+      }
+       else {
+        subs.doesMatch = false;
+        subs.errors.add_11rb$('Expected exactly ' + pattern.groups.size + ' groups but found ' + value.groups.size + " for '" + value.toCode_6z438g$() + "'");
+      }
+    }
+    if (pattern.namedGroups.size === value.namedGroups.size) {
+      tmp$_9 = pattern.namedGroups;
+      for (var i_2 = 0; i_2 !== tmp$_9.size; ++i_2) {
+        var tmp$_11;
+        var patternGrp = pattern.namedGroups.get_za3lpa$(i_2);
+        var valGrp = value.namedGroups.get_za3lpa$(i_2);
+        if (!((tmp$_11 = patternGrp.name) != null ? tmp$_11.equals(valGrp.name) : null)) {
+          subs.doesMatch = false;
+          subs.errors.add_11rb$('Mismatched named group: Expected ' + patternGrp.name + ' groups but found ' + valGrp.name + " for '" + value.toCode_6z438g$() + "'");
+        }
+        findSubstitutions(patternGrp.group, valGrp.group, subs);
+      }
+    }
+     else {
+      subs.doesMatch = false;
+      subs.errors.add_11rb$('Expected exactly ' + pattern.namedGroups.size + ' named groups but found ' + value.namedGroups.size + " for '" + value.toCode_6z438g$() + "'");
+    }
+  }
+  function getSubstitutions(pattern, value) {
+    var tmp$;
+    var errors = validatePattern(pattern);
+    if (!errors.isEmpty()) {
+      return new Substitutions(false, emptyMap(), errors);
+    }
+    var subs = new MutableSubstitutions(true, LinkedHashMap_init(), ArrayList_init());
+    if (pattern.parts.size === value.parts.size) {
+      tmp$ = pattern.parts;
+      for (var i = 0; i !== tmp$.size; ++i) {
+        findSubstitutions_0(pattern.parts.get_za3lpa$(i), value.parts.get_za3lpa$(i), subs);
+      }
+    }
+    return new Substitutions(subs.doesMatch, subs.substitutions, subs.errors);
+  }
+  function validatePatternGroupImpl(group, canBeVarArg, description, errors) {
+    var tmp$, tmp$_0;
+    if (group == null)
+      return;
+    if (group.isVarArg && !canBeVarArg) {
+      errors.add_11rb$(description + ' cannot be variadic');
+    }
+    if (group.isVarArg && (group.parameters.items.size !== 1 || group.parameters.items.get_za3lpa$(0).children.size !== 1 || !Kotlin.isType(group.parameters.items.get_za3lpa$(0).children.get_za3lpa$(0), TextTexTalkNode) || (Kotlin.isType(tmp$ = group.parameters.items.get_za3lpa$(0).children.get_za3lpa$(0), TextTexTalkNode) ? tmp$ : throwCCE()).isVarArg)) {
+      errors.add_11rb$('A variadic group can only have a single identifier parameter that is not variadic');
+      return;
+    }
+    tmp$_0 = group.parameters.items;
+    for (var i = 0; i !== tmp$_0.size; ++i) {
+      var expression = group.parameters.items.get_za3lpa$(i);
+      if (expression.children.size !== 1) {
+        errors.add_11rb$("Cannot have a parameter with more than one value: '" + expression.toCode_6z438g$() + "'");
+        continue;
+      }
+      var item = expression.children.get_za3lpa$(0);
+      if (!Kotlin.isType(item, TextTexTalkNode)) {
+        errors.add_11rb$("Parameters can only be identifiers but found '" + item.toCode_6z438g$() + "'");
+        continue;
+      }
+      if (item.isVarArg && i !== (group.parameters.items.size - 1 | 0)) {
+        errors.add_11rb$("Only the last parameter in a group can be variadic: '" + item.toCode_6z438g$() + "'");
+      }
+    }
+  }
+  function validatePatternImpl(part, errors) {
+    var tmp$, tmp$_0, tmp$_1, tmp$_2;
+    validatePatternGroupImpl(part.square, false, 'A square group', errors);
+    validatePatternGroupImpl((tmp$ = part.subSup) != null ? tmp$.sub : null, false, 'A ^ group', errors);
+    validatePatternGroupImpl((tmp$_0 = part.subSup) != null ? tmp$_0.sup : null, false, 'A _ group', errors);
+    tmp$_1 = part.groups;
+    for (var i = 0; i !== tmp$_1.size; ++i) {
+      var tmp$_3;
+      var canBeVarArg = i === (part.groups.size - 1 | 0);
+      if (i === (part.groups.size - 1 | 0)) {
+        tmp$_3 = 'The last group';
+      }
+       else {
+        tmp$_3 = 'A group';
+      }
+      var description = tmp$_3;
+      validatePatternGroupImpl(part.groups.get_za3lpa$(i), canBeVarArg, description, errors);
+    }
+    tmp$_2 = part.namedGroups;
+    for (var i_0 = 0; i_0 !== tmp$_2.size; ++i_0) {
+      validatePatternGroupImpl(part.namedGroups.get_za3lpa$(i_0).group, false, 'A named group', errors);
+    }
+  }
+  function validatePattern(command) {
+    var tmp$;
+    var errors = ArrayList_init();
+    tmp$ = command.parts.iterator();
+    while (tmp$.hasNext()) {
+      var part = tmp$.next();
+      validatePatternImpl(part, errors);
+    }
+    return errors;
+  }
+  function expandAsWritten(node, patternToExpansion) {
+    var tmp$;
+    var sigToPatternExpansion = LinkedHashMap_init();
+    tmp$ = patternToExpansion.entries.iterator();
+    while (tmp$.hasNext()) {
+      var tmp$_0 = tmp$.next();
+      var pattern = tmp$_0.key;
+      var expansion = tmp$_0.value;
+      var key = signature_0(pattern);
+      var value = new PatternExpansion(pattern, expansion);
+      sigToPatternExpansion.put_xwzc9p$(key, value);
+    }
+    return expandAsWrittenImpl(node, sigToPatternExpansion);
+  }
+  function PatternExpansion(pattern, expansion) {
+    this.pattern = pattern;
+    this.expansion = expansion;
+  }
+  PatternExpansion.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PatternExpansion',
+    interfaces: []
+  };
+  PatternExpansion.prototype.component1 = function () {
+    return this.pattern;
+  };
+  PatternExpansion.prototype.component2 = function () {
+    return this.expansion;
+  };
+  PatternExpansion.prototype.copy_9cta65$ = function (pattern, expansion) {
+    return new PatternExpansion(pattern === void 0 ? this.pattern : pattern, expansion === void 0 ? this.expansion : expansion);
+  };
+  PatternExpansion.prototype.toString = function () {
+    return 'PatternExpansion(pattern=' + Kotlin.toString(this.pattern) + (', expansion=' + Kotlin.toString(this.expansion)) + ')';
+  };
+  PatternExpansion.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.pattern) | 0;
+    result = result * 31 + Kotlin.hashCode(this.expansion) | 0;
+    return result;
+  };
+  PatternExpansion.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.pattern, other.pattern) && Kotlin.equals(this.expansion, other.expansion)))));
+  };
+  function expandAsWrittenImpl$lambda(closure$sigToPatternExpansion) {
+    return function (it) {
+      var tmp$;
+      if (Kotlin.isType(it, Command)) {
+        var patternExpansion = closure$sigToPatternExpansion.get_11rb$(signature_0(it));
+        if (patternExpansion == null) {
+          return null;
+        }
+         else {
+          var subs = getSubstitutions(patternExpansion.pattern, it);
+          if (!subs.doesMatch) {
+            return null;
+          }
+           else {
+            var expansion = patternExpansion.expansion;
+            tmp$ = subs.substitutions.entries.iterator();
+            while (tmp$.hasNext()) {
+              var tmp$_0 = tmp$.next();
+              var name = tmp$_0.key;
+              var exp = tmp$_0.value;
+              var newText = expandAsWrittenImpl(first(exp), closure$sigToPatternExpansion);
+              expansion = replace(expansion, name + '&', newText);
+            }
+            return expansion;
+          }
+        }
+      }
+       else
+        return null;
+    };
+  }
+  function expandAsWrittenImpl(node, sigToPatternExpansion) {
+    return node.toCode_6z438g$(expandAsWrittenImpl$lambda(sigToPatternExpansion));
+  }
   function getSignature(group) {
     var tmp$, tmp$_0, tmp$_1;
     if (Kotlin.isType(group, DefinesGroup))
@@ -10029,8 +10658,8 @@
   package$section_0.validateRefinesSection_tvx4um$ = validateRefinesSection;
   package$section_0.RepresentsSection = RepresentsSection;
   package$section_0.validateRepresentsSection_tvx4um$ = validateRepresentsSection;
-  package$section_0.ResultSection = ResultSection;
-  package$section_0.validateResultSection_tvx4um$ = validateResultSection;
+  package$section_0.ResourceSection = ResourceSection;
+  package$section_0.validateResourceSection_dopyg1$ = validateResourceSection;
   package$section_0.identifySections_b3nzct$ = identifySections;
   package$section_0.appendTargetArgs_oswce3$ = appendTargetArgs;
   Object.defineProperty(package$section_0, 'SOURCE_ITEM_CONSTRAINTS', {
@@ -10048,6 +10677,8 @@
   package$section_0.validateThatSection_tvx4um$ = validateThatSection;
   package$section_0.ThenSection = ThenSection;
   package$section_0.validateThenSection_tvx4um$ = validateThenSection;
+  package$section_0.TheoremSection = TheoremSection;
+  package$section_0.validateTheoremSection_tvx4um$ = validateTheoremSection;
   package$section_0.WhereSection = WhereSection;
   package$section_0.validateWhereSection_tvx4um$ = validateWhereSection;
   var package$toplevel = package$ast_0.toplevel || (package$ast_0.toplevel = {});
@@ -10065,14 +10696,14 @@
   package$toplevel.RepresentsGroup = RepresentsGroup;
   package$toplevel.isRepresentsGroup_baevx2$ = isRepresentsGroup;
   package$toplevel.validateRepresentsGroup_m7mi13$ = validateRepresentsGroup;
-  package$toplevel.ResultGroup = ResultGroup;
-  package$toplevel.isResultGroup_baevx2$ = isResultGroup;
-  package$toplevel.validateResultGroup_m7mi13$ = validateResultGroup;
-  package$toplevel.SourceGroup = SourceGroup;
-  package$toplevel.isSourceGroup_baevx2$ = isSourceGroup;
-  package$toplevel.validateSourceGroup_m7mi13$ = validateSourceGroup;
+  package$toplevel.ResourceGroup = ResourceGroup;
+  package$toplevel.isResourceGroup_baevx2$ = isResourceGroup;
+  package$toplevel.validateResourceGroup_m7mi13$ = validateResourceGroup;
+  package$toplevel.TheoremGroup = TheoremGroup;
+  package$toplevel.isTheoremGroup_baevx2$ = isTheoremGroup;
+  package$toplevel.validateTheoremGroup_m7mi13$ = validateTheoremGroup;
   package$toplevel.TopLevelGroup = TopLevelGroup;
-  package$toplevel.toCode_gniy11$ = toCode_1;
+  package$toplevel.topLevelToCode_gniy11$ = topLevelToCode;
   package$toplevel.validateResultLikeGroup_2tafwm$ = validateResultLikeGroup;
   package$toplevel.validateDefinesLikeGroup_7fxr05$ = validateDefinesLikeGroup;
   var package$collections = package$common.collections || (package$common.collections = {});
@@ -10210,6 +10841,9 @@
   package$transform.separateIsStatements_wef8g3$ = separateIsStatements;
   package$transform.glueCommands_wef8g3$ = glueCommands;
   package$transform.glueCommands_f1ync3$ = glueCommands_0;
+  package$transform.Substitutions = Substitutions;
+  package$transform.getSubstitutions_hbrnxy$ = getSubstitutions;
+  package$transform.expandAsWritten_xp7hq3$ = expandAsWritten;
   package$transform.getSignature_vwc43z$ = getSignature;
   package$transform.getSignature_6vedv1$ = getSignature_0;
   package$transform.getSignature_jeuz20$ = getSignature_1;
@@ -10280,12 +10914,12 @@
   OrSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   RefinesSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   RepresentsSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
-  ResultSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   SourceSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   SuchThatSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   TextSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   ThatSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   ThenSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
+  TheoremSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   WhereSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   TopLevelGroup.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   IsTexTalkNode.prototype.toCode_6z438g$ = TexTalkNode.prototype.toCode_6z438g$;
@@ -10350,7 +10984,7 @@
     return validateIffGroup(node, tracker);
   }))]);
   META_DATA_ITEM_CONSTRAINTS = mapOf([to('name', -1), to('classification', -1), to('tag', -1), to('author', -1), to('contributor', -1), to('written', -1), to('note', -1), to('id', 1), to('concept', 1), to('summary', 1)]);
-  SOURCE_ITEM_CONSTRAINTS = mapOf([to('type', 1), to('name', 1), to('author', -1), to('date', 1), to('homepage', 1), to('url', 1), to('offset', 1)]);
+  SOURCE_ITEM_CONSTRAINTS = mapOf([to('type', 1), to('name', 1), to('author', -1), to('date', 1), to('homepage', 1), to('url', 1), to('offset', 1), to('related', -1)]);
   INVALID_0 = new TexTalkToken('INVALID', TexTalkTokenType$Invalid_getInstance(), -1, -1);
   Kotlin.defineModule('mathlingua', _);
   return _;
