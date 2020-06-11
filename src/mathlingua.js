@@ -6,6 +6,7 @@
   var throwCCE = Kotlin.throwCCE;
   var equals = Kotlin.equals;
   var removeSurrounding = Kotlin.kotlin.text.removeSurrounding_90ijwr$;
+  var replace = Kotlin.kotlin.text.replace_680rmw$;
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
   var LinkedHashSet_init = Kotlin.kotlin.collections.LinkedHashSet_init_287e2$;
@@ -27,7 +28,6 @@
   var throwISE = Kotlin.throwISE;
   var Unit = Kotlin.kotlin.Unit;
   var Math_0 = Math;
-  var replace = Kotlin.kotlin.text.replace_680rmw$;
   var contains_0 = Kotlin.kotlin.text.contains_li3zpu$;
   var indexOf = Kotlin.kotlin.text.indexOf_l5u8uk$;
   var mutableSetOf = Kotlin.kotlin.collections.mutableSetOf_i5x0yv$;
@@ -380,6 +380,37 @@
   MathLingua.prototype.expandWrittenAs_51nw9s$ = function (phase2Node, patternToExpansion) {
     return phase2Node.transform_ql661s$(MathLingua$expandWrittenAs$lambda(patternToExpansion));
   };
+  MathLingua.prototype.printExpanded_qz9155$ = function (input, supplemental, html) {
+    var tmp$, tmp$_0;
+    var validation = this.parse_61zpoe$(input + '\n' + '\n' + '\n' + supplemental);
+    if (Kotlin.isType(validation, ValidationFailure))
+      tmp$ = emptyList();
+    else if (Kotlin.isType(validation, ValidationSuccess))
+      tmp$ = validation.value.defines;
+    else
+      tmp$ = Kotlin.noWhenBranchMatched();
+    var defines = tmp$;
+    var validation_0 = this.parse_61zpoe$(input);
+    if (Kotlin.isType(validation_0, ValidationFailure))
+      tmp$_0 = validationFailure(validation_0.errors);
+    else if (Kotlin.isType(validation_0, ValidationSuccess))
+      tmp$_0 = validationSuccess(this.prettyPrint_jjgd2n$(validation_0.value, defines, html));
+    else
+      tmp$_0 = Kotlin.noWhenBranchMatched();
+    return tmp$_0;
+  };
+  MathLingua.prototype.prettyPrint_jjgd2n$ = function (node, defines, html) {
+    var tmp$;
+    if (html) {
+      tmp$ = new HtmlCodeWriter(defines);
+    }
+     else {
+      tmp$ = new MathLinguaCodeWriter(defines);
+    }
+    var writer = tmp$;
+    var code = node.toCode_pc06dk$(false, 0, writer).getCode();
+    return getHtml(replace(code, '<br/><br/><br/>', '<br/><br/>'));
+  };
   MathLingua.$metadata$ = {
     kind: Kind_OBJECT,
     simpleName: 'MathLingua',
@@ -391,6 +422,9 @@
       new MathLingua();
     }
     return MathLingua_instance;
+  }
+  function getHtml(body) {
+    return '\n' + '<!DOCTYPE html>' + '\n' + '<html>' + '\n' + '    <head>' + '\n' + '        <link rel=' + '"' + 'stylesheet' + '"' + '\n' + '              href=' + '"' + 'https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css' + '"' + '\n' + '              integrity=' + '"' + 'sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq' + '"' + '\n' + '              crossorigin=' + '"' + 'anonymous' + '"' + '>' + '\n' + '        <script defer' + '\n' + '                src=' + '"' + 'https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js' + '"' + '\n' + '                integrity=' + '"' + 'sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz' + '"' + '\n' + '                crossorigin=' + '"' + 'anonymous' + '"' + '>' + '\n' + '        <\/script>' + '\n' + '        <script>' + '\n' + '            function buildMathFragment(text) {' + '\n' + '                const fragment = document.createDocumentFragment();' + '\n' + "                var buffer = '';" + '\n' + '                var i = 0;' + '\n' + '                while (i < text.length) {' + '\n' + "                    if (text[i] === '" + '\\' + '\\' + "' && text[i+1] === '[') {" + '\n' + '                        i += 2; // skip over ' + '\\' + ' and [' + '\n' + '                        fragment.appendChild(document.createTextNode(buffer));' + '\n' + "                        buffer = '';" + '\n' + '\n' + "                        const span = document.createElement('span');" + '\n' + "                        var math = '';" + '\n' + '                        while (i < text.length &&' + '\n' + "                            !(text[i] === '" + '\\' + '\\' + "' && text[i+1] === ']')) {" + '\n' + '                            math += text[i++];' + '\n' + '                        }' + '\n' + "                        if (text[i] === '" + '\\' + '\\' + "') {" + '\n' + '                            i++; // move past the ' + '\\' + '\n' + '                        }' + '\n' + "                        if (text[i] === ']') {" + '\n' + '                            i++; // move past the ]' + '\n' + '                        }' + '\n' + '                        try {' + '\n' + '                            katex.render(math, span, {' + '\n' + '                                throwOnError: true,' + '\n' + '                                displayMode: true' + '\n' + '                            });' + '\n' + '                        } catch {' + '\n' + '                            span.appendChild(document.createTextNode(math));' + '\n' + '                        }' + '\n' + '                        fragment.appendChild(span);' + '\n' + '                    } else {' + '\n' + '                        buffer += text[i++];' + '\n' + '                    }' + '\n' + '                }' + '\n' + '\n' + '                if (buffer.length > 0) {' + '\n' + '                    fragment.appendChild(document.createTextNode(buffer));' + '\n' + '                }' + '\n' + '\n' + '                return fragment;' + '\n' + '            }' + '\n' + '\n' + '            function render(node) {' + '\n' + '                for (let i = 0; i < node.childNodes.length; i++) {' + '\n' + '                    const child = node.childNodes[i];' + '\n' + '\n' + '                    // node is an element node => nodeType === 1' + '\n' + '                    // node is an attribute node => nodeType === 2' + '\n' + '                    // node is a text node => nodeType === 3' + '\n' + '                    // node is a comment node => nodeType === 8' + '\n' + '                    if (child.nodeType === 3) {' + '\n' + '                        const text = child.textContent;' + '\n' + '                        if (text.trim()) {' + '\n' + '                            const fragment = buildMathFragment(text);' + '\n' + '                            i += fragment.childNodes.length - 1;' + '\n' + '                            node.replaceChild(fragment, child);' + '\n' + '                        }' + '\n' + '                    } else if (child.nodeType === 1) {' + '\n' + '                        render(child);' + '\n' + '                    }' + '\n' + '                }' + '\n' + '            }' + '\n' + '        <\/script>' + '\n' + '        <style>' + '\n' + '            .content {' + '\n' + '                margin-top: 2em;' + '\n' + '                margin-bottom: 2em;' + '\n' + '                font-size: 1.75em;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua {' + '\n' + '                font-family: monospace;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-header {' + '\n' + '                font-weight: bold;' + '\n' + '                color: #0055bb;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-whitespace {' + '\n' + '                padding: 0;' + '\n' + '                margin: 0;' + '\n' + '                margin-left: 1ex;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-id {' + '\n' + '                margin-left: -0.2em;' + '\n' + '                font-weight: bold;' + '\n' + '                color: #5500aa;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-text {' + '\n' + '                color: #007700;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-top-level {' + '\n' + '                box-shadow: 0px 0px 2px 0px #888888;' + '\n' + '                padding: 1em;' + '\n' + '                display: block;' + '\n' + '                width: fit-content;' + '\n' + '                overflow: scroll;' + '\n' + '                margin-left: auto;' + '\n' + '                margin-right: auto;' + '\n' + '            }' + '\n' + '\n' + '            .katex {' + '\n' + '                font-size: 0.75em;' + '\n' + '            }' + '\n' + '\n' + '            .katex-display {' + '\n' + '                display: contents;' + '\n' + '            }' + '\n' + '\n' + '            .katex-display > .katex {' + '\n' + '                display: contents;' + '\n' + '            }' + '\n' + '\n' + '            .katex-display > .katex > .katex-html {' + '\n' + '                display: contents;' + '\n' + '            }' + '\n' + '        <\/style>' + '\n' + '    <\/head>' + '\n' + '    <body onload=' + '"' + 'render(document.body)' + '"' + '>' + '\n' + '        <div class=' + '"' + 'content' + '"' + '>' + '\n' + '            ' + body + '\n' + '        <\/div>' + '\n' + '    <\/body>' + '\n' + '<\/html>' + '\n';
   }
   function ParseError(message, row, column) {
     RuntimeException_init(message, this);

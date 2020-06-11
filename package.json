@@ -2,7 +2,7 @@
     "name": "mathlingua-language-support",
     "displayName": "Mathlingua Language Support",
     "description": "Visual Studio Code language support for the Mathlingua language",
-    "version": "0.5.1",
+    "version": "0.6.0",
     "publisher": "dominickramer",
     "author": {
         "name": "Dominic Kramer"
@@ -45,6 +45,13 @@
                 "language": "mathlingua",
                 "scopeName": "source.math",
                 "path": "./syntaxes/mathlingua.tmLanguage.json"
+            }
+        ],
+        "commands": [
+            {
+                "command": "mathlingua.preview",
+                "title": "Preview MathLingua code",
+                "category": "mathlingua"
             }
         ]
     },

@@ -16,7 +16,10 @@
 
 import * as vscode from 'vscode';
 
-import {MathlinguaProvider} from './mathlingua_provider';
+import {MathlinguaProvider, getAllDocContents} from './mathlingua_provider';
+
+const mlg = require('./mathlingua');
+
 
 interface StaticCompletion {
   name: string;
@@ -220,6 +223,37 @@ function getDynamicIdCompletions(text: string): vscode.CompletionItem[] {
   return result;
 }
 
+function toHtml(input: string, supplemental: string): string {
+  const validation = mlg.mathlingua.common.MathLingua.printExpanded_qz9155$(input, supplemental, true);
+  if (validation.value != null) {
+    return validation.value;
+  }
+
+  const errors = validation.errors;
+  if (!errors) {
+    return '';
+  }
+
+  const errorArr = errors.array_hd7ov6$_0;
+  if (!errorArr) {
+    return '';
+  }
+
+  let errHtml = '<html><body><ul style="margin: 2em;">';
+  for (let i=0; i<errorArr.length; i++) {
+    const err = errorArr[i];
+    const message = err.message;
+    const row = err.row;
+    // there seems to be a bug in the Mathlingua parser
+    // where the column is off by 1
+    const column = Math.max(0, err.column - 1);
+    errHtml += `<li style="font-size: 1.75em;"><span style="color: red">ERROR(${row}, ${column}):</span> ${message}</li>`;
+  }
+  errHtml += '</ul></body></html>';
+
+  return errHtml;
+}
+
 export function activate(context: vscode.ExtensionContext) {
 
   const mathlinguaProvider = new MathlinguaProvider();
@@ -241,5 +275,24 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  context.subscriptions.push(staticCompletionProvider);
+  const previewCommand = vscode.commands.registerCommand('mathlingua.preview', async () => {
+    const panel = vscode.window.createWebviewPanel(
+      'mathlingua',
+      'MathLingua Preview',
+      vscode.ViewColumn.Beside,
+      {
+        enableScripts: true
+      }
+    );
+
+    vscode.workspace.onDidSaveTextDocument(async textDoc => {
+      const allDocs = (await getAllDocContents(true)).join('\n\n\n');
+      panel.webview.html = toHtml(textDoc.getText(), allDocs);
+    });
+
+    panel.webview.html = '<html><body><span style="font-size: 1.75em; margin-top: 2em;">' +
+      'Whenever a MathLingua document is saved, its contents will be displayed here.</span></body></html>';
+  });
+
+  context.subscriptions.push(staticCompletionProvider, previewCommand);
 }

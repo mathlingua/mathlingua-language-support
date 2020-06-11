@@ -86,6 +86,31 @@ function analyze(input: string): MathlinguaDiagnostic[] {
   return res;
 }
 
+async function processFileRecusrively(fullPath: string, fileContents: string[]) {
+  const stat = await fs.promises.stat(fullPath);
+  if (stat.isFile() && fullPath.endsWith('.math')) {
+    const content = await fs.promises.readFile(fullPath, 'utf8');
+    fileContents.push(content);
+  } else if (stat.isDirectory()) {
+    const files = await fs.promises.readdir(fullPath);
+    await Promise.all(files.map(it =>
+      processFileRecusrively(path.join(fullPath, it), fileContents)));
+  }
+}
+
+export async function getAllDocContents(readFilesystem: boolean) {
+  let docs: string[];
+    if (readFilesystem) {
+      docs = [];
+      await Promise.all(
+        vscode.workspace.workspaceFolders?.map(it =>
+          processFileRecusrively(it.uri.fsPath, docs)) || []);
+    } else {
+      docs = vscode.workspace.textDocuments.map(it => it.getText());
+    }
+    return docs;
+}
+
 export class MathlinguaProvider implements vscode.CodeActionProvider {
 
   private command!: vscode.Disposable;
@@ -114,18 +139,6 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
     this.diagnosticCollection.clear();
     this.diagnosticCollection.dispose();
     this.command.dispose();
-  }
-
-  private async processFileRecusrively(fullPath: string, fileContents: string[]) {
-    const stat = await fs.promises.stat(fullPath);
-    if (stat.isFile() && fullPath.endsWith('.math')) {
-      const content = await fs.promises.readFile(fullPath, 'utf8');
-      fileContents.push(content);
-    } else if (stat.isDirectory()) {
-      const files = await fs.promises.readdir(fullPath);
-      await Promise.all(files.map(it =>
-        this.processFileRecusrively(path.join(fullPath, it), fileContents)));
-    }
   }
 
   private processAll() {
@@ -164,7 +177,7 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
       otherDocs = [];
       await Promise.all(
         vscode.workspace.workspaceFolders?.map(it =>
-          this.processFileRecusrively(it.uri.fsPath, otherDocs)) || []);
+          processFileRecusrively(it.uri.fsPath, otherDocs)) || []);
     } else {
       otherDocs = vscode.workspace.textDocuments.filter(it => it.uri !== textDocument.uri)
                                                 .map(it => it.getText());
