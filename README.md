@@ -10,6 +10,10 @@ Furthermore, entering the `mathlingua` command at the command palette will open 
 
 ## Release Notes
 
+### 0.7.0 (2020-06-25)
+- Add support for rendering custom infix operators.  (For example render `x \set.in X` as `x \in X`).
+- Left justify rendered html.
+
 ### 0.6.0 (2020-06-11)
 - Add support for rendering MathLingua documents.
 

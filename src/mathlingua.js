@@ -16,6 +16,7 @@
   var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
   var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
   var isBlank = Kotlin.kotlin.text.isBlank_gw00vp$;
+  var CharRange = Kotlin.kotlin.ranges.CharRange;
   var endsWith = Kotlin.kotlin.text.endsWith_7epoxm$;
   var ensureNotNull = Kotlin.ensureNotNull;
   var toBoxedChar = Kotlin.toBoxedChar;
@@ -48,13 +49,19 @@
   var filterNotNull = Kotlin.kotlin.collections.filterNotNull_emfgvx$;
   var Iterable = Kotlin.kotlin.collections.Iterable;
   var StringBuilder = Kotlin.kotlin.text.StringBuilder;
+  var Exception_init = Kotlin.kotlin.Exception_init_pdl1vj$;
+  var Exception = Kotlin.kotlin.Exception;
+  var getOrNull = Kotlin.kotlin.collections.getOrNull_yzln2o$;
+  var reverse = Kotlin.kotlin.collections.reverse_vvxzk3$;
+  var plus = Kotlin.kotlin.collections.plus_mydzjv$;
   var HashSet_init = Kotlin.kotlin.collections.HashSet_init_287e2$;
   var distinct = Kotlin.kotlin.collections.distinct_7wnvza$;
   var Error_init = Kotlin.kotlin.Error_init_pdl1vj$;
   var Collection = Kotlin.kotlin.collections.Collection;
-  var toString = Kotlin.toString;
+  var toMutableList = Kotlin.kotlin.collections.toMutableList_4c7yge$;
   var emptyMap = Kotlin.kotlin.collections.emptyMap_q3lmfv$;
-  var first_0 = Kotlin.kotlin.collections.first_7wnvza$;
+  var toString = Kotlin.toString;
+  var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
   var emptySet = Kotlin.kotlin.collections.emptySet_287e2$;
   var filterNotNull_0 = Kotlin.kotlin.collections.filterNotNull_m3lr2h$;
   var toSet = Kotlin.kotlin.collections.toSet_7wnvza$;
@@ -116,6 +123,10 @@
   TexTalkNodeType.prototype.constructor = TexTalkNodeType;
   TexTalkTokenType.prototype = Object.create(Enum.prototype);
   TexTalkTokenType.prototype.constructor = TexTalkTokenType;
+  ParseException.prototype = Object.create(Exception.prototype);
+  ParseException.prototype.constructor = ParseException;
+  Associativity.prototype = Object.create(Enum.prototype);
+  Associativity.prototype.constructor = Associativity;
   function Parse(document, tracker) {
     this.document = document;
     this.tracker = tracker;
@@ -224,16 +235,13 @@
     return prettyPrintIdentifier(text);
   };
   MathLingua.prototype.signatureOf_26whta$ = function (group) {
-    return getSignature(group);
+    return getSignature_0(group);
   };
   MathLingua.prototype.signatureOf_mwzhn3$ = function (command) {
-    return getCommandSignature(command);
+    return signature_0(command);
   };
   MathLingua.prototype.findAllSignatures_capiq$ = function (node, locationTracker) {
     return toList(locateAllSignatures(node, locationTracker));
-  };
-  MathLingua.prototype.flattenSignature_61zpoe$ = function (signature) {
-    return flattenSignature(signature);
   };
   MathLingua.prototype.findAllCommands_2v05ti$ = function (node) {
     return toList(locateAllCommands(node));
@@ -322,23 +330,23 @@
   MathLingua.prototype.expand_pkhkwo$ = function (doc) {
     return fullExpandComplete(doc);
   };
-  MathLingua.prototype.getPatternsToWrittenAs_g8umse$ = function (defines) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2;
+  MathLingua.prototype.getPatternsToWrittenAs_r44ck5$ = function (defines, represents) {
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6;
     var result = LinkedHashMap_init();
-    tmp$ = defines.iterator();
+    tmp$ = represents.iterator();
     while (tmp$.hasNext()) {
-      var def = tmp$.next();
-      var allItems = (tmp$_0 = def.metaDataSection) != null ? tmp$_0.items : null;
+      var rep = tmp$.next();
+      var allItems = (tmp$_0 = rep.metaDataSection) != null ? tmp$_0.items : null;
       var writtenAs = null;
       if (allItems != null) {
         tmp$_1 = allItems.iterator();
         while (tmp$_1.hasNext()) {
           var item = tmp$_1.next();
-          var tmp$_3 = Kotlin.isType(item, StringSectionGroup) && equals(item.section.name, 'written');
-          if (tmp$_3) {
-            tmp$_3 = !item.section.values.isEmpty();
+          var tmp$_7 = Kotlin.isType(item, StringSectionGroup) && equals(item.section.name, 'written');
+          if (tmp$_7) {
+            tmp$_7 = !item.section.values.isEmpty();
           }
-          if (tmp$_3) {
+          if (tmp$_7) {
             writtenAs = removeSurrounding(item.section.values.get_za3lpa$(0), '"', '"');
             break;
           }
@@ -347,17 +355,53 @@
       if (writtenAs == null) {
         continue;
       }
-      var validation = def.id.texTalkRoot;
+      var validation = rep.id.texTalkRoot;
       if (Kotlin.isType(validation, ValidationSuccess)) {
         var exp = validation.value;
-        if (exp.children.size === 1 && Kotlin.isType(exp.children.get_za3lpa$(0), Command)) {
-          var key = Kotlin.isType(tmp$_2 = exp.children.get_za3lpa$(0), Command) ? tmp$_2 : throwCCE();
+        if (exp.children.size === 1 && Kotlin.isType(exp.children.get_za3lpa$(0), OperatorTexTalkNode)) {
+          var key = Kotlin.isType(tmp$_2 = exp.children.get_za3lpa$(0), OperatorTexTalkNode) ? tmp$_2 : throwCCE();
           var value = writtenAs;
           result.put_xwzc9p$(key, value);
         }
       }
     }
+    tmp$_3 = defines.iterator();
+    while (tmp$_3.hasNext()) {
+      var def = tmp$_3.next();
+      var allItems_0 = (tmp$_4 = def.metaDataSection) != null ? tmp$_4.items : null;
+      var writtenAs_0 = null;
+      if (allItems_0 != null) {
+        tmp$_5 = allItems_0.iterator();
+        while (tmp$_5.hasNext()) {
+          var item_0 = tmp$_5.next();
+          var tmp$_8 = Kotlin.isType(item_0, StringSectionGroup) && equals(item_0.section.name, 'written');
+          if (tmp$_8) {
+            tmp$_8 = !item_0.section.values.isEmpty();
+          }
+          if (tmp$_8) {
+            writtenAs_0 = removeSurrounding(item_0.section.values.get_za3lpa$(0), '"', '"');
+            break;
+          }
+        }
+      }
+      if (writtenAs_0 == null) {
+        continue;
+      }
+      var validation_0 = def.id.texTalkRoot;
+      if (Kotlin.isType(validation_0, ValidationSuccess)) {
+        var exp_0 = validation_0.value;
+        if (exp_0.children.size === 1 && Kotlin.isType(exp_0.children.get_za3lpa$(0), Command)) {
+          var cmd = Kotlin.isType(tmp$_6 = exp_0.children.get_za3lpa$(0), Command) ? tmp$_6 : throwCCE();
+          var key_0 = new OperatorTexTalkNode(null, cmd, null);
+          var value_0 = writtenAs_0;
+          result.put_xwzc9p$(key_0, value_0);
+        }
+      }
+    }
     return result;
+  };
+  MathLingua.prototype.expandWrittenAs_yjgk9m$ = function (node, defines, represents) {
+    return expandAsWritten(node, this.getPatternsToWrittenAs_r44ck5$(defines, represents));
   };
   function MathLingua$expandWrittenAs$lambda(closure$patternToExpansion) {
     return function (it) {
@@ -377,39 +421,53 @@
         return it;
     };
   }
-  MathLingua.prototype.expandWrittenAs_51nw9s$ = function (phase2Node, patternToExpansion) {
+  MathLingua.prototype.expandWrittenAs_r924yu$ = function (phase2Node, patternToExpansion) {
     return phase2Node.transform_ql661s$(MathLingua$expandWrittenAs$lambda(patternToExpansion));
   };
   MathLingua.prototype.printExpanded_qz9155$ = function (input, supplemental, html) {
-    var tmp$, tmp$_0;
-    var validation = this.parse_61zpoe$(input + '\n' + '\n' + '\n' + supplemental);
-    if (Kotlin.isType(validation, ValidationFailure))
+    var tmp$, tmp$_0, tmp$_1;
+    var totalText = input + '\n' + '\n' + '\n' + supplemental;
+    var totalTextValidation = this.parse_61zpoe$(totalText);
+    if (Kotlin.isType(totalTextValidation, ValidationFailure))
       tmp$ = emptyList();
-    else if (Kotlin.isType(validation, ValidationSuccess))
-      tmp$ = validation.value.defines;
+    else if (Kotlin.isType(totalTextValidation, ValidationSuccess))
+      tmp$ = totalTextValidation.value.defines;
     else
       tmp$ = Kotlin.noWhenBranchMatched();
     var defines = tmp$;
-    var validation_0 = this.parse_61zpoe$(input);
-    if (Kotlin.isType(validation_0, ValidationFailure))
-      tmp$_0 = validationFailure(validation_0.errors);
-    else if (Kotlin.isType(validation_0, ValidationSuccess))
-      tmp$_0 = validationSuccess(this.prettyPrint_jjgd2n$(validation_0.value, defines, html));
+    if (Kotlin.isType(totalTextValidation, ValidationFailure))
+      tmp$_0 = emptyList();
+    else if (Kotlin.isType(totalTextValidation, ValidationSuccess))
+      tmp$_0 = totalTextValidation.value.represents;
     else
       tmp$_0 = Kotlin.noWhenBranchMatched();
-    return tmp$_0;
+    var represents = tmp$_0;
+    var validation = this.parse_61zpoe$(input);
+    if (Kotlin.isType(validation, ValidationFailure))
+      tmp$_1 = validationFailure(validation.errors);
+    else if (Kotlin.isType(validation, ValidationSuccess))
+      tmp$_1 = validationSuccess(this.prettyPrint_rcnm04$(validation.value, defines, represents, html));
+    else
+      tmp$_1 = Kotlin.noWhenBranchMatched();
+    return tmp$_1;
   };
-  MathLingua.prototype.prettyPrint_jjgd2n$ = function (node, defines, html) {
-    var tmp$;
+  MathLingua.prototype.prettyPrint_rcnm04$ = function (node, defines, represents, html) {
+    var tmp$, tmp$_0;
     if (html) {
-      tmp$ = new HtmlCodeWriter(defines);
+      tmp$ = new HtmlCodeWriter(defines, represents);
     }
      else {
-      tmp$ = new MathLinguaCodeWriter(defines);
+      tmp$ = new MathLinguaCodeWriter(defines, represents);
     }
     var writer = tmp$;
     var code = node.toCode_pc06dk$(false, 0, writer).getCode();
-    return getHtml(replace(code, '<br/><br/><br/>', '<br/><br/>'));
+    if (html) {
+      tmp$_0 = getHtml(replace(code, '<br/><br/><br/>', '<br/><br/>'));
+    }
+     else {
+      tmp$_0 = code;
+    }
+    return tmp$_0;
   };
   MathLingua.$metadata$ = {
     kind: Kind_OBJECT,
@@ -424,7 +482,7 @@
     return MathLingua_instance;
   }
   function getHtml(body) {
-    return '\n' + '<!DOCTYPE html>' + '\n' + '<html>' + '\n' + '    <head>' + '\n' + '        <link rel=' + '"' + 'stylesheet' + '"' + '\n' + '              href=' + '"' + 'https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css' + '"' + '\n' + '              integrity=' + '"' + 'sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq' + '"' + '\n' + '              crossorigin=' + '"' + 'anonymous' + '"' + '>' + '\n' + '        <script defer' + '\n' + '                src=' + '"' + 'https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js' + '"' + '\n' + '                integrity=' + '"' + 'sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz' + '"' + '\n' + '                crossorigin=' + '"' + 'anonymous' + '"' + '>' + '\n' + '        <\/script>' + '\n' + '        <script>' + '\n' + '            function buildMathFragment(text) {' + '\n' + '                const fragment = document.createDocumentFragment();' + '\n' + "                var buffer = '';" + '\n' + '                var i = 0;' + '\n' + '                while (i < text.length) {' + '\n' + "                    if (text[i] === '" + '\\' + '\\' + "' && text[i+1] === '[') {" + '\n' + '                        i += 2; // skip over ' + '\\' + ' and [' + '\n' + '                        fragment.appendChild(document.createTextNode(buffer));' + '\n' + "                        buffer = '';" + '\n' + '\n' + "                        const span = document.createElement('span');" + '\n' + "                        var math = '';" + '\n' + '                        while (i < text.length &&' + '\n' + "                            !(text[i] === '" + '\\' + '\\' + "' && text[i+1] === ']')) {" + '\n' + '                            math += text[i++];' + '\n' + '                        }' + '\n' + "                        if (text[i] === '" + '\\' + '\\' + "') {" + '\n' + '                            i++; // move past the ' + '\\' + '\n' + '                        }' + '\n' + "                        if (text[i] === ']') {" + '\n' + '                            i++; // move past the ]' + '\n' + '                        }' + '\n' + '                        try {' + '\n' + '                            katex.render(math, span, {' + '\n' + '                                throwOnError: true,' + '\n' + '                                displayMode: true' + '\n' + '                            });' + '\n' + '                        } catch {' + '\n' + '                            span.appendChild(document.createTextNode(math));' + '\n' + '                        }' + '\n' + '                        fragment.appendChild(span);' + '\n' + '                    } else {' + '\n' + '                        buffer += text[i++];' + '\n' + '                    }' + '\n' + '                }' + '\n' + '\n' + '                if (buffer.length > 0) {' + '\n' + '                    fragment.appendChild(document.createTextNode(buffer));' + '\n' + '                }' + '\n' + '\n' + '                return fragment;' + '\n' + '            }' + '\n' + '\n' + '            function render(node) {' + '\n' + '                for (let i = 0; i < node.childNodes.length; i++) {' + '\n' + '                    const child = node.childNodes[i];' + '\n' + '\n' + '                    // node is an element node => nodeType === 1' + '\n' + '                    // node is an attribute node => nodeType === 2' + '\n' + '                    // node is a text node => nodeType === 3' + '\n' + '                    // node is a comment node => nodeType === 8' + '\n' + '                    if (child.nodeType === 3) {' + '\n' + '                        const text = child.textContent;' + '\n' + '                        if (text.trim()) {' + '\n' + '                            const fragment = buildMathFragment(text);' + '\n' + '                            i += fragment.childNodes.length - 1;' + '\n' + '                            node.replaceChild(fragment, child);' + '\n' + '                        }' + '\n' + '                    } else if (child.nodeType === 1) {' + '\n' + '                        render(child);' + '\n' + '                    }' + '\n' + '                }' + '\n' + '            }' + '\n' + '        <\/script>' + '\n' + '        <style>' + '\n' + '            .content {' + '\n' + '                margin-top: 2em;' + '\n' + '                margin-bottom: 2em;' + '\n' + '                font-size: 1.75em;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua {' + '\n' + '                font-family: monospace;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-header {' + '\n' + '                font-weight: bold;' + '\n' + '                color: #0055bb;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-whitespace {' + '\n' + '                padding: 0;' + '\n' + '                margin: 0;' + '\n' + '                margin-left: 1ex;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-id {' + '\n' + '                margin-left: -0.2em;' + '\n' + '                font-weight: bold;' + '\n' + '                color: #5500aa;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-text {' + '\n' + '                color: #007700;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-top-level {' + '\n' + '                box-shadow: 0px 0px 2px 0px #888888;' + '\n' + '                padding: 1em;' + '\n' + '                display: block;' + '\n' + '                width: fit-content;' + '\n' + '                overflow: scroll;' + '\n' + '                margin-left: auto;' + '\n' + '                margin-right: auto;' + '\n' + '            }' + '\n' + '\n' + '            .katex {' + '\n' + '                font-size: 0.75em;' + '\n' + '            }' + '\n' + '\n' + '            .katex-display {' + '\n' + '                display: contents;' + '\n' + '            }' + '\n' + '\n' + '            .katex-display > .katex {' + '\n' + '                display: contents;' + '\n' + '            }' + '\n' + '\n' + '            .katex-display > .katex > .katex-html {' + '\n' + '                display: contents;' + '\n' + '            }' + '\n' + '        <\/style>' + '\n' + '    <\/head>' + '\n' + '    <body onload=' + '"' + 'render(document.body)' + '"' + '>' + '\n' + '        <div class=' + '"' + 'content' + '"' + '>' + '\n' + '            ' + body + '\n' + '        <\/div>' + '\n' + '    <\/body>' + '\n' + '<\/html>' + '\n';
+    return '\n' + '<!DOCTYPE html>' + '\n' + '<html>' + '\n' + '    <head>' + '\n' + '        <link rel=' + '"' + 'stylesheet' + '"' + '\n' + '              href=' + '"' + 'https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css' + '"' + '\n' + '              integrity=' + '"' + 'sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq' + '"' + '\n' + '              crossorigin=' + '"' + 'anonymous' + '"' + '>' + '\n' + '        <script defer' + '\n' + '                src=' + '"' + 'https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js' + '"' + '\n' + '                integrity=' + '"' + 'sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz' + '"' + '\n' + '                crossorigin=' + '"' + 'anonymous' + '"' + '>' + '\n' + '        <\/script>' + '\n' + '        <script>' + '\n' + '            function buildMathFragment(text) {' + '\n' + '                const fragment = document.createDocumentFragment();' + '\n' + "                var buffer = '';" + '\n' + '                var i = 0;' + '\n' + '                while (i < text.length) {' + '\n' + "                    if (text[i] === '" + '\\' + '\\' + "' && text[i+1] === '[') {" + '\n' + '                        i += 2; // skip over ' + '\\' + ' and [' + '\n' + '                        fragment.appendChild(document.createTextNode(buffer));' + '\n' + "                        buffer = '';" + '\n' + '\n' + "                        const span = document.createElement('span');" + '\n' + "                        var math = '';" + '\n' + '                        while (i < text.length &&' + '\n' + "                            !(text[i] === '" + '\\' + '\\' + "' && text[i+1] === ']')) {" + '\n' + '                            math += text[i++];' + '\n' + '                        }' + '\n' + "                        if (text[i] === '" + '\\' + '\\' + "') {" + '\n' + '                            i++; // move past the ' + '\\' + '\n' + '                        }' + '\n' + "                        if (text[i] === ']') {" + '\n' + '                            i++; // move past the ]' + '\n' + '                        }' + '\n' + '                        try {' + '\n' + '                            katex.render(math, span, {' + '\n' + '                                throwOnError: true,' + '\n' + '                                displayMode: true' + '\n' + '                            });' + '\n' + '                        } catch {' + '\n' + '                            span.appendChild(document.createTextNode(math));' + '\n' + '                        }' + '\n' + '                        fragment.appendChild(span);' + '\n' + '                    } else {' + '\n' + '                        buffer += text[i++];' + '\n' + '                    }' + '\n' + '                }' + '\n' + '\n' + '                if (buffer.length > 0) {' + '\n' + '                    fragment.appendChild(document.createTextNode(buffer));' + '\n' + '                }' + '\n' + '\n' + '                return fragment;' + '\n' + '            }' + '\n' + '\n' + '            function render(node) {' + '\n' + '                for (let i = 0; i < node.childNodes.length; i++) {' + '\n' + '                    const child = node.childNodes[i];' + '\n' + '\n' + '                    // node is an element node => nodeType === 1' + '\n' + '                    // node is an attribute node => nodeType === 2' + '\n' + '                    // node is a text node => nodeType === 3' + '\n' + '                    // node is a comment node => nodeType === 8' + '\n' + '                    if (child.nodeType === 3) {' + '\n' + '                        const text = child.textContent;' + '\n' + '                        if (text.trim()) {' + '\n' + '                            const fragment = buildMathFragment(text);' + '\n' + '                            i += fragment.childNodes.length - 1;' + '\n' + '                            node.replaceChild(fragment, child);' + '\n' + '                        }' + '\n' + '                    } else if (child.nodeType === 1) {' + '\n' + '                        render(child);' + '\n' + '                    }' + '\n' + '                }' + '\n' + '            }' + '\n' + '        <\/script>' + '\n' + '        <style>' + '\n' + '            .content {' + '\n' + '                margin-top: 1em;' + '\n' + '                margin-bottom: 1em;' + '\n' + '                font-size: 1em;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua {' + '\n' + '                font-family: monospace;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-header {' + '\n' + '                font-weight: bold;' + '\n' + '                color: #0055bb;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-whitespace {' + '\n' + '                padding: 0;' + '\n' + '                margin: 0;' + '\n' + '                margin-left: 1ex;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-id {' + '\n' + '                font-weight: bold;' + '\n' + '                color: #5500aa;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-text {' + '\n' + '                color: #007700;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-top-level {' + '\n' + '                display: block;' + '\n' + '                width: fit-content;' + '\n' + '                overflow: scroll;' + '\n' + '                margin-left: 1em;' + '\n' + '            }' + '\n' + '\n' + '            .katex {' + '\n' + '                font-size: 0.75em;' + '\n' + '            }' + '\n' + '\n' + '            .katex-display {' + '\n' + '                display: contents;' + '\n' + '            }' + '\n' + '\n' + '            .katex-display > .katex {' + '\n' + '                display: contents;' + '\n' + '            }' + '\n' + '\n' + '            .katex-display > .katex > .katex-html {' + '\n' + '                display: contents;' + '\n' + '            }' + '\n' + '        <\/style>' + '\n' + '    <\/head>' + '\n' + '    <body onload=' + '"' + 'render(document.body)' + '"' + '>' + '\n' + '        <div class=' + '"' + 'content' + '"' + '>' + '\n' + '            ' + body + '\n' + '        <\/div>' + '\n' + '    <\/body>' + '\n' + '<\/html>' + '\n';
   }
   function ParseError(message, row, column) {
     RuntimeException_init(message, this);
@@ -681,6 +739,9 @@
   function newChalkTalkLexer(text) {
     return new ChalkTalkLexerImpl(text);
   }
+  function isDigit(c) {
+    return (new CharRange(48, 57)).contains_mef7kx$(c);
+  }
   function ChalkTalkLexerImpl(text) {
     this.text_0 = text;
     this.errors_0 = ArrayList_init();
@@ -693,7 +754,7 @@
     }
   };
   ChalkTalkLexerImpl.prototype.initialize_0 = function () {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6, tmp$_7, tmp$_8, tmp$_9, tmp$_10, tmp$_11, tmp$_12, tmp$_13, tmp$_14, tmp$_15, tmp$_16, tmp$_17, tmp$_18, tmp$_19, tmp$_20, tmp$_21, tmp$_22, tmp$_23, tmp$_24, tmp$_25, tmp$_26, tmp$_27, tmp$_28, tmp$_29;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6, tmp$_7, tmp$_8, tmp$_9, tmp$_10, tmp$_11, tmp$_12, tmp$_13, tmp$_14, tmp$_15, tmp$_16, tmp$_17, tmp$_18, tmp$_19, tmp$_20, tmp$_21, tmp$_22, tmp$_23, tmp$_24, tmp$_25, tmp$_26, tmp$_27, tmp$_28, tmp$_29, tmp$_30, tmp$_31, tmp$_32, tmp$_33, tmp$_34, tmp$_35, tmp$_36, tmp$_37, tmp$_38, tmp$_39, tmp$_40, tmp$_41, tmp$_42, tmp$_43, tmp$_44, tmp$_45, tmp$_46, tmp$_47, tmp$_48, tmp$_49;
     this.chalkTalkTokens_0 = ArrayList_init();
     if (!endsWith(this.text_0, '\n')) {
       this.text_0 = this.text_0 + '\n';
@@ -719,7 +780,13 @@
       }
       var c = this.text_0.charCodeAt((tmp$ = i, i = tmp$ + 1 | 0, tmp$));
       column = column + 1 | 0;
-      if (c === 61) {
+      if (c === 46 && i < this.text_0.length && this.text_0.charCodeAt(i) === 46 && (i + 1 | 0) < this.text_0.length && this.text_0.charCodeAt(i + 1 | 0) === 46) {
+        var startColumn = column;
+        i = i + 2 | 0;
+        column = column + 2 | 0;
+        ensureNotNull(this.chalkTalkTokens_0).add_11rb$(new Phase1Token('...', ChalkTalkTokenType$DotDotDot_getInstance(), line, startColumn));
+      }
+       else if (c === 61) {
         ensureNotNull(this.chalkTalkTokens_0).add_11rb$(new Phase1Token('=', ChalkTalkTokenType$Equals_getInstance(), line, column));
       }
        else if (c === 95) {
@@ -793,7 +860,7 @@
       }
        else if (this.isOperatorChar_0(c)) {
         var startLine = line;
-        var startColumn = column;
+        var startColumn_0 = column;
         var name = '' + String.fromCharCode(toBoxedChar(c));
         while (i < this.text_0.length && this.isOperatorChar_0(this.text_0.charCodeAt(i))) {
           tmp$_3 = name;
@@ -802,12 +869,13 @@
           name = tmp$_3 + String.fromCharCode(tmp$_2.charCodeAt(tmp$_1));
           column = column + 1 | 0;
         }
-        ensureNotNull(this.chalkTalkTokens_0).add_11rb$(new Phase1Token(name, ChalkTalkTokenType$Name_getInstance(), startLine, startColumn));
+        ensureNotNull(this.chalkTalkTokens_0).add_11rb$(new Phase1Token(name, ChalkTalkTokenType$Name_getInstance(), startLine, startColumn_0));
       }
        else if (this.isNameChar_0(c)) {
         var startLine_0 = line;
-        var startColumn_0 = column;
+        var startColumn_1 = column;
         var name_0 = '' + String.fromCharCode(toBoxedChar(c));
+        var isComplete = false;
         while (i < this.text_0.length && this.isNameChar_0(this.text_0.charCodeAt(i))) {
           tmp$_7 = name_0;
           tmp$_6 = this.text_0;
@@ -815,26 +883,70 @@
           name_0 = tmp$_7 + String.fromCharCode(tmp$_6.charCodeAt(tmp$_5));
           column = column + 1 | 0;
         }
-        if (i < this.text_0.length && this.text_0.charCodeAt(i) === 46 && (i + 1 | 0) < this.text_0.length && this.text_0.charCodeAt(i + 1 | 0) === 46 && (i + 2 | 0) < this.text_0.length && this.text_0.charCodeAt(i + 2 | 0) === 46) {
+        if (i < this.text_0.length && this.text_0.charCodeAt(i) === 35 && (i + 1 | 0) < this.text_0.length && isDigit(this.text_0.charCodeAt(i + 1 | 0))) {
+          tmp$_11 = name_0;
+          tmp$_10 = this.text_0;
+          tmp$_9 = (tmp$_8 = i, i = tmp$_8 + 1 | 0, tmp$_8);
+          name_0 = tmp$_11 + String.fromCharCode(tmp$_10.charCodeAt(tmp$_9));
+          column = column + 1 | 0;
+          while (i < this.text_0.length && isDigit(this.text_0.charCodeAt(i))) {
+            tmp$_15 = name_0;
+            tmp$_14 = this.text_0;
+            tmp$_13 = (tmp$_12 = i, i = tmp$_12 + 1 | 0, tmp$_12);
+            name_0 = tmp$_15 + String.fromCharCode(tmp$_14.charCodeAt(tmp$_13));
+            column = column + 1 | 0;
+          }
+          isComplete = true;
+        }
+        if (!isComplete && i < this.text_0.length && this.text_0.charCodeAt(i) === 46 && (i + 1 | 0) < this.text_0.length && this.text_0.charCodeAt(i + 1 | 0) === 46 && (i + 2 | 0) < this.text_0.length && this.text_0.charCodeAt(i + 2 | 0) === 46) {
           for (var tmp = 0; tmp < 3; tmp++) {
-            tmp$_11 = name_0;
-            tmp$_10 = this.text_0;
-            tmp$_9 = (tmp$_8 = i, i = tmp$_8 + 1 | 0, tmp$_8);
-            name_0 = tmp$_11 + String.fromCharCode(tmp$_10.charCodeAt(tmp$_9));
+            tmp$_19 = name_0;
+            tmp$_18 = this.text_0;
+            tmp$_17 = (tmp$_16 = i, i = tmp$_16 + 1 | 0, tmp$_16);
+            name_0 = tmp$_19 + String.fromCharCode(tmp$_18.charCodeAt(tmp$_17));
             column = column + 1 | 0;
           }
         }
-        ensureNotNull(this.chalkTalkTokens_0).add_11rb$(new Phase1Token(name_0, ChalkTalkTokenType$Name_getInstance(), startLine_0, startColumn_0));
+        if (!isComplete && i < this.text_0.length && this.text_0.charCodeAt(i) === 35) {
+          tmp$_23 = name_0;
+          tmp$_22 = this.text_0;
+          tmp$_21 = (tmp$_20 = i, i = tmp$_20 + 1 | 0, tmp$_20);
+          name_0 = tmp$_23 + String.fromCharCode(tmp$_22.charCodeAt(tmp$_21));
+          column = column + 1 | 0;
+          while (i < this.text_0.length && this.isNameChar_0(this.text_0.charCodeAt(i))) {
+            tmp$_27 = name_0;
+            tmp$_26 = this.text_0;
+            tmp$_25 = (tmp$_24 = i, i = tmp$_24 + 1 | 0, tmp$_24);
+            name_0 = tmp$_27 + String.fromCharCode(tmp$_26.charCodeAt(tmp$_25));
+            column = column + 1 | 0;
+          }
+          if (endsWith(name_0, '#')) {
+            this.errors_0.add_11rb$(new ParseError('If a name contains a # is must be of the form ' + ("<identifier>...#<identifier>... but found '" + name_0 + "' ") + " (missing the name after '#')", startLine_0, startColumn_1));
+          }
+          if (i < this.text_0.length && this.text_0.charCodeAt(i) === 46 && (i + 1 | 0) < this.text_0.length && this.text_0.charCodeAt(i + 1 | 0) === 46 && (i + 2 | 0) < this.text_0.length && this.text_0.charCodeAt(i + 2 | 0) === 46) {
+            for (var tmp_0 = 0; tmp_0 < 3; tmp_0++) {
+              tmp$_31 = name_0;
+              tmp$_30 = this.text_0;
+              tmp$_29 = (tmp$_28 = i, i = tmp$_28 + 1 | 0, tmp$_28);
+              name_0 = tmp$_31 + String.fromCharCode(tmp$_30.charCodeAt(tmp$_29));
+              column = column + 1 | 0;
+            }
+          }
+          if (!endsWith(name_0, '...')) {
+            this.errors_0.add_11rb$(new ParseError('If a name contains a # is must be of the form ' + ("<identifier>...#<identifier>... but found '" + name_0 + "' ") + "(missing the trailing '...')", startLine_0, startColumn_1));
+          }
+        }
+        ensureNotNull(this.chalkTalkTokens_0).add_11rb$(new Phase1Token(name_0, ChalkTalkTokenType$Name_getInstance(), startLine_0, startColumn_1));
       }
        else if (c === 34) {
         var startLine_1 = line;
-        var startColumn_1 = column;
+        var startColumn_2 = column;
         var str = '' + String.fromCharCode(toBoxedChar(c));
         while (i < this.text_0.length && this.text_0.charCodeAt(i) !== 34) {
-          tmp$_15 = str;
-          tmp$_14 = this.text_0;
-          tmp$_13 = (tmp$_12 = i, i = tmp$_12 + 1 | 0, tmp$_12);
-          str = tmp$_15 + String.fromCharCode(tmp$_14.charCodeAt(tmp$_13));
+          tmp$_35 = str;
+          tmp$_34 = this.text_0;
+          tmp$_33 = (tmp$_32 = i, i = tmp$_32 + 1 | 0, tmp$_32);
+          str = tmp$_35 + String.fromCharCode(tmp$_34.charCodeAt(tmp$_33));
           column = column + 1 | 0;
         }
         if (i === this.text_0.length) {
@@ -842,23 +954,23 @@
           str += '"';
         }
          else {
-          tmp$_19 = str;
-          tmp$_18 = this.text_0;
-          tmp$_17 = (tmp$_16 = i, i = tmp$_16 + 1 | 0, tmp$_16);
-          str = tmp$_19 + String.fromCharCode(tmp$_18.charCodeAt(tmp$_17));
+          tmp$_39 = str;
+          tmp$_38 = this.text_0;
+          tmp$_37 = (tmp$_36 = i, i = tmp$_36 + 1 | 0, tmp$_36);
+          str = tmp$_39 + String.fromCharCode(tmp$_38.charCodeAt(tmp$_37));
           column = column + 1 | 0;
         }
-        ensureNotNull(this.chalkTalkTokens_0).add_11rb$(new Phase1Token(str, ChalkTalkTokenType$String_getInstance(), startLine_1, startColumn_1));
+        ensureNotNull(this.chalkTalkTokens_0).add_11rb$(new Phase1Token(str, ChalkTalkTokenType$String_getInstance(), startLine_1, startColumn_2));
       }
        else if (c === 39) {
         var startLine_2 = line;
-        var startColumn_2 = column;
+        var startColumn_3 = column;
         var stmt = '' + String.fromCharCode(toBoxedChar(c));
         while (i < this.text_0.length && this.text_0.charCodeAt(i) !== 39) {
-          tmp$_23 = stmt;
-          tmp$_22 = this.text_0;
-          tmp$_21 = (tmp$_20 = i, i = tmp$_20 + 1 | 0, tmp$_20);
-          stmt = tmp$_23 + String.fromCharCode(tmp$_22.charCodeAt(tmp$_21));
+          tmp$_43 = stmt;
+          tmp$_42 = this.text_0;
+          tmp$_41 = (tmp$_40 = i, i = tmp$_40 + 1 | 0, tmp$_40);
+          stmt = tmp$_43 + String.fromCharCode(tmp$_42.charCodeAt(tmp$_41));
           column = column + 1 | 0;
         }
         if (i === this.text_0.length) {
@@ -866,28 +978,28 @@
           stmt += "'";
         }
          else {
-          tmp$_27 = stmt;
-          tmp$_26 = this.text_0;
-          tmp$_25 = (tmp$_24 = i, i = tmp$_24 + 1 | 0, tmp$_24);
-          stmt = tmp$_27 + String.fromCharCode(tmp$_26.charCodeAt(tmp$_25));
+          tmp$_47 = stmt;
+          tmp$_46 = this.text_0;
+          tmp$_45 = (tmp$_44 = i, i = tmp$_44 + 1 | 0, tmp$_44);
+          stmt = tmp$_47 + String.fromCharCode(tmp$_46.charCodeAt(tmp$_45));
           column = column + 1 | 0;
         }
-        ensureNotNull(this.chalkTalkTokens_0).add_11rb$(new Phase1Token(stmt, ChalkTalkTokenType$Statement_getInstance(), startLine_2, startColumn_2));
+        ensureNotNull(this.chalkTalkTokens_0).add_11rb$(new Phase1Token(stmt, ChalkTalkTokenType$Statement_getInstance(), startLine_2, startColumn_3));
       }
        else if (c === 91) {
         var startLine_3 = line;
-        var startColumn_3 = column;
+        var startColumn_4 = column;
         var id = '' + String.fromCharCode(toBoxedChar(c));
         var braceCount = 1;
         while (i < this.text_0.length && this.text_0.charCodeAt(i) !== 10) {
-          var next = this.text_0.charCodeAt((tmp$_28 = i, i = tmp$_28 + 1 | 0, tmp$_28));
+          var next = this.text_0.charCodeAt((tmp$_48 = i, i = tmp$_48 + 1 | 0, tmp$_48));
           id += String.fromCharCode(next);
           column = column + 1 | 0;
           if (next === 91) {
             braceCount = braceCount + 1 | 0;
           }
            else if (next === 93) {
-            tmp$_29 = braceCount, braceCount = tmp$_29 - 1 | 0;
+            tmp$_49 = braceCount, braceCount = tmp$_49 - 1 | 0;
           }
           if (braceCount === 0) {
             break;
@@ -897,7 +1009,7 @@
           this.errors_0.add_11rb$(new ParseError('Expected a terminating ]', line, column));
           id += ']';
         }
-        ensureNotNull(this.chalkTalkTokens_0).add_11rb$(new Phase1Token(id, ChalkTalkTokenType$Id_getInstance(), startLine_3, startColumn_3));
+        ensureNotNull(this.chalkTalkTokens_0).add_11rb$(new Phase1Token(id, ChalkTalkTokenType$Id_getInstance(), startLine_3, startColumn_4));
       }
        else if (c !== 32) {
         this.errors_0.add_11rb$(new ParseError('Unrecognized character ' + String.fromCharCode(c), line, column));
@@ -912,7 +1024,7 @@
     return contains('~!@%^&*-+<>\\/=', c);
   };
   ChalkTalkLexerImpl.prototype.isNameChar_0 = function (c) {
-    return Regex_init('[$#a-zA-Z0-9]+').matches_6bul2c$(String.fromCharCode(c));
+    return Regex_init('[a-zA-Z0-9]+').matches_6bul2c$(String.fromCharCode(c));
   };
   ChalkTalkLexerImpl.prototype.hasNext = function () {
     this.ensureInitialized_0();
@@ -1169,14 +1281,31 @@
         break;
       }
     }
+    var isVarArgs = false;
+    var subParams = null;
     if (isEnclosed) {
       this.expect_0(ChalkTalkTokenType$RCurly_getInstance());
+      if (this.has_0(ChalkTalkTokenType$Underscore_getInstance())) {
+        this.expect_0(ChalkTalkTokenType$Underscore_getInstance());
+        if (this.has_0(ChalkTalkTokenType$LCurly_getInstance())) {
+          this.expect_0(ChalkTalkTokenType$LCurly_getInstance());
+          subParams = this.nameList_0(ChalkTalkTokenType$RCurly_getInstance());
+          this.expect_0(ChalkTalkTokenType$RCurly_getInstance());
+        }
+         else {
+          subParams = listOf(this.expect_0(ChalkTalkTokenType$Name_getInstance()));
+        }
+      }
+      if (this.has_0(ChalkTalkTokenType$DotDotDot_getInstance())) {
+        this.expect_0(ChalkTalkTokenType$DotDotDot_getInstance());
+        isVarArgs = true;
+      }
     }
     if (!isEnclosed && parts.isEmpty()) {
       tmp$ = null;
     }
      else {
-      tmp$ = new Abstraction(isEnclosed, parts);
+      tmp$ = new Abstraction(isEnclosed, isVarArgs, parts, subParams);
     }
     return tmp$;
   };
@@ -1554,6 +1683,7 @@
     ChalkTalkTokenType$LCurly_instance = new ChalkTalkTokenType('LCurly', 15);
     ChalkTalkTokenType$RCurly_instance = new ChalkTalkTokenType('RCurly', 16);
     ChalkTalkTokenType$Underscore_instance = new ChalkTalkTokenType('Underscore', 17);
+    ChalkTalkTokenType$DotDotDot_instance = new ChalkTalkTokenType('DotDotDot', 18);
   }
   var ChalkTalkTokenType$DotSpace_instance;
   function ChalkTalkTokenType$DotSpace_getInstance() {
@@ -1645,13 +1775,18 @@
     ChalkTalkTokenType_initFields();
     return ChalkTalkTokenType$Underscore_instance;
   }
+  var ChalkTalkTokenType$DotDotDot_instance;
+  function ChalkTalkTokenType$DotDotDot_getInstance() {
+    ChalkTalkTokenType_initFields();
+    return ChalkTalkTokenType$DotDotDot_instance;
+  }
   ChalkTalkTokenType.$metadata$ = {
     kind: Kind_CLASS,
     simpleName: 'ChalkTalkTokenType',
     interfaces: [Enum]
   };
   function ChalkTalkTokenType$values() {
-    return [ChalkTalkTokenType$DotSpace_getInstance(), ChalkTalkTokenType$Name_getInstance(), ChalkTalkTokenType$Colon_getInstance(), ChalkTalkTokenType$String_getInstance(), ChalkTalkTokenType$Statement_getInstance(), ChalkTalkTokenType$Id_getInstance(), ChalkTalkTokenType$Comma_getInstance(), ChalkTalkTokenType$Begin_getInstance(), ChalkTalkTokenType$End_getInstance(), ChalkTalkTokenType$Linebreak_getInstance(), ChalkTalkTokenType$Invalid_getInstance(), ChalkTalkTokenType$Equals_getInstance(), ChalkTalkTokenType$ColonEquals_getInstance(), ChalkTalkTokenType$LParen_getInstance(), ChalkTalkTokenType$RParen_getInstance(), ChalkTalkTokenType$LCurly_getInstance(), ChalkTalkTokenType$RCurly_getInstance(), ChalkTalkTokenType$Underscore_getInstance()];
+    return [ChalkTalkTokenType$DotSpace_getInstance(), ChalkTalkTokenType$Name_getInstance(), ChalkTalkTokenType$Colon_getInstance(), ChalkTalkTokenType$String_getInstance(), ChalkTalkTokenType$Statement_getInstance(), ChalkTalkTokenType$Id_getInstance(), ChalkTalkTokenType$Comma_getInstance(), ChalkTalkTokenType$Begin_getInstance(), ChalkTalkTokenType$End_getInstance(), ChalkTalkTokenType$Linebreak_getInstance(), ChalkTalkTokenType$Invalid_getInstance(), ChalkTalkTokenType$Equals_getInstance(), ChalkTalkTokenType$ColonEquals_getInstance(), ChalkTalkTokenType$LParen_getInstance(), ChalkTalkTokenType$RParen_getInstance(), ChalkTalkTokenType$LCurly_getInstance(), ChalkTalkTokenType$RCurly_getInstance(), ChalkTalkTokenType$Underscore_getInstance(), ChalkTalkTokenType$DotDotDot_getInstance()];
   }
   ChalkTalkTokenType.values = ChalkTalkTokenType$values;
   function ChalkTalkTokenType$valueOf(name) {
@@ -1692,6 +1827,8 @@
         return ChalkTalkTokenType$RCurly_getInstance();
       case 'Underscore':
         return ChalkTalkTokenType$Underscore_getInstance();
+      case 'DotDotDot':
+        return ChalkTalkTokenType$DotDotDot_getInstance();
       default:throwISE('No enum constant mathlingua.common.chalktalk.phase1.ast.ChalkTalkTokenType.' + name);
     }
   }
@@ -2006,10 +2143,12 @@
   Tuple.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.items, other.items))));
   };
-  function Abstraction(isEnclosed, parts) {
+  function Abstraction(isEnclosed, isVarArgs, parts, subParams) {
     AssignmentRhs.call(this);
     this.isEnclosed = isEnclosed;
+    this.isVarArgs = isVarArgs;
     this.parts = parts;
+    this.subParams = subParams;
   }
   Abstraction.prototype.forEach_t0jmzf$ = function (fn) {
     var tmp$;
@@ -2020,7 +2159,7 @@
     }
   };
   Abstraction.prototype.toCode = function () {
-    var tmp$;
+    var tmp$, tmp$_0;
     var builder = StringBuilder_init();
     if (this.isEnclosed) {
       builder.append_s8itvh$(123);
@@ -2034,6 +2173,26 @@
     }
     if (this.isEnclosed) {
       builder.append_s8itvh$(125);
+      if (this.subParams != null) {
+        builder.append_s8itvh$(95);
+        if (this.subParams.size === 1) {
+          builder.append_gw00v9$(this.subParams.get_za3lpa$(0).toCode());
+        }
+         else {
+          builder.append_s8itvh$(123);
+          tmp$_0 = this.subParams;
+          for (var i_0 = 0; i_0 !== tmp$_0.size; ++i_0) {
+            builder.append_gw00v9$(this.subParams.get_za3lpa$(i_0).toCode());
+            if (i_0 !== (this.subParams.size - 1 | 0)) {
+              builder.append_gw00v9$(', ');
+            }
+          }
+          builder.append_s8itvh$(125);
+        }
+      }
+    }
+    if (this.isVarArgs) {
+      builder.append_gw00v9$('...');
     }
     return builder.toString();
   };
@@ -2041,17 +2200,33 @@
     return this;
   };
   Abstraction.prototype.transform_w8pxcw$ = function (transformer) {
-    var tmp$ = this.isEnclosed;
+    var tmp$, tmp$_0, tmp$_1;
+    tmp$ = this.isEnclosed;
+    tmp$_0 = this.isVarArgs;
     var $receiver = this.parts;
     var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
-    var tmp$_0;
-    tmp$_0 = $receiver.iterator();
-    while (tmp$_0.hasNext()) {
-      var item = tmp$_0.next();
-      var tmp$_1;
-      destination.add_11rb$(Kotlin.isType(tmp$_1 = item.transform_w8pxcw$(transformer), AbstractionPart) ? tmp$_1 : throwCCE());
+    var tmp$_2;
+    tmp$_2 = $receiver.iterator();
+    while (tmp$_2.hasNext()) {
+      var item = tmp$_2.next();
+      var tmp$_3;
+      destination.add_11rb$(Kotlin.isType(tmp$_3 = item.transform_w8pxcw$(transformer), AbstractionPart) ? tmp$_3 : throwCCE());
     }
-    return transformer(new Abstraction(tmp$, destination));
+    var tmp$_4;
+    if ((tmp$_1 = this.subParams) != null) {
+      var destination_0 = ArrayList_init_0(collectionSizeOrDefault(tmp$_1, 10));
+      var tmp$_5;
+      tmp$_5 = tmp$_1.iterator();
+      while (tmp$_5.hasNext()) {
+        var item_0 = tmp$_5.next();
+        var tmp$_6;
+        destination_0.add_11rb$(Kotlin.isType(tmp$_6 = item_0.transform_w8pxcw$(transformer), Phase1Token) ? tmp$_6 : throwCCE());
+      }
+      tmp$_4 = destination_0;
+    }
+     else
+      tmp$_4 = null;
+    return transformer(new Abstraction(tmp$, tmp$_0, destination, tmp$_4));
   };
   Abstraction.$metadata$ = {
     kind: Kind_CLASS,
@@ -2062,22 +2237,30 @@
     return this.isEnclosed;
   };
   Abstraction.prototype.component2 = function () {
+    return this.isVarArgs;
+  };
+  Abstraction.prototype.component3 = function () {
     return this.parts;
   };
-  Abstraction.prototype.copy_8kpkgx$ = function (isEnclosed, parts) {
-    return new Abstraction(isEnclosed === void 0 ? this.isEnclosed : isEnclosed, parts === void 0 ? this.parts : parts);
+  Abstraction.prototype.component4 = function () {
+    return this.subParams;
+  };
+  Abstraction.prototype.copy_ofhqv1$ = function (isEnclosed, isVarArgs, parts, subParams) {
+    return new Abstraction(isEnclosed === void 0 ? this.isEnclosed : isEnclosed, isVarArgs === void 0 ? this.isVarArgs : isVarArgs, parts === void 0 ? this.parts : parts, subParams === void 0 ? this.subParams : subParams);
   };
   Abstraction.prototype.toString = function () {
-    return 'Abstraction(isEnclosed=' + Kotlin.toString(this.isEnclosed) + (', parts=' + Kotlin.toString(this.parts)) + ')';
+    return 'Abstraction(isEnclosed=' + Kotlin.toString(this.isEnclosed) + (', isVarArgs=' + Kotlin.toString(this.isVarArgs)) + (', parts=' + Kotlin.toString(this.parts)) + (', subParams=' + Kotlin.toString(this.subParams)) + ')';
   };
   Abstraction.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.isEnclosed) | 0;
+    result = result * 31 + Kotlin.hashCode(this.isVarArgs) | 0;
     result = result * 31 + Kotlin.hashCode(this.parts) | 0;
+    result = result * 31 + Kotlin.hashCode(this.subParams) | 0;
     return result;
   };
   Abstraction.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.isEnclosed, other.isEnclosed) && Kotlin.equals(this.parts, other.parts)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.isEnclosed, other.isEnclosed) && Kotlin.equals(this.isVarArgs, other.isVarArgs) && Kotlin.equals(this.parts, other.parts) && Kotlin.equals(this.subParams, other.subParams)))));
   };
   function AbstractionPart(name, subParams, params) {
     AssignmentRhs.call(this);
@@ -2274,8 +2457,9 @@
     simpleName: 'CodeWriter',
     interfaces: []
   };
-  function HtmlCodeWriter(defines) {
+  function HtmlCodeWriter(defines, represents) {
     this.defines = defines;
+    this.represents = represents;
     this.builder = StringBuilder_init();
   }
   HtmlCodeWriter.prototype.append_v8axul$ = function (node, hasDot, indent) {
@@ -2335,7 +2519,7 @@
   HtmlCodeWriter.prototype.writeId_uaa61e$ = function (id) {
     this.builder.append_gw00v9$("<span class='mathlingua-id'>");
     this.builder.append_s8itvh$(91);
-    var stmt = id.toStatement().toCode_pc06dk$(false, 0, new MathLinguaCodeWriter(emptyList())).getCode();
+    var stmt = id.toStatement().toCode_pc06dk$(false, 0, new MathLinguaCodeWriter(emptyList(), emptyList())).getCode();
     this.builder.append_gw00v9$(removeSurrounding(stmt, "'", "'"));
     this.builder.append_s8itvh$(93);
     this.builder.append_gw00v9$('<\/span>');
@@ -2362,7 +2546,7 @@
       var lhs = trim(Kotlin.isCharSequence(tmp$ = $receiver) ? tmp$ : throwCCE()).toString();
       var lhsParsed = newTexTalkParser().parse_2mg13h$(newTexTalkLexer(lhs));
       if (lhsParsed.errors.isEmpty()) {
-        var patternsToWrittenAs = MathLingua_getInstance().getPatternsToWrittenAs_g8umse$(this.defines);
+        var patternsToWrittenAs = MathLingua_getInstance().getPatternsToWrittenAs_r44ck5$(this.defines, this.represents);
         this.builder.append_gw00v9$('\\' + '[' + expandAsWritten(lhsParsed.root, patternsToWrittenAs) + '\\' + ']');
       }
        else {
@@ -2372,10 +2556,14 @@
      else {
       var tmp$_0 = Kotlin.isType(root, ValidationSuccess);
       if (tmp$_0) {
-        tmp$_0 = !this.defines.isEmpty();
+        var tmp$_1 = !this.defines.isEmpty();
+        if (!tmp$_1) {
+          tmp$_1 = !this.represents.isEmpty();
+        }
+        tmp$_0 = tmp$_1;
       }
       if (tmp$_0) {
-        var patternsToWrittenAs_0 = MathLingua_getInstance().getPatternsToWrittenAs_g8umse$(this.defines);
+        var patternsToWrittenAs_0 = MathLingua_getInstance().getPatternsToWrittenAs_r44ck5$(this.defines, this.represents);
         this.builder.append_gw00v9$('\\' + '[' + expandAsWritten(root.value, patternsToWrittenAs_0) + '\\' + ']');
       }
        else {
@@ -2402,7 +2590,7 @@
     this.builder.append_gw00v9$('<\/span>');
   };
   HtmlCodeWriter.prototype.newCodeWriter_g8umse$ = function (defines) {
-    return new HtmlCodeWriter(defines);
+    return new HtmlCodeWriter(defines, this.represents);
   };
   HtmlCodeWriter.prototype.getCode = function () {
     var $receiver = this.builder.toString();
@@ -2415,8 +2603,9 @@
     simpleName: 'HtmlCodeWriter',
     interfaces: [CodeWriter]
   };
-  function MathLinguaCodeWriter(defines) {
+  function MathLinguaCodeWriter(defines, represents) {
     this.defines = defines;
+    this.represents = represents;
     this.builder_0 = StringBuilder_init();
   }
   MathLinguaCodeWriter.prototype.append_v8axul$ = function (node, hasDot, indent) {
@@ -2475,10 +2664,14 @@
   MathLinguaCodeWriter.prototype.writeStatement_ytmu5s$ = function (stmtText, root) {
     var tmp$ = Kotlin.isType(root, ValidationSuccess);
     if (tmp$) {
-      tmp$ = !this.defines.isEmpty();
+      var tmp$_0 = !this.defines.isEmpty();
+      if (!tmp$_0) {
+        tmp$_0 = !this.represents.isEmpty();
+      }
+      tmp$ = tmp$_0;
     }
     if (tmp$) {
-      var patternsToWrittenAs = MathLingua_getInstance().getPatternsToWrittenAs_g8umse$(this.defines);
+      var patternsToWrittenAs = MathLingua_getInstance().getPatternsToWrittenAs_r44ck5$(this.defines, this.represents);
       this.builder_0.append_gw00v9$("'" + expandAsWritten(root.value, patternsToWrittenAs) + "'");
     }
      else {
@@ -2499,7 +2692,7 @@
   MathLinguaCodeWriter.prototype.endTopLevel = function () {
   };
   MathLinguaCodeWriter.prototype.newCodeWriter_g8umse$ = function (defines) {
-    return new MathLinguaCodeWriter(defines);
+    return new MathLinguaCodeWriter(defines, this.represents);
   };
   MathLinguaCodeWriter.prototype.getCode = function () {
     return this.builder_0.toString();
@@ -3035,7 +3228,7 @@
   }
   Phase2Node.prototype.toCode_pc06dk$ = function (isArg, indent, writer, callback$default) {
     if (writer === void 0)
-      writer = new MathLinguaCodeWriter(emptyList());
+      writer = new MathLinguaCodeWriter(emptyList(), emptyList());
     return callback$default ? callback$default(isArg, indent, writer) : this.toCode_pc06dk$$default(isArg, indent, writer);
   };
   Phase2Node.$metadata$ = {
@@ -3502,6 +3695,102 @@
     }), getCallableRef('ExistsGroup', function (existsSection, suchThatSection) {
       return new ExistsGroup(existsSection, suchThatSection);
     }));
+  }
+  function ExpandsGroup(expandsSection, asSection) {
+    this.expandsSection = expandsSection;
+    this.asSection = asSection;
+  }
+  ExpandsGroup.prototype.forEach_s8izwl$ = function (fn) {
+    fn(this.expandsSection);
+    fn(this.asSection);
+  };
+  ExpandsGroup.prototype.toCode_pc06dk$$default = function (isArg, indent, writer) {
+    return toCode_0(writer, isArg, indent, [this.expandsSection, this.asSection]);
+  };
+  ExpandsGroup.prototype.transform_ql661s$ = function (chalkTransformer) {
+    var tmp$, tmp$_0;
+    return chalkTransformer(new ExpandsGroup(Kotlin.isType(tmp$ = this.expandsSection.transform_ql661s$(chalkTransformer), ExpandsSection) ? tmp$ : throwCCE(), Kotlin.isType(tmp$_0 = this.asSection.transform_ql661s$(chalkTransformer), AsSection) ? tmp$_0 : throwCCE()));
+  };
+  ExpandsGroup.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ExpandsGroup',
+    interfaces: [Clause]
+  };
+  ExpandsGroup.prototype.component1 = function () {
+    return this.expandsSection;
+  };
+  ExpandsGroup.prototype.component2 = function () {
+    return this.asSection;
+  };
+  ExpandsGroup.prototype.copy_l5i7c7$ = function (expandsSection, asSection) {
+    return new ExpandsGroup(expandsSection === void 0 ? this.expandsSection : expandsSection, asSection === void 0 ? this.asSection : asSection);
+  };
+  ExpandsGroup.prototype.toString = function () {
+    return 'ExpandsGroup(expandsSection=' + Kotlin.toString(this.expandsSection) + (', asSection=' + Kotlin.toString(this.asSection)) + ')';
+  };
+  ExpandsGroup.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.expandsSection) | 0;
+    result = result * 31 + Kotlin.hashCode(this.asSection) | 0;
+    return result;
+  };
+  ExpandsGroup.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.expandsSection, other.expandsSection) && Kotlin.equals(this.asSection, other.asSection)))));
+  };
+  function isExpandsGroup(node) {
+    return firstSectionMatchesName(node, 'expands');
+  }
+  function validateExpandsGroup(rawNode, tracker) {
+    var tmp$;
+    var node = rawNode.resolve();
+    var errors = ArrayList_init();
+    if (!Kotlin.isType(node, Group)) {
+      errors.add_11rb$(new ParseError('Expected a Group', getRow(node), getColumn(node)));
+      return validationFailure(errors);
+    }
+    var sections = node.component1();
+    var sectionMap;
+    try {
+      sectionMap = identifySections(sections, ['expands', 'as']);
+    }
+     catch (e) {
+      if (Kotlin.isType(e, ParseError)) {
+        errors.add_11rb$(new ParseError(e.message, e.row, e.column));
+        return validationFailure(errors);
+      }
+       else
+        throw e;
+    }
+    var expandsSection = null;
+    var expandsNode = sectionMap.get_11rb$('expands');
+    var expandsEvaluation = validateExpandsSection(ensureNotNull(expandsNode).get_za3lpa$(0), tracker);
+    if (Kotlin.isType(expandsEvaluation, ValidationSuccess))
+      expandsSection = expandsEvaluation.value;
+    else if (Kotlin.isType(expandsEvaluation, ValidationFailure))
+      errors.addAll_brywnq$(expandsEvaluation.errors);
+    else
+      Kotlin.noWhenBranchMatched();
+    var asSection = null;
+    var asNode = sectionMap.get_11rb$('as');
+    var asValidation = validateAsSection(ensureNotNull(asNode).get_za3lpa$(0), tracker);
+    if (Kotlin.isType(asValidation, ValidationSuccess))
+      asSection = asValidation.value;
+    else if (Kotlin.isType(asValidation, ValidationFailure))
+      errors.addAll_brywnq$(asValidation.errors);
+    else
+      Kotlin.noWhenBranchMatched();
+    if (expandsSection == null) {
+      errors.add_11rb$(new ParseError("Expected a 'expands:' section", getRow(rawNode), getColumn(rawNode)));
+    }
+    if (asSection == null) {
+      errors.add_11rb$(new ParseError("Expected a 'as:' section", getRow(rawNode), getColumn(rawNode)));
+    }
+    if (!errors.isEmpty()) {
+      tmp$ = validationFailure(errors);
+    }
+     else
+      tmp$ = validationSuccess_0(tracker, rawNode, new ExpandsGroup(ensureNotNull(expandsSection), ensureNotNull(asSection)));
+    return tmp$;
   }
   function ForGroup(forSection, whereSection, thenSection) {
     this.forSection = forSection;
@@ -5001,6 +5290,52 @@
     }
     return tmp$_0;
   }
+  function AsSection(clauses) {
+    this.clauses = clauses;
+  }
+  AsSection.prototype.forEach_s8izwl$ = function (fn) {
+    this.clauses.forEach_s8izwl$(fn);
+  };
+  AsSection.prototype.toCode_pc06dk$$default = function (isArg, indent, writer) {
+    writer.writeIndent_eltk6l$(isArg, indent);
+    writer.writeHeader_61zpoe$('as');
+    if (!this.clauses.clauses.isEmpty()) {
+      writer.writeNewline_za3lpa$();
+    }
+    writer.append_v8axul$(this.clauses, true, indent + 2 | 0);
+    return writer;
+  };
+  AsSection.prototype.transform_ql661s$ = function (chalkTransformer) {
+    var tmp$;
+    return chalkTransformer(new AsSection(Kotlin.isType(tmp$ = this.clauses.transform_ql661s$(chalkTransformer), ClauseListNode) ? tmp$ : throwCCE()));
+  };
+  AsSection.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'AsSection',
+    interfaces: [Phase2Node]
+  };
+  AsSection.prototype.component1 = function () {
+    return this.clauses;
+  };
+  AsSection.prototype.copy_bln7jj$ = function (clauses) {
+    return new AsSection(clauses === void 0 ? this.clauses : clauses);
+  };
+  AsSection.prototype.toString = function () {
+    return 'AsSection(clauses=' + Kotlin.toString(this.clauses) + ')';
+  };
+  AsSection.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.clauses) | 0;
+    return result;
+  };
+  AsSection.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.clauses, other.clauses))));
+  };
+  function validateAsSection(node, tracker) {
+    return validateClauseList(tracker, node, 'as', false, getCallableRef('AsSection', function (clauses) {
+      return new AsSection(clauses);
+    }));
+  }
   function AssumingSection(clauses) {
     this.clauses = clauses;
   }
@@ -5251,6 +5586,131 @@
       return new ExistsSection(identifiers);
     }));
   }
+  function ExpandsSection(targets) {
+    this.targets = targets;
+  }
+  ExpandsSection.prototype.forEach_s8izwl$ = function (fn) {
+    var tmp$;
+    tmp$ = this.targets.iterator();
+    while (tmp$.hasNext()) {
+      var element = tmp$.next();
+      fn(element);
+    }
+  };
+  ExpandsSection.prototype.toCode_pc06dk$$default = function (isArg, indent, writer) {
+    writer.writeIndent_eltk6l$(isArg, indent);
+    writer.writeHeader_61zpoe$('expands');
+    appendTargetArgs(writer, this.targets, indent + 2 | 0);
+    return writer;
+  };
+  ExpandsSection.prototype.transform_ql661s$ = function (chalkTransformer) {
+    var $receiver = this.targets;
+    var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
+    var tmp$;
+    tmp$ = $receiver.iterator();
+    while (tmp$.hasNext()) {
+      var item = tmp$.next();
+      var tmp$_0;
+      destination.add_11rb$(Kotlin.isType(tmp$_0 = item.transform_ql661s$(chalkTransformer), AbstractionNode) ? tmp$_0 : throwCCE());
+    }
+    return chalkTransformer(new ExpandsSection(destination));
+  };
+  ExpandsSection.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ExpandsSection',
+    interfaces: [Phase2Node]
+  };
+  ExpandsSection.prototype.component1 = function () {
+    return this.targets;
+  };
+  ExpandsSection.prototype.copy_vnbnf9$ = function (targets) {
+    return new ExpandsSection(targets === void 0 ? this.targets : targets);
+  };
+  ExpandsSection.prototype.toString = function () {
+    return 'ExpandsSection(targets=' + Kotlin.toString(this.targets) + ')';
+  };
+  ExpandsSection.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.targets) | 0;
+    return result;
+  };
+  ExpandsSection.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.targets, other.targets))));
+  };
+  function PseudoExpandsSection(targets) {
+    this.targets = targets;
+  }
+  PseudoExpandsSection.prototype.forEach_s8izwl$ = function (fn) {
+    throw RuntimeException_init('PseudoExpandsSection.forEach() should never be invoked');
+  };
+  PseudoExpandsSection.prototype.toCode_pc06dk$$default = function (isArg, indent, writer) {
+    throw RuntimeException_init('PseudoExpandsSection.toCode() should never be invoked');
+  };
+  PseudoExpandsSection.prototype.transform_ql661s$ = function (chalkTransformer) {
+    throw RuntimeException_init('PseudoExpandsSection.transform() should never be invoked');
+  };
+  PseudoExpandsSection.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'PseudoExpandsSection',
+    interfaces: [Phase2Node]
+  };
+  PseudoExpandsSection.prototype.component1 = function () {
+    return this.targets;
+  };
+  PseudoExpandsSection.prototype.copy_jev4lk$ = function (targets) {
+    return new PseudoExpandsSection(targets === void 0 ? this.targets : targets);
+  };
+  PseudoExpandsSection.prototype.toString = function () {
+    return 'PseudoExpandsSection(targets=' + Kotlin.toString(this.targets) + ')';
+  };
+  PseudoExpandsSection.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.targets) | 0;
+    return result;
+  };
+  PseudoExpandsSection.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.targets, other.targets))));
+  };
+  function isValidAbstraction(node) {
+    return node.abstraction.subParams == null && node.abstraction.parts.size === 1 && node.abstraction.parts.get_za3lpa$(0).subParams == null && node.abstraction.parts.get_za3lpa$(0).params == null && (!node.abstraction.isEnclosed && endsWith(node.abstraction.parts.get_za3lpa$(0).name.text, '...') || (node.abstraction.isEnclosed && node.abstraction.isVarArgs && !endsWith(node.abstraction.parts.get_za3lpa$(0).name.text, '...')));
+  }
+  function validateExpandsSection(node, tracker) {
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4;
+    var validation = validateTargetList(tracker, node, 'expands', getCallableRef('PseudoExpandsSection', function (targets) {
+      return new PseudoExpandsSection(targets);
+    }));
+    if (Kotlin.isType(validation, ValidationFailure))
+      return validationFailure(validation.errors);
+    else if (Kotlin.isType(validation, ValidationSuccess)) {
+      var newErrors = ArrayList_init();
+      var targets = ArrayList_init();
+      tmp$ = validation.value.targets.iterator();
+      while (tmp$.hasNext()) {
+        var target = tmp$.next();
+        if (Kotlin.isType(target, AbstractionNode) && isValidAbstraction(target)) {
+          tmp$_0 = target;
+        }
+         else {
+          tmp$_0 = null;
+        }
+        var id = tmp$_0;
+        if (id == null) {
+          newErrors.add_11rb$(new ParseError("an 'expands' section can only contain <name>... or {<name>}...", (tmp$_2 = (tmp$_1 = tracker.getLocationOf_2v05ti$(target)) != null ? tmp$_1.row : null) != null ? tmp$_2 : -1, (tmp$_4 = (tmp$_3 = tracker.getLocationOf_2v05ti$(target)) != null ? tmp$_3.column : null) != null ? tmp$_4 : -1));
+        }
+         else {
+          targets.add_11rb$(id);
+        }
+      }
+      if (newErrors.isEmpty()) {
+        return validationSuccess_0(tracker, node, new ExpandsSection(targets));
+      }
+       else {
+        return validationFailure(newErrors);
+      }
+    }
+     else
+      return Kotlin.noWhenBranchMatched();
+  }
   function ForSection(targets) {
     this.targets = targets;
   }
@@ -5403,7 +5863,7 @@
     this.clauses = clauses;
   }
   MeansSection.prototype.forEach_s8izwl$ = function (fn) {
-    fn(this.clauses);
+    this.clauses.forEach_s8izwl$(fn);
   };
   MeansSection.prototype.toCode_pc06dk$$default = function (isArg, indent, writer) {
     writer.writeIndent_eltk6l$(isArg, indent);
@@ -6924,15 +7384,15 @@
     return tmp$_1;
   }
   function validateDefinesLikeGroup(tracker, groupNode, definesLikeSectionName, validateDefinesLikeSection, endSectionName, validateEndSection, buildGroup) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4;
     var errors = ArrayList_init();
     var group = groupNode.resolve();
     var id = null;
     if (group.id != null) {
-      var tmp$_6 = group.id;
-      var rawText = tmp$_6.component1()
-      , row = tmp$_6.component3()
-      , column = tmp$_6.component4();
+      var tmp$_5 = group.id;
+      var rawText = tmp$_5.component1()
+      , row = tmp$_5.component3()
+      , column = tmp$_5.component4();
       var endIndex = rawText.length - 1 | 0;
       var statementText = "'" + rawText.substring(1, endIndex) + "'";
       var stmtToken = new Phase1Token(statementText, ChalkTalkTokenType$Statement_getInstance(), row, column);
@@ -7023,12 +7483,11 @@
         Kotlin.noWhenBranchMatched();
     }
     if (!errors.isEmpty()) {
-      tmp$_5 = validationFailure(errors);
+      tmp$_4 = validationFailure(errors);
     }
-     else {
-      tmp$_5 = validationSuccess_0(tracker, groupNode, buildGroup((tmp$_4 = getSignature_1(ensureNotNull(id).toStatement(), newLocationTracker())) != null ? tmp$_4.form : null, id, ensureNotNull(definesLikeSection), assumingSection, endSections, aliasSection, metaDataSection));
-    }
-    return tmp$_5;
+     else
+      tmp$_4 = validationSuccess_0(tracker, groupNode, buildGroup(id != null ? signature_1(id) : null, ensureNotNull(id), ensureNotNull(definesLikeSection), assumingSection, endSections, aliasSection, metaDataSection));
+    return tmp$_4;
   }
   function Queue() {
   }
@@ -7104,18 +7563,19 @@
     TexTalkNodeType$Token_instance = new TexTalkNodeType('Token', 0);
     TexTalkNodeType$Identifier_instance = new TexTalkNodeType('Identifier', 1);
     TexTalkNodeType$Operator_instance = new TexTalkNodeType('Operator', 2);
-    TexTalkNodeType$ParenGroup_instance = new TexTalkNodeType('ParenGroup', 3);
-    TexTalkNodeType$SquareGroup_instance = new TexTalkNodeType('SquareGroup', 4);
-    TexTalkNodeType$CurlyGroup_instance = new TexTalkNodeType('CurlyGroup', 5);
-    TexTalkNodeType$NamedGroup_instance = new TexTalkNodeType('NamedGroup', 6);
-    TexTalkNodeType$Command_instance = new TexTalkNodeType('Command', 7);
-    TexTalkNodeType$CommandPart_instance = new TexTalkNodeType('CommandPart', 8);
-    TexTalkNodeType$Expression_instance = new TexTalkNodeType('Expression', 9);
-    TexTalkNodeType$SubSup_instance = new TexTalkNodeType('SubSup', 10);
-    TexTalkNodeType$Parameters_instance = new TexTalkNodeType('Parameters', 11);
-    TexTalkNodeType$Comma_instance = new TexTalkNodeType('Comma', 12);
-    TexTalkNodeType$Is_instance = new TexTalkNodeType('Is', 13);
-    TexTalkNodeType$ColonEquals_instance = new TexTalkNodeType('ColonEquals', 14);
+    TexTalkNodeType$SyntheticGroup_instance = new TexTalkNodeType('SyntheticGroup', 3);
+    TexTalkNodeType$ParenGroup_instance = new TexTalkNodeType('ParenGroup', 4);
+    TexTalkNodeType$SquareGroup_instance = new TexTalkNodeType('SquareGroup', 5);
+    TexTalkNodeType$CurlyGroup_instance = new TexTalkNodeType('CurlyGroup', 6);
+    TexTalkNodeType$NamedGroup_instance = new TexTalkNodeType('NamedGroup', 7);
+    TexTalkNodeType$Command_instance = new TexTalkNodeType('Command', 8);
+    TexTalkNodeType$CommandPart_instance = new TexTalkNodeType('CommandPart', 9);
+    TexTalkNodeType$Expression_instance = new TexTalkNodeType('Expression', 10);
+    TexTalkNodeType$SubSup_instance = new TexTalkNodeType('SubSup', 11);
+    TexTalkNodeType$Parameters_instance = new TexTalkNodeType('Parameters', 12);
+    TexTalkNodeType$Comma_instance = new TexTalkNodeType('Comma', 13);
+    TexTalkNodeType$Is_instance = new TexTalkNodeType('Is', 14);
+    TexTalkNodeType$ColonEquals_instance = new TexTalkNodeType('ColonEquals', 15);
   }
   var TexTalkNodeType$Token_instance;
   function TexTalkNodeType$Token_getInstance() {
@@ -7131,6 +7591,11 @@
   function TexTalkNodeType$Operator_getInstance() {
     TexTalkNodeType_initFields();
     return TexTalkNodeType$Operator_instance;
+  }
+  var TexTalkNodeType$SyntheticGroup_instance;
+  function TexTalkNodeType$SyntheticGroup_getInstance() {
+    TexTalkNodeType_initFields();
+    return TexTalkNodeType$SyntheticGroup_instance;
   }
   var TexTalkNodeType$ParenGroup_instance;
   function TexTalkNodeType$ParenGroup_getInstance() {
@@ -7198,7 +7663,7 @@
     interfaces: [Enum]
   };
   function TexTalkNodeType$values() {
-    return [TexTalkNodeType$Token_getInstance(), TexTalkNodeType$Identifier_getInstance(), TexTalkNodeType$Operator_getInstance(), TexTalkNodeType$ParenGroup_getInstance(), TexTalkNodeType$SquareGroup_getInstance(), TexTalkNodeType$CurlyGroup_getInstance(), TexTalkNodeType$NamedGroup_getInstance(), TexTalkNodeType$Command_getInstance(), TexTalkNodeType$CommandPart_getInstance(), TexTalkNodeType$Expression_getInstance(), TexTalkNodeType$SubSup_getInstance(), TexTalkNodeType$Parameters_getInstance(), TexTalkNodeType$Comma_getInstance(), TexTalkNodeType$Is_getInstance(), TexTalkNodeType$ColonEquals_getInstance()];
+    return [TexTalkNodeType$Token_getInstance(), TexTalkNodeType$Identifier_getInstance(), TexTalkNodeType$Operator_getInstance(), TexTalkNodeType$SyntheticGroup_getInstance(), TexTalkNodeType$ParenGroup_getInstance(), TexTalkNodeType$SquareGroup_getInstance(), TexTalkNodeType$CurlyGroup_getInstance(), TexTalkNodeType$NamedGroup_getInstance(), TexTalkNodeType$Command_getInstance(), TexTalkNodeType$CommandPart_getInstance(), TexTalkNodeType$Expression_getInstance(), TexTalkNodeType$SubSup_getInstance(), TexTalkNodeType$Parameters_getInstance(), TexTalkNodeType$Comma_getInstance(), TexTalkNodeType$Is_getInstance(), TexTalkNodeType$ColonEquals_getInstance()];
   }
   TexTalkNodeType.values = TexTalkNodeType$values;
   function TexTalkNodeType$valueOf(name) {
@@ -7209,6 +7674,8 @@
         return TexTalkNodeType$Identifier_getInstance();
       case 'Operator':
         return TexTalkNodeType$Operator_getInstance();
+      case 'SyntheticGroup':
+        return TexTalkNodeType$SyntheticGroup_getInstance();
       case 'ParenGroup':
         return TexTalkNodeType$ParenGroup_getInstance();
       case 'SquareGroup':
@@ -7714,6 +8181,10 @@
         prefix = '{';
         suffix = '}';
         break;
+      case 'SyntheticGroup':
+        prefix = '';
+        suffix = '';
+        break;
       default:throw RuntimeException_init('Unrecognized group type ' + this.type);
     }
     var buffer = new StringBuilder(prefix);
@@ -7887,8 +8358,9 @@
   SubSupTexTalkNode.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.sub, other.sub) && Kotlin.equals(this.sup, other.sup)))));
   };
-  function TextTexTalkNode(type, text, isVarArg) {
+  function TextTexTalkNode(type, tokenType, text, isVarArg) {
     this.type_twguqo$_0 = type;
+    this.tokenType = tokenType;
     this.text = text;
     this.isVarArg = isVarArg;
   }
@@ -7926,26 +8398,104 @@
     return this.type;
   };
   TextTexTalkNode.prototype.component2 = function () {
-    return this.text;
+    return this.tokenType;
   };
   TextTexTalkNode.prototype.component3 = function () {
+    return this.text;
+  };
+  TextTexTalkNode.prototype.component4 = function () {
     return this.isVarArg;
   };
-  TextTexTalkNode.prototype.copy_g9556o$ = function (type, text, isVarArg) {
-    return new TextTexTalkNode(type === void 0 ? this.type : type, text === void 0 ? this.text : text, isVarArg === void 0 ? this.isVarArg : isVarArg);
+  TextTexTalkNode.prototype.copy_e4igys$ = function (type, tokenType, text, isVarArg) {
+    return new TextTexTalkNode(type === void 0 ? this.type : type, tokenType === void 0 ? this.tokenType : tokenType, text === void 0 ? this.text : text, isVarArg === void 0 ? this.isVarArg : isVarArg);
   };
   TextTexTalkNode.prototype.toString = function () {
-    return 'TextTexTalkNode(type=' + Kotlin.toString(this.type) + (', text=' + Kotlin.toString(this.text)) + (', isVarArg=' + Kotlin.toString(this.isVarArg)) + ')';
+    return 'TextTexTalkNode(type=' + Kotlin.toString(this.type) + (', tokenType=' + Kotlin.toString(this.tokenType)) + (', text=' + Kotlin.toString(this.text)) + (', isVarArg=' + Kotlin.toString(this.isVarArg)) + ')';
   };
   TextTexTalkNode.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.type) | 0;
+    result = result * 31 + Kotlin.hashCode(this.tokenType) | 0;
     result = result * 31 + Kotlin.hashCode(this.text) | 0;
     result = result * 31 + Kotlin.hashCode(this.isVarArg) | 0;
     return result;
   };
   TextTexTalkNode.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.type, other.type) && Kotlin.equals(this.text, other.text) && Kotlin.equals(this.isVarArg, other.isVarArg)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.type, other.type) && Kotlin.equals(this.tokenType, other.tokenType) && Kotlin.equals(this.text, other.text) && Kotlin.equals(this.isVarArg, other.isVarArg)))));
+  };
+  function OperatorTexTalkNode(lhs, command, rhs) {
+    this.lhs = lhs;
+    this.command = command;
+    this.rhs = rhs;
+  }
+  Object.defineProperty(OperatorTexTalkNode.prototype, 'type', {
+    get: function () {
+      return TexTalkNodeType$Operator_getInstance();
+    }
+  });
+  OperatorTexTalkNode.prototype.toCode_6z438g$$default = function (interceptor) {
+    var res = interceptor(this);
+    if (res != null) {
+      return res;
+    }
+    var builder = StringBuilder_init();
+    if (this.lhs != null) {
+      builder.append_gw00v9$(this.lhs.toCode_6z438g$(interceptor));
+      if (this.rhs != null) {
+        builder.append_s8itvh$(32);
+      }
+    }
+    builder.append_gw00v9$(this.command.toCode_6z438g$(interceptor));
+    if (this.rhs != null) {
+      if (this.lhs != null) {
+        builder.append_s8itvh$(32);
+      }
+      builder.append_gw00v9$(this.rhs.toCode_6z438g$(interceptor));
+    }
+    return builder.toString();
+  };
+  OperatorTexTalkNode.prototype.forEach_j2ps96$ = function (fn) {
+    if (this.lhs != null) {
+      fn(this.lhs);
+    }
+    fn(this.command);
+    if (this.rhs != null) {
+      fn(this.rhs);
+    }
+  };
+  OperatorTexTalkNode.prototype.transform_7szim8$ = function (transformer) {
+    var tmp$, tmp$_0;
+    return transformer(new OperatorTexTalkNode((tmp$ = this.lhs) != null ? tmp$.transform_7szim8$(transformer) : null, this.command.transform_7szim8$(transformer), (tmp$_0 = this.rhs) != null ? tmp$_0.transform_7szim8$(transformer) : null));
+  };
+  OperatorTexTalkNode.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'OperatorTexTalkNode',
+    interfaces: [TexTalkNode]
+  };
+  OperatorTexTalkNode.prototype.component1 = function () {
+    return this.lhs;
+  };
+  OperatorTexTalkNode.prototype.component2 = function () {
+    return this.command;
+  };
+  OperatorTexTalkNode.prototype.component3 = function () {
+    return this.rhs;
+  };
+  OperatorTexTalkNode.prototype.copy_wvr5j1$ = function (lhs, command, rhs) {
+    return new OperatorTexTalkNode(lhs === void 0 ? this.lhs : lhs, command === void 0 ? this.command : command, rhs === void 0 ? this.rhs : rhs);
+  };
+  OperatorTexTalkNode.prototype.toString = function () {
+    return 'OperatorTexTalkNode(lhs=' + Kotlin.toString(this.lhs) + (', command=' + Kotlin.toString(this.command)) + (', rhs=' + Kotlin.toString(this.rhs)) + ')';
+  };
+  OperatorTexTalkNode.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.lhs) | 0;
+    result = result * 31 + Kotlin.hashCode(this.command) | 0;
+    result = result * 31 + Kotlin.hashCode(this.rhs) | 0;
+    return result;
+  };
+  OperatorTexTalkNode.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.lhs, other.lhs) && Kotlin.equals(this.command, other.command) && Kotlin.equals(this.rhs, other.rhs)))));
   };
   function TexTalkToken(text, tokenType, row, column) {
     this.text = text;
@@ -8199,6 +8749,340 @@
       path.removeAt_za3lpa$(path.size - 1 | 0);
     }
   }
+  function parseOperators(root) {
+    var tmp$;
+    try {
+      var isRhsExpressions = findIsRhsExpressions(root);
+      var idPrefixOpRoot = identifySpecialPrefixOperators(root, isRhsExpressions);
+      var idPostfixOpRoot = identifySpecialPostfixOperators(idPrefixOpRoot, isRhsExpressions);
+      var idInfixOpRoot = identifyInfixCommandOperators(idPostfixOpRoot, isRhsExpressions);
+      var final = runShuntingYard(idInfixOpRoot, isRhsExpressions);
+      var resultRoot = Kotlin.isType(tmp$ = final, ExpressionTexTalkNode) ? tmp$ : throwCCE();
+      return new TexTalkParseResult(resultRoot, emptyList());
+    }
+     catch (e) {
+      if (Kotlin.isType(e, ParseException)) {
+        return new TexTalkParseResult(new ExpressionTexTalkNode(emptyList()), listOf(e.parseError));
+      }
+       else
+        throw e;
+    }
+  }
+  function ParseException(parseError) {
+    Exception_init(parseError.message, this);
+    this.parseError = parseError;
+    this.name = 'ParseException';
+  }
+  ParseException.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'ParseException',
+    interfaces: [Exception]
+  };
+  function findIsRhsExpressions(root) {
+    var result = LinkedHashSet_init();
+    findIsRhsExpressionsImpl(root, result);
+    return result;
+  }
+  function findIsRhsExpressionsImpl$lambda(closure$result) {
+    return function (it) {
+      findIsRhsExpressionsImpl(it, closure$result);
+      return Unit;
+    };
+  }
+  function findIsRhsExpressionsImpl(node, result) {
+    if (Kotlin.isType(node, IsTexTalkNode)) {
+      result.addAll_brywnq$(node.rhs.items);
+    }
+    node.forEach_j2ps96$(findIsRhsExpressionsImpl$lambda(result));
+  }
+  function isSpecialOperator(node) {
+    return node != null && Kotlin.isType(node, TextTexTalkNode) && (node.tokenType === TexTalkTokenType$Operator_getInstance() || node.tokenType === TexTalkTokenType$Caret_getInstance());
+  }
+  function identifySpecialPrefixOperators$lambda(closure$isNodeRhsExpressions) {
+    return function (it) {
+      if (Kotlin.isType(it, ExpressionTexTalkNode) && !closure$isNodeRhsExpressions.contains_11rb$(it)) {
+        var newChildren = ArrayList_init();
+        var i = 0;
+        while (i < it.children.size) {
+          var prev = getOrNull(it.children, i - 1 | 0);
+          var cur = it.children.get_za3lpa$(i);
+          var next = getOrNull(it.children, i + 1 | 0);
+          i = i + 1 | 0;
+          if (prev == null && isSpecialOperator(cur) && next == null) {
+            throw new ParseException(new ParseError('An operator needs to have at least a left or ' + ("right side argument ('" + cur.toCode_6z438g$() + "')"), -1, -1));
+          }
+           else if ((isSpecialOperator(prev) || prev == null) && isSpecialOperator(cur) && !isSpecialOperator(next)) {
+            newChildren.add_11rb$(new GroupTexTalkNode(TexTalkNodeType$SyntheticGroup_getInstance(), new ParametersTexTalkNode(listOf(new ExpressionTexTalkNode(listOf(new OperatorTexTalkNode(null, cur, next))))), false));
+            i = i + 1 | 0;
+          }
+           else {
+            newChildren.add_11rb$(cur);
+          }
+        }
+        return new ExpressionTexTalkNode(newChildren);
+      }
+       else {
+        return it;
+      }
+    };
+  }
+  function identifySpecialPrefixOperators(root, isNodeRhsExpressions) {
+    var tmp$;
+    return Kotlin.isType(tmp$ = root.transform_7szim8$(identifySpecialPrefixOperators$lambda(isNodeRhsExpressions)), ExpressionTexTalkNode) ? tmp$ : throwCCE();
+  }
+  function identifySpecialPostfixOperators$lambda(closure$isNodeRhsExpressions) {
+    return function (it) {
+      if (Kotlin.isType(it, ExpressionTexTalkNode) && !closure$isNodeRhsExpressions.contains_11rb$(it)) {
+        var newChildren = ArrayList_init();
+        var i = 0;
+        while (i < it.children.size) {
+          var cur = it.children.get_za3lpa$(i);
+          var next = getOrNull(it.children, i + 1 | 0);
+          var nextNext = getOrNull(it.children, i + 2 | 0);
+          i = i + 1 | 0;
+          if (!isSpecialOperator(cur) && isSpecialOperator(next) && (isSpecialOperator(nextNext) || nextNext == null)) {
+            newChildren.add_11rb$(new GroupTexTalkNode(TexTalkNodeType$SyntheticGroup_getInstance(), new ParametersTexTalkNode(listOf(new ExpressionTexTalkNode(listOf(new OperatorTexTalkNode(cur, ensureNotNull(next), null))))), false));
+            i = i + 1 | 0;
+          }
+           else {
+            newChildren.add_11rb$(cur);
+          }
+        }
+        return new ExpressionTexTalkNode(newChildren);
+      }
+       else {
+        return it;
+      }
+    };
+  }
+  function identifySpecialPostfixOperators(root, isNodeRhsExpressions) {
+    var tmp$;
+    return Kotlin.isType(tmp$ = root.transform_7szim8$(identifySpecialPostfixOperators$lambda(isNodeRhsExpressions)), ExpressionTexTalkNode) ? tmp$ : throwCCE();
+  }
+  function identifyInfixCommandOperators$lambda(closure$isNodeRhsExpressions) {
+    return function (it) {
+      var tmp$;
+      if (Kotlin.isType(it, ExpressionTexTalkNode) && !closure$isNodeRhsExpressions.contains_11rb$(it)) {
+        var newChildren = ArrayList_init();
+        var sections = splitBetweenInfixOperators(it.children);
+        tmp$ = sections.iterator();
+        while (tmp$.hasNext()) {
+          var section = tmp$.next();
+          if (section.isEmpty()) {
+            throw new ParseException(new ParseError("Two infix operators cannot be side by side ('" + it.toCode_6z438g$() + "')", -1, -1));
+          }
+           else if (section.size === 1) {
+            newChildren.add_11rb$(section.get_za3lpa$(0));
+          }
+           else if (section.size === 3) {
+            var lhs = section.get_za3lpa$(0);
+            var cmd = section.get_za3lpa$(1);
+            var rhs = section.get_za3lpa$(2);
+            if (!Kotlin.isType(cmd, Command)) {
+              throw new ParseException(new ParseError('Expected an argument but found ' + cmd.toCode_6z438g$(), -1, -1));
+            }
+             else {
+              newChildren.add_11rb$(new OperatorTexTalkNode(lhs, cmd, rhs));
+            }
+          }
+           else if (section.size === 2 && Kotlin.isType(section.get_za3lpa$(1), GroupTexTalkNode) && section.get_za3lpa$(1).type === TexTalkNodeType$ParenGroup_getInstance()) {
+            newChildren.add_11rb$(section.get_za3lpa$(1));
+            newChildren.add_11rb$(section.get_za3lpa$(0));
+          }
+           else {
+            throw new ParseException(new ParseError("Multiple infix operators cannot be side by side ('" + it.toCode_6z438g$() + "').  " + "They can only be one of the forms: '\\x \\op \\y', '\\x \\op y', 'x \\op \\y', or 'x \\op y'", -1, -1));
+          }
+        }
+        return new ExpressionTexTalkNode(newChildren);
+      }
+       else {
+        return it;
+      }
+    };
+  }
+  function identifyInfixCommandOperators(root, isNodeRhsExpressions) {
+    return root.transform_7szim8$(identifyInfixCommandOperators$lambda(isNodeRhsExpressions));
+  }
+  function splitBetweenInfixOperators(nodes) {
+    var tmp$, tmp$_0;
+    var result = ArrayList_init();
+    var i = 0;
+    while (i < nodes.size) {
+      var inner = ArrayList_init();
+      while (i < nodes.size && !isSpecialOperator(nodes.get_za3lpa$(i))) {
+        inner.add_11rb$(nodes.get_za3lpa$((tmp$ = i, i = tmp$ + 1 | 0, tmp$)));
+      }
+      result.add_11rb$(inner);
+      if (i < nodes.size && isSpecialOperator(nodes.get_za3lpa$(i))) {
+        result.add_11rb$(mutableListOf([nodes.get_za3lpa$((tmp$_0 = i, i = tmp$_0 + 1 | 0, tmp$_0))]));
+      }
+    }
+    return result;
+  }
+  function Associativity(name, ordinal) {
+    Enum.call(this);
+    this.name$ = name;
+    this.ordinal$ = ordinal;
+  }
+  function Associativity_initFields() {
+    Associativity_initFields = function () {
+    };
+    Associativity$Left_instance = new Associativity('Left', 0);
+    Associativity$Right_instance = new Associativity('Right', 1);
+    Associativity$Unknown_instance = new Associativity('Unknown', 2);
+  }
+  var Associativity$Left_instance;
+  function Associativity$Left_getInstance() {
+    Associativity_initFields();
+    return Associativity$Left_instance;
+  }
+  var Associativity$Right_instance;
+  function Associativity$Right_getInstance() {
+    Associativity_initFields();
+    return Associativity$Right_instance;
+  }
+  var Associativity$Unknown_instance;
+  function Associativity$Unknown_getInstance() {
+    Associativity_initFields();
+    return Associativity$Unknown_instance;
+  }
+  Associativity.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'Associativity',
+    interfaces: [Enum]
+  };
+  function Associativity$values() {
+    return [Associativity$Left_getInstance(), Associativity$Right_getInstance(), Associativity$Unknown_getInstance()];
+  }
+  Associativity.values = Associativity$values;
+  function Associativity$valueOf(name) {
+    switch (name) {
+      case 'Left':
+        return Associativity$Left_getInstance();
+      case 'Right':
+        return Associativity$Right_getInstance();
+      case 'Unknown':
+        return Associativity$Unknown_getInstance();
+      default:throwISE('No enum constant mathlingua.common.textalk.Associativity.' + name);
+    }
+  }
+  Associativity.valueOf_61zpoe$ = Associativity$valueOf;
+  function getPrecedence(node) {
+    var tmp$;
+    if (isSpecialOperator(node)) {
+      var op = (Kotlin.isType(tmp$ = node, TextTexTalkNode) ? tmp$ : throwCCE()).text;
+      if (equals(op, '+') || equals(op, '-'))
+        return 1;
+      else if (equals(op, '*') || equals(op, '/'))
+        return 2;
+      else if (equals(op, '^'))
+        return 3;
+      else
+        return 0;
+    }
+     else if (Kotlin.isType(node, Command))
+      return 0;
+    else
+      throw new ParseException(new ParseError("Cannot get precedence of node '" + node.toCode_6z438g$() + "'", -1, -1));
+  }
+  function getAssociativity(node) {
+    var tmp$;
+    if (isSpecialOperator(node)) {
+      var op = (Kotlin.isType(tmp$ = node, TextTexTalkNode) ? tmp$ : throwCCE()).text;
+      if (equals(op, '+') || equals(op, '-') || equals(op, '*') || equals(op, '/'))
+        return Associativity$Left_getInstance();
+      else if (equals(op, '^'))
+        return Associativity$Right_getInstance();
+      else
+        return Associativity$Unknown_getInstance();
+    }
+     else
+      return Associativity$Unknown_getInstance();
+  }
+  function runShuntingYard$lambda(closure$isNodeRhsExpressions) {
+    return function (it) {
+      if (Kotlin.isType(it, ExpressionTexTalkNode) && !closure$isNodeRhsExpressions.contains_11rb$(it)) {
+        var postfix = toPostfixForm(it.children);
+        return new ExpressionTexTalkNode(postfixToTree(postfix));
+      }
+       else {
+        return it;
+      }
+    };
+  }
+  function runShuntingYard(root, isNodeRhsExpressions) {
+    return root.transform_7szim8$(runShuntingYard$lambda(isNodeRhsExpressions));
+  }
+  function toPostfixForm(nodes) {
+    var tmp$;
+    var argStack = newStack();
+    var opStack = newStack();
+    tmp$ = nodes.iterator();
+    while (tmp$.hasNext()) {
+      var a = tmp$.next();
+      if (!isSpecialOperator(a)) {
+        argStack.push_11rb$(a);
+        continue;
+      }
+      if (opStack.isEmpty()) {
+        opStack.push_11rb$(a);
+        continue;
+      }
+      var topOp = opStack.peek();
+      var topPrec = getPrecedence(topOp);
+      var curPrec = getPrecedence(a);
+      if (topPrec < curPrec)
+        opStack.push_11rb$(a);
+      else if (topPrec > curPrec) {
+        argStack.push_11rb$(opStack.pop());
+        opStack.push_11rb$(a);
+      }
+       else {
+        if (getAssociativity(topOp) === Associativity$Left_getInstance() || getAssociativity(topOp) === Associativity$Unknown_getInstance()) {
+          argStack.push_11rb$(opStack.pop());
+          opStack.push_11rb$(a);
+        }
+         else if (getAssociativity(topOp) === Associativity$Right_getInstance())
+          opStack.push_11rb$(a);
+      }
+    }
+    while (!opStack.isEmpty()) {
+      argStack.push_11rb$(opStack.pop());
+    }
+    var result = ArrayList_init();
+    while (!argStack.isEmpty()) {
+      result.add_11rb$(argStack.pop());
+    }
+    reverse(result);
+    return result;
+  }
+  function postfixToTree(nodes) {
+    var tmp$;
+    var stack = newStack();
+    tmp$ = nodes.iterator();
+    while (tmp$.hasNext()) {
+      var n = tmp$.next();
+      if (isSpecialOperator(n)) {
+        if (stack.isEmpty()) {
+          throw new ParseException(new ParseError('Expected two arguments for operator ' + n.toCode_6z438g$() + ' but found none', -1, -1));
+        }
+        var rhs = stack.pop();
+        if (stack.isEmpty()) {
+          throw new ParseException(new ParseError('Expected two arguments for operator ' + n.toCode_6z438g$() + ' but found one', -1, -1));
+        }
+        var lhs = stack.pop();
+        stack.push_11rb$(new OperatorTexTalkNode(lhs, n, rhs));
+      }
+       else {
+        stack.push_11rb$(n);
+      }
+    }
+    var result = ArrayList_init();
+    while (!stack.isEmpty()) {
+      result.add_11rb$(stack.pop());
+    }
+    return result;
+  }
   function TexTalkLexer() {
   }
   TexTalkLexer.$metadata$ = {
@@ -8389,7 +9273,15 @@
     var worker = new TexTalkParserImpl$ParserWorker(texTalkLexer);
     var root = worker.parse();
     var errors = worker.getErrors();
-    return new TexTalkParseResult(root, errors);
+    var result = new TexTalkParseResult(root, errors);
+    if (!errors.isEmpty()) {
+      return result;
+    }
+    var operatorResult = parseOperators(result.root);
+    if (!operatorResult.errors.isEmpty()) {
+      return new TexTalkParseResult(result.root, plus(result.errors, operatorResult.errors));
+    }
+    return operatorResult;
   };
   function TexTalkParserImpl$ParserWorker(texTalkLexer) {
     this.texTalkLexer_0 = texTalkLexer;
@@ -8559,7 +9451,7 @@
     var grp = null;
     if (this.has_0(TexTalkTokenType$Identifier_getInstance())) {
       var id = this.next_0();
-      grp = new GroupTexTalkNode(TexTalkNodeType$CurlyGroup_getInstance(), new ParametersTexTalkNode(listOf(new ExpressionTexTalkNode(listOf(new TextTexTalkNode(TexTalkNodeType$Identifier_getInstance(), id.text, false))))), false);
+      grp = new GroupTexTalkNode(TexTalkNodeType$CurlyGroup_getInstance(), new ParametersTexTalkNode(listOf(new ExpressionTexTalkNode(listOf(new TextTexTalkNode(TexTalkNodeType$Identifier_getInstance(), id.tokenType, id.text, false))))), false);
     }
     if (grp == null) {
       var curly = this.group_0(TexTalkNodeType$CurlyGroup_getInstance());
@@ -8589,7 +9481,7 @@
     var grp = null;
     if (this.has_0(TexTalkTokenType$Identifier_getInstance())) {
       var id = this.next_0();
-      grp = new GroupTexTalkNode(TexTalkNodeType$CurlyGroup_getInstance(), new ParametersTexTalkNode(listOf(new ExpressionTexTalkNode(listOf(new TextTexTalkNode(TexTalkNodeType$Identifier_getInstance(), id.text, false))))), false);
+      grp = new GroupTexTalkNode(TexTalkNodeType$CurlyGroup_getInstance(), new ParametersTexTalkNode(listOf(new ExpressionTexTalkNode(listOf(new TextTexTalkNode(TexTalkNodeType$Identifier_getInstance(), id.tokenType, id.text, false))))), false);
     }
     if (grp == null) {
       var curly = this.group_0(TexTalkNodeType$CurlyGroup_getInstance());
@@ -8664,7 +9556,7 @@
     }
      else {
       this.addError_0('Expected an identifier in a named group');
-      tmp$ = new TextTexTalkNode(TexTalkNodeType$Identifier_getInstance(), 'INVALID', false);
+      tmp$ = new TextTexTalkNode(TexTalkNodeType$Identifier_getInstance(), TexTalkTokenType$Invalid_getInstance(), 'INVALID', false);
     }
     var text = tmp$;
     var rawGroup = this.group_0(TexTalkNodeType$CurlyGroup_getInstance());
@@ -8698,7 +9590,7 @@
     if (nextIsDotDotDot) {
       this.next_0();
     }
-    return new TextTexTalkNode(nodeType, textToken.text, isVarArg);
+    return new TextTexTalkNode(nodeType, tokenType, textToken.text, isVarArg);
   };
   TexTalkParserImpl$ParserWorker.prototype.expression_0 = function (terminators) {
     var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6, tmp$_7, tmp$_8;
@@ -8831,8 +9723,8 @@
   }
   function replaceSignatures$lambda(closure$signature, closure$replacement, closure$texTalkNode) {
     return function (it) {
-      if (Kotlin.isType(it, Command) && equals(getCommandSignature(it), closure$signature)) {
-        return new TextTexTalkNode(TexTalkNodeType$Identifier_getInstance(), closure$replacement, false);
+      if (Kotlin.isType(it, Command) && equals(signature_0(it), closure$signature)) {
+        return new TextTexTalkNode(TexTalkNodeType$Identifier_getInstance(), TexTalkTokenType$Identifier_getInstance(), closure$replacement, false);
       }
        else {
         return closure$texTalkNode;
@@ -8876,7 +9768,7 @@
         }
          else {
           var name = closure$cmdToReplacement.get_11rb$(it);
-          return new TextTexTalkNode(TexTalkNodeType$Identifier_getInstance(), ensureNotNull(name), false);
+          return new TextTexTalkNode(TexTalkNodeType$Identifier_getInstance(), TexTalkTokenType$Identifier_getInstance(), ensureNotNull(name), false);
         }
       }
     };
@@ -8979,70 +9871,57 @@
   }
   function glueCommands$lambda(closure$newFollow, closure$follow) {
     return function (it) {
-      var tmp$, tmp$_0;
-      var tmp$_1 = Kotlin.isType(it, Statement) && Kotlin.isType(it.texTalkRoot, ValidationSuccess);
-      if (tmp$_1) {
-        tmp$_1 = !it.texTalkRoot.value.children.isEmpty();
-      }
-      var tmp$_2 = tmp$_1;
-      if (tmp$_2) {
-        var $receiver = it.texTalkRoot.value.children;
-        var all$result;
-        all$break: do {
-          var tmp$_3;
-          if (Kotlin.isType($receiver, Collection) && $receiver.isEmpty()) {
-            all$result = true;
-            break all$break;
-          }
-          tmp$_3 = $receiver.iterator();
-          while (tmp$_3.hasNext()) {
-            var element = tmp$_3.next();
-            if (!Kotlin.isType(element, Command)) {
-              all$result = false;
+      var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3;
+      var tmp$_4 = Kotlin.isType(it, Statement) && Kotlin.isType(it.texTalkRoot, ValidationSuccess) && it.texTalkRoot.value.children.size === 1 && Kotlin.isType(it.texTalkRoot.value.children.get_za3lpa$(0), IsTexTalkNode);
+      if (tmp$_4) {
+        var tmp$_5;
+        if ((tmp$_1 = (tmp$_0 = getOrNull((Kotlin.isType(tmp$ = it.texTalkRoot.value.children.get_za3lpa$(0), IsTexTalkNode) ? tmp$ : throwCCE()).rhs.items, 0)) != null ? tmp$_0.children : null) != null) {
+          var all$result;
+          all$break: do {
+            var tmp$_6;
+            if (Kotlin.isType(tmp$_1, Collection) && tmp$_1.isEmpty()) {
+              all$result = true;
               break all$break;
             }
+            tmp$_6 = tmp$_1.iterator();
+            while (tmp$_6.hasNext()) {
+              var element = tmp$_6.next();
+              if (!Kotlin.isType(element, Command)) {
+                all$result = false;
+                break all$break;
+              }
+            }
+            all$result = true;
           }
-          all$result = true;
+           while (false);
+          tmp$_5 = all$result;
         }
-         while (false);
-        tmp$_2 = all$result;
+         else
+          tmp$_5 = null;
+        tmp$_4 = tmp$_5 === true;
       }
-      if (tmp$_2) {
-        var exp = it.texTalkRoot.value;
-        var cmds = getCommandsToGlue(exp);
+      if (tmp$_4) {
+        var isNode = Kotlin.isType(tmp$_2 = it.texTalkRoot.value.children.get_za3lpa$(0), IsTexTalkNode) ? tmp$_2 : throwCCE();
+        if (isNode.rhs.items.size !== 1) {
+          throw Error_init("Expected 'is' node " + isNode + ' to only contain a single rhs item');
+        }
+        var cmds = getCommandsToGlue(isNode.rhs.items.get_za3lpa$(0));
         var gluedCmds = glueCommands_0(cmds);
         if (gluedCmds.size !== 1) {
-          throw Error_init('Expected id ' + it + ' to only contain a single glued command');
+          throw Error_init("Expected 'is' node " + isNode + ' to have only one glued rhs command');
         }
-        var newExp = new ExpressionTexTalkNode(listOf(gluedCmds.get_za3lpa$(0)));
+        var newExp = new ExpressionTexTalkNode(listOf(new IsTexTalkNode(isNode.lhs, new ParametersTexTalkNode(listOf(new ExpressionTexTalkNode(listOf(gluedCmds.get_za3lpa$(0))))))));
         var result = new Statement(newExp.toCode_6z438g$(), validationSuccess(newExp));
         if (closure$newFollow.v == null && hasChild(it, closure$follow)) {
           closure$newFollow.v = result;
         }
-        tmp$_0 = result;
-      }
-       else if (Kotlin.isType(it, Statement) && Kotlin.isType(it.texTalkRoot, ValidationSuccess) && it.texTalkRoot.value.children.size === 1 && Kotlin.isType(it.texTalkRoot.value.children.get_za3lpa$(0), IsTexTalkNode)) {
-        var isNode = Kotlin.isType(tmp$ = it.texTalkRoot.value.children.get_za3lpa$(0), IsTexTalkNode) ? tmp$ : throwCCE();
-        if (isNode.rhs.items.size !== 1) {
-          throw Error_init("Expected 'is' node " + isNode + ' to only contain a single rhs item');
-        }
-        var cmds_0 = getCommandsToGlue(isNode.rhs.items.get_za3lpa$(0));
-        var gluedCmds_0 = glueCommands_0(cmds_0);
-        if (gluedCmds_0.size !== 1) {
-          throw Error_init("Expected 'is' node " + isNode + ' to have only one glued rhs command');
-        }
-        var newExp_0 = new ExpressionTexTalkNode(listOf(new IsTexTalkNode(isNode.lhs, new ParametersTexTalkNode(listOf(new ExpressionTexTalkNode(listOf(gluedCmds_0.get_za3lpa$(0))))))));
-        var result_0 = new Statement(newExp_0.toCode_6z438g$(), validationSuccess(newExp_0));
-        if (closure$newFollow.v == null && hasChild(it, closure$follow)) {
-          closure$newFollow.v = result_0;
-        }
-        tmp$_0 = result_0;
+        tmp$_3 = result;
       }
        else {
-        tmp$_0 = it;
+        tmp$_3 = it;
       }
-      var result_1 = tmp$_0;
-      return result_1;
+      var result_0 = tmp$_3;
+      return result_0;
     };
   }
   function glueCommands(root, follow) {
@@ -9086,15 +9965,13 @@
   }
   function signature($receiver) {
     var tmp$;
-    var builder = StringBuilder_init();
-    builder.append_gw00v9$($receiver.name.text);
-    tmp$ = $receiver.namedGroups.iterator();
-    while (tmp$.hasNext()) {
-      var grp = tmp$.next();
-      builder.append_s8itvh$(58);
-      builder.append_gw00v9$(grp.name.text);
-    }
-    return builder.toString();
+    tmp$ = $receiver.command;
+    if (Kotlin.isType(tmp$, Command))
+      return signature_0($receiver.command);
+    else if (Kotlin.isType(tmp$, TextTexTalkNode))
+      return $receiver.command.text;
+    else
+      throw RuntimeException_init('Cannot get a signature of an ' + ('operator with command ' + $receiver.command.toCode_6z438g$()));
   }
   function signature_0($receiver) {
     var tmp$;
@@ -9105,45 +9982,30 @@
       if (i > 0) {
         builder.append_s8itvh$(46);
       }
-      builder.append_gw00v9$(signature($receiver.parts.get_za3lpa$(i)));
+      builder.append_gw00v9$(signature_2($receiver.parts.get_za3lpa$(i)));
     }
     return builder.toString();
   }
-  function MutableSubstitutions(doesMatch, substitutions, errors) {
-    this.doesMatch = doesMatch;
-    this.substitutions = substitutions;
-    this.errors = errors;
+  function signature_1($receiver) {
+    var tmp$, tmp$_0, tmp$_1;
+    tmp$ = $receiver.texTalkRoot;
+    if (Kotlin.isType(tmp$, ValidationFailure))
+      return null;
+    else if (Kotlin.isType(tmp$, ValidationSuccess)) {
+      var root = $receiver.texTalkRoot.value;
+      if (root.children.size === 1 && Kotlin.isType(root.children.get_za3lpa$(0), Command)) {
+        return signature_0(Kotlin.isType(tmp$_0 = root.children.get_za3lpa$(0), Command) ? tmp$_0 : throwCCE());
+      }
+       else if (root.children.size === 1 && Kotlin.isType(root.children.get_za3lpa$(0), OperatorTexTalkNode)) {
+        return signature(Kotlin.isType(tmp$_1 = root.children.get_za3lpa$(0), OperatorTexTalkNode) ? tmp$_1 : throwCCE());
+      }
+       else {
+        return null;
+      }
+    }
+     else
+      return Kotlin.noWhenBranchMatched();
   }
-  MutableSubstitutions.$metadata$ = {
-    kind: Kind_CLASS,
-    simpleName: 'MutableSubstitutions',
-    interfaces: []
-  };
-  MutableSubstitutions.prototype.component1 = function () {
-    return this.doesMatch;
-  };
-  MutableSubstitutions.prototype.component2 = function () {
-    return this.substitutions;
-  };
-  MutableSubstitutions.prototype.component3 = function () {
-    return this.errors;
-  };
-  MutableSubstitutions.prototype.copy_pgx6c2$ = function (doesMatch, substitutions, errors) {
-    return new MutableSubstitutions(doesMatch === void 0 ? this.doesMatch : doesMatch, substitutions === void 0 ? this.substitutions : substitutions, errors === void 0 ? this.errors : errors);
-  };
-  MutableSubstitutions.prototype.toString = function () {
-    return 'MutableSubstitutions(doesMatch=' + Kotlin.toString(this.doesMatch) + (', substitutions=' + Kotlin.toString(this.substitutions)) + (', errors=' + Kotlin.toString(this.errors)) + ')';
-  };
-  MutableSubstitutions.prototype.hashCode = function () {
-    var result = 0;
-    result = result * 31 + Kotlin.hashCode(this.doesMatch) | 0;
-    result = result * 31 + Kotlin.hashCode(this.substitutions) | 0;
-    result = result * 31 + Kotlin.hashCode(this.errors) | 0;
-    return result;
-  };
-  MutableSubstitutions.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.doesMatch, other.doesMatch) && Kotlin.equals(this.substitutions, other.substitutions) && Kotlin.equals(this.errors, other.errors)))));
-  };
   function Substitutions(doesMatch, substitutions, errors) {
     this.doesMatch = doesMatch;
     this.substitutions = substitutions;
@@ -9179,6 +10041,141 @@
   Substitutions.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.doesMatch, other.doesMatch) && Kotlin.equals(this.substitutions, other.substitutions) && Kotlin.equals(this.errors, other.errors)))));
   };
+  function getSubstitutions(pattern, value) {
+    var tmp$;
+    var subs = new MutableSubstitutions(true, LinkedHashMap_init(), ArrayList_init());
+    if (pattern.lhs == null !== (value.lhs == null)) {
+      subs.doesMatch = false;
+      return subs.toImmutable();
+    }
+    if (pattern.lhs != null) {
+      if (!Kotlin.isType(pattern.lhs, TextTexTalkNode)) {
+        subs.doesMatch = false;
+        subs.errors.add_11rb$('The left-hand-side of an infix operator ' + ('pattern must be an identifier but found ' + pattern.lhs.toCode_6z438g$()));
+        return subs.toImmutable();
+      }
+      var $receiver = subs.substitutions;
+      var key = pattern.lhs.text;
+      var value_0 = mutableListOf([ensureNotNull(value.lhs)]);
+      $receiver.put_xwzc9p$(key, value_0);
+    }
+    if (pattern.rhs == null !== (value.rhs == null)) {
+      subs.doesMatch = false;
+      return subs.toImmutable();
+    }
+    if (pattern.rhs != null) {
+      if (!Kotlin.isType(pattern.rhs, TextTexTalkNode)) {
+        subs.doesMatch = false;
+        subs.errors.add_11rb$('The right-hand-side of an infix operator ' + ('pattern must be an identifier but found ' + pattern.rhs.toCode_6z438g$()));
+        return subs.toImmutable();
+      }
+      var $receiver_0 = subs.substitutions;
+      var key_0 = pattern.rhs.text;
+      var value_1 = mutableListOf([ensureNotNull(value.rhs)]);
+      $receiver_0.put_xwzc9p$(key_0, value_1);
+    }
+    if (Kotlin.isType(pattern.command, TextTexTalkNode) && Kotlin.isType(value.command, TextTexTalkNode)) {
+      if (!equals(pattern.command.text, value.command.text)) {
+        subs.doesMatch = false;
+      }
+      return subs.toImmutable();
+    }
+    if (Kotlin.isType(pattern.command, Command) && Kotlin.isType(value.command, Command)) {
+      var cmdSubs = getSubstitutions_0(pattern.command, value.command);
+      subs.errors.addAll_brywnq$(cmdSubs.errors);
+      subs.doesMatch = (subs.doesMatch && cmdSubs.doesMatch);
+      tmp$ = cmdSubs.substitutions.entries.iterator();
+      while (tmp$.hasNext()) {
+        var tmp$_0 = tmp$.next();
+        var name = tmp$_0.key;
+        var values = tmp$_0.value;
+        var $receiver_1 = subs.substitutions;
+        var value_2 = toMutableList(values);
+        $receiver_1.put_xwzc9p$(name, value_2);
+      }
+      return subs.toImmutable();
+    }
+    throw RuntimeException_init('Encountered a pattern or value operator with a ' + ('command that is an expression.  Pattern: ' + pattern.toCode_6z438g$() + ', Value: ' + value.toCode_6z438g$()));
+  }
+  function getSubstitutions_0(pattern, value) {
+    var tmp$;
+    var errors = validatePattern(pattern);
+    if (!errors.isEmpty()) {
+      return new Substitutions(false, emptyMap(), errors);
+    }
+    var subs = new MutableSubstitutions(true, LinkedHashMap_init(), ArrayList_init());
+    if (pattern.parts.size === value.parts.size) {
+      tmp$ = pattern.parts;
+      for (var i = 0; i !== tmp$.size; ++i) {
+        findSubstitutions_0(pattern.parts.get_za3lpa$(i), value.parts.get_za3lpa$(i), subs);
+      }
+    }
+    return subs.toImmutable();
+  }
+  function expandAsWritten(node, operatorPatternToExpansion) {
+    var tmp$;
+    var sigToPatternExpansion = LinkedHashMap_init();
+    tmp$ = operatorPatternToExpansion.entries.iterator();
+    while (tmp$.hasNext()) {
+      var tmp$_0 = tmp$.next();
+      var opPattern = tmp$_0.key;
+      var expansion = tmp$_0.value;
+      var key = signature(opPattern);
+      var value = new PatternExpansion(opPattern, expansion);
+      sigToPatternExpansion.put_xwzc9p$(key, value);
+    }
+    return expandAsWrittenImpl(node, sigToPatternExpansion);
+  }
+  function MutableSubstitutions(doesMatch, substitutions, errors) {
+    this.doesMatch = doesMatch;
+    this.substitutions = substitutions;
+    this.errors = errors;
+  }
+  MutableSubstitutions.prototype.toImmutable = function () {
+    return new Substitutions(this.doesMatch, this.substitutions, this.errors);
+  };
+  MutableSubstitutions.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'MutableSubstitutions',
+    interfaces: []
+  };
+  MutableSubstitutions.prototype.component1 = function () {
+    return this.doesMatch;
+  };
+  MutableSubstitutions.prototype.component2 = function () {
+    return this.substitutions;
+  };
+  MutableSubstitutions.prototype.component3 = function () {
+    return this.errors;
+  };
+  MutableSubstitutions.prototype.copy_pgx6c2$ = function (doesMatch, substitutions, errors) {
+    return new MutableSubstitutions(doesMatch === void 0 ? this.doesMatch : doesMatch, substitutions === void 0 ? this.substitutions : substitutions, errors === void 0 ? this.errors : errors);
+  };
+  MutableSubstitutions.prototype.toString = function () {
+    return 'MutableSubstitutions(doesMatch=' + Kotlin.toString(this.doesMatch) + (', substitutions=' + Kotlin.toString(this.substitutions)) + (', errors=' + Kotlin.toString(this.errors)) + ')';
+  };
+  MutableSubstitutions.prototype.hashCode = function () {
+    var result = 0;
+    result = result * 31 + Kotlin.hashCode(this.doesMatch) | 0;
+    result = result * 31 + Kotlin.hashCode(this.substitutions) | 0;
+    result = result * 31 + Kotlin.hashCode(this.errors) | 0;
+    return result;
+  };
+  MutableSubstitutions.prototype.equals = function (other) {
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.doesMatch, other.doesMatch) && Kotlin.equals(this.substitutions, other.substitutions) && Kotlin.equals(this.errors, other.errors)))));
+  };
+  function signature_2($receiver) {
+    var tmp$;
+    var builder = StringBuilder_init();
+    builder.append_gw00v9$($receiver.name.text);
+    tmp$ = $receiver.namedGroups.iterator();
+    while (tmp$.hasNext()) {
+      var grp = tmp$.next();
+      builder.append_s8itvh$(58);
+      builder.append_gw00v9$(grp.name.text);
+    }
+    return builder.toString();
+  }
   function findSubstitutions(pattern, value, subs) {
     var tmp$, tmp$_0;
     if (pattern == null !== (value == null)) {
@@ -9187,7 +10184,7 @@
         subs.errors.add_11rb$("Unexpected group '" + toString(value != null ? value.toCode_6z438g$() : null) + "'");
       }
        else {
-        subs.errors.add_11rb$("Unxpected a match for '" + pattern.toCode_6z438g$() + "'");
+        subs.errors.add_11rb$("Unexpected a match for '" + pattern.toCode_6z438g$() + "'");
       }
       return;
     }
@@ -9327,21 +10324,6 @@
       subs.errors.add_11rb$('Expected exactly ' + pattern.namedGroups.size + ' named groups but found ' + value.namedGroups.size + " for '" + value.toCode_6z438g$() + "'");
     }
   }
-  function getSubstitutions(pattern, value) {
-    var tmp$;
-    var errors = validatePattern(pattern);
-    if (!errors.isEmpty()) {
-      return new Substitutions(false, emptyMap(), errors);
-    }
-    var subs = new MutableSubstitutions(true, LinkedHashMap_init(), ArrayList_init());
-    if (pattern.parts.size === value.parts.size) {
-      tmp$ = pattern.parts;
-      for (var i = 0; i !== tmp$.size; ++i) {
-        findSubstitutions_0(pattern.parts.get_za3lpa$(i), value.parts.get_za3lpa$(i), subs);
-      }
-    }
-    return new Substitutions(subs.doesMatch, subs.substitutions, subs.errors);
-  }
   function validatePatternGroupImpl(group, canBeVarArg, description, errors) {
     var tmp$, tmp$_0;
     if (group == null)
@@ -9403,20 +10385,6 @@
     }
     return errors;
   }
-  function expandAsWritten(node, patternToExpansion) {
-    var tmp$;
-    var sigToPatternExpansion = LinkedHashMap_init();
-    tmp$ = patternToExpansion.entries.iterator();
-    while (tmp$.hasNext()) {
-      var tmp$_0 = tmp$.next();
-      var pattern = tmp$_0.key;
-      var expansion = tmp$_0.value;
-      var key = signature_0(pattern);
-      var value = new PatternExpansion(pattern, expansion);
-      sigToPatternExpansion.put_xwzc9p$(key, value);
-    }
-    return expandAsWrittenImpl(node, sigToPatternExpansion);
-  }
   function PatternExpansion(pattern, expansion) {
     this.pattern = pattern;
     this.expansion = expansion;
@@ -9432,7 +10400,7 @@
   PatternExpansion.prototype.component2 = function () {
     return this.expansion;
   };
-  PatternExpansion.prototype.copy_9cta65$ = function (pattern, expansion) {
+  PatternExpansion.prototype.copy_6svs8n$ = function (pattern, expansion) {
     return new PatternExpansion(pattern === void 0 ? this.pattern : pattern, expansion === void 0 ? this.expansion : expansion);
   };
   PatternExpansion.prototype.toString = function () {
@@ -9447,106 +10415,118 @@
   PatternExpansion.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.pattern, other.pattern) && Kotlin.equals(this.expansion, other.expansion)))));
   };
-  function expandAsWrittenImpl$lambda(closure$sigToPatternExpansion) {
-    return function (it) {
-      var tmp$;
-      if (Kotlin.isType(it, Command)) {
-        var patternExpansion = closure$sigToPatternExpansion.get_11rb$(signature_0(it));
-        if (patternExpansion == null) {
-          return null;
+  function expandAsWrittenImplImpl(cmd, sigToPatternExpansion) {
+    return expandAsWrittenImplImpl_0(new OperatorTexTalkNode(null, cmd, null), sigToPatternExpansion);
+  }
+  function expandAsWrittenImplImpl_0(op, sigToPatternExpansion) {
+    var tmp$, tmp$_0, tmp$_1, tmp$_2;
+    tmp$ = sigToPatternExpansion.get_11rb$(signature(op));
+    if (tmp$ == null) {
+      return null;
+    }
+    var patternExpansion = tmp$;
+    var subs = getSubstitutions(patternExpansion.pattern, op);
+    if (!subs.doesMatch) {
+      return null;
+    }
+    var expansion = patternExpansion.expansion;
+    tmp$_0 = subs.substitutions.entries.iterator();
+    while (tmp$_0.hasNext()) {
+      var tmp$_3 = tmp$_0.next();
+      var name = tmp$_3.key;
+      var exp = tmp$_3.value;
+      var prefixRegex = Regex_init(name + '\\' + '{(.*)' + '\\' + '.' + '\\' + '.' + '\\' + '.' + '\\' + '}' + '\\' + '?');
+      var infixRegex = Regex_init(name + '\\' + '{(.*)' + '\\' + '.' + '\\' + '.' + '\\' + '.(.*)' + '\\' + '.' + '\\' + '.' + '\\' + '.(.*)' + '\\' + '}' + '\\' + '?');
+      var suffixRegex = Regex_init(name + '\\' + '{' + '\\' + '.' + '\\' + '.' + '\\' + '.(.*)' + '\\' + '}' + '\\' + '?');
+      if (infixRegex.matches_6bul2c$(expansion)) {
+        var destination = ArrayList_init_0(collectionSizeOrDefault(exp, 10));
+        var tmp$_4;
+        tmp$_4 = exp.iterator();
+        while (tmp$_4.hasNext()) {
+          var item = tmp$_4.next();
+          destination.add_11rb$(expandAsWrittenImpl(item, sigToPatternExpansion));
         }
-         else {
-          var subs = getSubstitutions(patternExpansion.pattern, it);
-          if (!subs.doesMatch) {
-            return null;
-          }
-           else {
-            var expansion = patternExpansion.expansion;
-            tmp$ = subs.substitutions.entries.iterator();
-            while (tmp$.hasNext()) {
-              var tmp$_0 = tmp$.next();
-              var name = tmp$_0.key;
-              var exp = tmp$_0.value;
-              var newText = expandAsWrittenImpl(first(exp), closure$sigToPatternExpansion);
-              expansion = replace(expansion, name + '&', newText);
-            }
-            return expansion;
-          }
+        var args = destination;
+        var result = infixRegex.find_905azu$(expansion);
+        if (result != null && result.groupValues.size >= 4) {
+          var prefix = result.groupValues.get_za3lpa$(1);
+          var separator = result.groupValues.get_za3lpa$(2);
+          var suffix = result.groupValues.get_za3lpa$(3);
+          var joinedArgs = joinToString(args, separator);
+          var pattern = result.groupValues.get_za3lpa$(0);
+          expansion = replace(expansion, pattern, joinedArgs);
+          expansion = prefix + expansion + suffix;
         }
       }
-       else
+       else if (prefixRegex.matches_6bul2c$(expansion)) {
+        var destination_0 = ArrayList_init_0(collectionSizeOrDefault(exp, 10));
+        var tmp$_5;
+        tmp$_5 = exp.iterator();
+        while (tmp$_5.hasNext()) {
+          var item_0 = tmp$_5.next();
+          destination_0.add_11rb$(expandAsWrittenImpl(item_0, sigToPatternExpansion));
+        }
+        var args_0 = destination_0;
+        var result_0 = prefixRegex.find_905azu$(expansion);
+        if (result_0 != null && result_0.groupValues.size >= 2) {
+          var separator_0 = result_0.groupValues.get_za3lpa$(1);
+          var joinedArgsBuilder = StringBuilder_init();
+          tmp$_1 = args_0.iterator();
+          while (tmp$_1.hasNext()) {
+            var a = tmp$_1.next();
+            joinedArgsBuilder.append_gw00v9$(separator_0);
+            joinedArgsBuilder.append_gw00v9$(a);
+          }
+          var joinedArgs_0 = joinedArgsBuilder.toString();
+          var pattern_0 = result_0.groupValues.get_za3lpa$(0);
+          expansion = replace(expansion, pattern_0, joinedArgs_0);
+        }
+      }
+       else if (suffixRegex.matches_6bul2c$(expansion)) {
+        var destination_1 = ArrayList_init_0(collectionSizeOrDefault(exp, 10));
+        var tmp$_6;
+        tmp$_6 = exp.iterator();
+        while (tmp$_6.hasNext()) {
+          var item_1 = tmp$_6.next();
+          destination_1.add_11rb$(expandAsWrittenImpl(item_1, sigToPatternExpansion));
+        }
+        var args_1 = destination_1;
+        var result_1 = suffixRegex.find_905azu$(expansion);
+        if (result_1 != null && result_1.groupValues.size >= 2) {
+          var separator_1 = result_1.groupValues.get_za3lpa$(1);
+          var joinedArgsBuilder_0 = StringBuilder_init();
+          tmp$_2 = args_1.iterator();
+          while (tmp$_2.hasNext()) {
+            var a_0 = tmp$_2.next();
+            joinedArgsBuilder_0.append_gw00v9$(a_0);
+            joinedArgsBuilder_0.append_gw00v9$(separator_1);
+          }
+          var joinedArgs_1 = joinedArgsBuilder_0.toString();
+          var pattern_1 = result_1.groupValues.get_za3lpa$(0);
+          expansion = replace(expansion, pattern_1, joinedArgs_1);
+        }
+      }
+       else {
+        if (!exp.isEmpty()) {
+          var newText = expandAsWrittenImpl(first(exp), sigToPatternExpansion);
+          expansion = replace(expansion, name + '?', newText);
+        }
+      }
+    }
+    return expansion;
+  }
+  function expandAsWrittenImpl$lambda(closure$sigToPatternExpansion) {
+    return function (it) {
+      if (Kotlin.isType(it, Command))
+        return expandAsWrittenImplImpl(it, closure$sigToPatternExpansion);
+      else if (Kotlin.isType(it, OperatorTexTalkNode))
+        return expandAsWrittenImplImpl_0(it, closure$sigToPatternExpansion);
+      else
         return null;
     };
   }
   function expandAsWrittenImpl(node, sigToPatternExpansion) {
     return node.toCode_6z438g$(expandAsWrittenImpl$lambda(sigToPatternExpansion));
-  }
-  function getSignature(group) {
-    var tmp$, tmp$_0, tmp$_1;
-    if (Kotlin.isType(group, DefinesGroup))
-      tmp$_1 = (tmp$ = getSignature_0(group.id, newLocationTracker())) != null ? tmp$.form : null;
-    else if (Kotlin.isType(group, RepresentsGroup))
-      tmp$_1 = (tmp$_0 = getSignature_0(group.id, newLocationTracker())) != null ? tmp$_0.form : null;
-    else if (Kotlin.isType(group, ProtoGroup))
-      tmp$_1 = getSignature_2(group.textSection);
-    else
-      tmp$_1 = null;
-    return tmp$_1;
-  }
-  function getSignature_0(id, locationTracker) {
-    return getSignature_1(id.toStatement(), locationTracker);
-  }
-  function getSignature_1(stmt, locationTracker) {
-    var tmp$;
-    var sigs = findAllStatementSignatures(stmt, locationTracker);
-    if (sigs.size === 1) {
-      tmp$ = first_0(sigs);
-    }
-     else
-      tmp$ = null;
-    return tmp$;
-  }
-  function findAllStatementSignatures(stmt, locationTracker) {
-    var tmp$, tmp$_0, tmp$_1;
-    var gluedStmt = Kotlin.isType(tmp$ = glueCommands(stmt, stmt).root, Statement) ? tmp$ : throwCCE();
-    var rootValidation = gluedStmt.texTalkRoot;
-    if (Kotlin.isType(rootValidation, ValidationSuccess)) {
-      var expressionNode = rootValidation.value;
-      var signatures = LinkedHashSet_init();
-      findAllSignaturesImpl_0(expressionNode, signatures, (tmp$_0 = locationTracker.getLocationOf_2v05ti$(stmt)) != null ? tmp$_0 : new Location(-1, -1));
-      tmp$_1 = signatures;
-    }
-     else if (Kotlin.isType(rootValidation, ValidationFailure))
-      tmp$_1 = emptySet();
-    else
-      tmp$_1 = Kotlin.noWhenBranchMatched();
-    return tmp$_1;
-  }
-  function getMergedCommandSignature(expressionNode) {
-    var tmp$;
-    var commandParts = ArrayList_init();
-    tmp$ = expressionNode.children.iterator();
-    while (tmp$.hasNext()) {
-      var child = tmp$.next();
-      if (Kotlin.isType(child, Command)) {
-        commandParts.addAll_brywnq$(child.parts);
-      }
-    }
-    if (!commandParts.isEmpty()) {
-      return getCommandSignature(new Command(commandParts));
-    }
-    return null;
-  }
-  function getCommandSignature(command) {
-    var $receiver = command.parts;
-    var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
-    var tmp$;
-    tmp$ = $receiver.iterator();
-    while (tmp$.hasNext()) {
-      var item = tmp$.next();
-      destination.add_11rb$(getCommandPartForSignature(item));
-    }
-    return flattenSignature((new Command(destination)).toCode_6z438g$());
   }
   function locateAllSignatures(node, locationTracker) {
     var signatures = LinkedHashSet_init();
@@ -9568,19 +10548,35 @@
       findAllSignaturesImpl(node.toStatement(), signatures, locationTracker);
     }
      else if (Kotlin.isType(node, TextSection)) {
-      var sig = getSignature_2(node);
+      var sig = getSignature(node);
       if (sig != null) {
         signatures.add_11rb$(new Signature(sig, (tmp$ = locationTracker.getLocationOf_2v05ti$(node)) != null ? tmp$ : new Location(-1, -1)));
       }
     }
     node.forEach_s8izwl$(findAllSignaturesImpl$lambda(signatures, locationTracker));
   }
-  function getSignature_2(section) {
+  function getSignature(section) {
     var match = Regex_init('\\\\term\\{(.*?)\\}').find_905azu$(section.text);
     if (match == null || match.groupValues.size < 2) {
       return null;
     }
     return match.groupValues.get_za3lpa$(1);
+  }
+  function findAllStatementSignatures(stmt, locationTracker) {
+    var tmp$, tmp$_0, tmp$_1;
+    var gluedStmt = Kotlin.isType(tmp$ = glueCommands(stmt, stmt).root, Statement) ? tmp$ : throwCCE();
+    var rootValidation = gluedStmt.texTalkRoot;
+    if (Kotlin.isType(rootValidation, ValidationSuccess)) {
+      var expressionNode = rootValidation.value;
+      var signatures = LinkedHashSet_init();
+      findAllSignaturesImpl_0(expressionNode, signatures, (tmp$_0 = locationTracker.getLocationOf_2v05ti$(stmt)) != null ? tmp$_0 : new Location(-1, -1));
+      tmp$_1 = signatures;
+    }
+     else if (Kotlin.isType(rootValidation, ValidationFailure))
+      tmp$_1 = emptySet();
+    else
+      tmp$_1 = Kotlin.noWhenBranchMatched();
+    return tmp$_1;
   }
   function findAllSignaturesImpl$lambda_0(closure$signatures, closure$location) {
     return function (it) {
@@ -9602,82 +10598,37 @@
       return;
     }
      else if (Kotlin.isType(texTalkNode, Command)) {
-      var sig_0 = getCommandSignature(texTalkNode);
+      var sig_0 = signature_0(texTalkNode);
       signatures.add_11rb$(new Signature(sig_0, location));
     }
     texTalkNode.forEach_j2ps96$(findAllSignaturesImpl$lambda_0(signatures, location));
   }
-  function callOrNull(input, fn) {
-    if (input == null) {
-      return null;
-    }
-     else {
-      return fn(input);
-    }
-  }
-  function getCommandPartForSignature(node) {
-    var tmp$ = node.name;
-    var tmp$_0 = callOrNull(node.square, getCallableRef('getGroupNodeForSignature', function (node) {
-      return getGroupNodeForSignature(node);
-    }));
-    var tmp$_1 = callOrNull(node.subSup, getCallableRef('getSubSupForSignature', function (node) {
-      return getSubSupForSignature(node);
-    }));
-    var $receiver = node.groups;
-    var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
-    var tmp$_2;
-    tmp$_2 = $receiver.iterator();
-    while (tmp$_2.hasNext()) {
-      var item = tmp$_2.next();
-      destination.add_11rb$(getGroupNodeForSignature(item));
-    }
-    var $receiver_0 = node.namedGroups;
-    var destination_0 = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
-    var tmp$_3;
-    tmp$_3 = $receiver_0.iterator();
-    while (tmp$_3.hasNext()) {
-      var item_0 = tmp$_3.next();
-      destination_0.add_11rb$(getNamedGroupNodeForSignature(item_0));
-    }
-    return new CommandPart(tmp$, tmp$_0, tmp$_1, destination, destination_0);
-  }
-  function getSubSupForSignature(node) {
-    return new SubSupTexTalkNode(callOrNull(node.sub, getCallableRef('getGroupNodeForSignature', function (node) {
-      return getGroupNodeForSignature(node);
-    })), callOrNull(node.sup, getCallableRef('getGroupNodeForSignature', function (node) {
-      return getGroupNodeForSignature(node);
-    })));
-  }
-  function getGroupNodeForSignature(node) {
-    return new GroupTexTalkNode(node.type, getParametersNodeForSignature(node.parameters), node.isVarArg);
-  }
-  function getParametersNodeForSignature(node) {
-    var $receiver = node.items;
-    var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
+  function getMergedCommandSignature(expressionNode) {
     var tmp$;
-    tmp$ = $receiver.iterator();
+    var commandParts = ArrayList_init();
+    tmp$ = expressionNode.children.iterator();
     while (tmp$.hasNext()) {
-      var item = tmp$.next();
-      var tmp$_0 = destination.add_11rb$;
-      var transform$result;
-      var tmp$_1;
-      if (item.children.size === 1 && Kotlin.isType(item.children.get_za3lpa$(0), TextTexTalkNode) && (Kotlin.isType(tmp$_1 = item.children.get_za3lpa$(0), TextTexTalkNode) ? tmp$_1 : throwCCE()).isVarArg) {
-        transform$result = new ExpressionTexTalkNode(listOf(new TextTexTalkNode(TexTalkNodeType$Identifier_getInstance(), '?', true)));
+      var child = tmp$.next();
+      if (Kotlin.isType(child, Command)) {
+        commandParts.addAll_brywnq$(child.parts);
       }
-       else {
-        transform$result = new ExpressionTexTalkNode(listOf(new TextTexTalkNode(TexTalkNodeType$Identifier_getInstance(), '?', false)));
-      }
-      tmp$_0.call(destination, transform$result);
     }
-    return new ParametersTexTalkNode(destination);
+    if (!commandParts.isEmpty()) {
+      return signature_0(new Command(commandParts));
+    }
+    return null;
   }
-  function getNamedGroupNodeForSignature(node) {
-    return new NamedGroupTexTalkNode(node.name, getGroupNodeForSignature(node.group));
-  }
-  function flattenSignature(signature) {
-    var $receiver = Regex_init('\\?\\.\\.\\.').replace_x2uqeu$(signature, '?');
-    var $receiver_0 = replace(Regex_init('\\s*\\??(\\s*,\\s*\\?\\s*)*').replace_x2uqeu$($receiver, ''), ' ', '');
-    return Regex_init('(\\{\\})*\\{\\}\\.\\.\\.').replace_x2uqeu$($receiver_0, '{}...');
+  function getSignature_0(group) {
+    var tmp$;
+    if (Kotlin.isType(group, DefinesGroup))
+      tmp$ = signature_1(group.id);
+    else if (Kotlin.isType(group, RepresentsGroup))
+      tmp$ = signature_1(group.id);
+    else if (Kotlin.isType(group, ProtoGroup))
+      tmp$ = getSignature(group.textSection);
+    else
+      tmp$ = null;
+    return tmp$;
   }
   function getKey(node) {
     var str = node.toString();
@@ -9687,7 +10638,7 @@
   function moveInlineCommandsToIsNode$realShouldProcessTex(closure$knownDefSigs) {
     return function (root, node) {
       var tmp$;
-      if (Kotlin.isType(node, Command) && !closure$knownDefSigs.contains_11rb$(getCommandSignature(node))) {
+      if (Kotlin.isType(node, Command) && !closure$knownDefSigs.contains_11rb$(signature_0(node))) {
         return false;
       }
       var parents = getTexTalkAncestry(root, node);
@@ -9824,7 +10775,7 @@
     while (tmp$_5.hasNext()) {
       var item_0 = tmp$_5.next();
       var tmp$_6 = destination_0.add_11rb$;
-      var isNode = new IsTexTalkNode(new ParametersTexTalkNode(listOf(new ExpressionTexTalkNode(listOf(new TextTexTalkNode(TexTalkNodeType$Identifier_getInstance(), ensureNotNull(cmdToReplacement.get_11rb$(item_0)), false))))), new ParametersTexTalkNode(listOf(new ExpressionTexTalkNode(listOf(item_0)))));
+      var isNode = new IsTexTalkNode(new ParametersTexTalkNode(listOf(new ExpressionTexTalkNode(listOf(new TextTexTalkNode(TexTalkNodeType$Identifier_getInstance(), TexTalkTokenType$Identifier_getInstance(), ensureNotNull(cmdToReplacement.get_11rb$(item_0)), false))))), new ParametersTexTalkNode(listOf(new ExpressionTexTalkNode(listOf(item_0)))));
       tmp$_6.call(destination_0, new Statement(isNode.toCode_6z438g$(), validationSuccess(new ExpressionTexTalkNode(listOf(isNode)))));
     }
     return new ForGroup(tmp$_4, new WhereSection(new ClauseListNode(destination_0)), new ThenSection(new ClauseListNode(listOf(newNode))));
@@ -9845,7 +10796,7 @@
         }
         if (Kotlin.isType(clause.texTalkRoot, ValidationSuccess) && clause.texTalkRoot.value.children.size === 1 && Kotlin.isType(clause.texTalkRoot.value.children.get_za3lpa$(0), Command)) {
           var command = Kotlin.isType(tmp$_0 = clause.texTalkRoot.value.children.get_za3lpa$(0), Command) ? tmp$_0 : throwCCE();
-          var sig = getCommandSignature(command);
+          var sig = signature_0(command);
           if (!closure$repMap.containsKey_11rb$(sig)) {
             return node;
           }
@@ -9874,7 +10825,7 @@
           var left = Kotlin.isType(tmp$_4 = clause.texTalkRoot.value.children.get_za3lpa$(0), TextTexTalkNode) ? tmp$_4 : throwCCE();
           var op = Kotlin.isType(tmp$_5 = clause.texTalkRoot.value.children.get_za3lpa$(1), Command) ? tmp$_5 : throwCCE();
           var right = Kotlin.isType(tmp$_6 = clause.texTalkRoot.value.children.get_za3lpa$(2), TextTexTalkNode) ? tmp$_6 : throwCCE();
-          var sig_0 = getCommandSignature(op);
+          var sig_0 = signature_0(op);
           if (!closure$repMap.containsKey_11rb$(sig_0)) {
             return node;
           }
@@ -9989,7 +10940,7 @@
           continue;
         }
         var command = Kotlin.isType(tmp$_2 = isNode.rhs.items.get_za3lpa$(0).children.get_za3lpa$(0), Command) ? tmp$_2 : throwCCE();
-        var sig = getCommandSignature(command);
+        var sig = signature_0(command);
         if (!closure$defMap.containsKey_11rb$(sig)) {
           newClauses.add_11rb$(c);
           continue;
@@ -10352,7 +11303,7 @@
     return function (it) {
       var tmp$;
       if (Kotlin.isType(it, TextTexTalkNode)) {
-        return it.copy_g9556o$(void 0, (tmp$ = closure$map.get_11rb$(it.text)) != null ? tmp$ : it.text);
+        return it.copy_e4igys$(void 0, void 0, (tmp$ = closure$map.get_11rb$(it.text)) != null ? tmp$ : it.text);
       }
        else {
         return it;
@@ -10558,6 +11509,9 @@
   Object.defineProperty(ChalkTalkTokenType, 'Underscore', {
     get: ChalkTalkTokenType$Underscore_getInstance
   });
+  Object.defineProperty(ChalkTalkTokenType, 'DotDotDot', {
+    get: ChalkTalkTokenType$DotDotDot_getInstance
+  });
   package$ast.ChalkTalkTokenType = ChalkTalkTokenType;
   package$ast.Phase1Target = Phase1Target;
   package$ast.Mapping = Mapping;
@@ -10607,6 +11561,9 @@
   package$clause.ExistsGroup = ExistsGroup;
   package$clause.isExistsGroup_baevx2$ = isExistsGroup;
   package$clause.validateExistsGroup_tvx4um$ = validateExistsGroup;
+  package$clause.ExpandsGroup = ExpandsGroup;
+  package$clause.isExpandsGroup_baevx2$ = isExpandsGroup;
+  package$clause.validateExpandsGroup_tvx4um$ = validateExpandsGroup;
   package$clause.ForGroup = ForGroup;
   package$clause.isForGroup_baevx2$ = isForGroup;
   package$clause.validateForGroup_tvx4um$ = validateForGroup;
@@ -10666,6 +11623,8 @@
   var package$section_0 = package$ast_0.section || (package$ast_0.section = {});
   package$section_0.AliasSection = AliasSection;
   package$section_0.validateAliasSection_dopyg1$ = validateAliasSection;
+  package$section_0.AsSection = AsSection;
+  package$section_0.validateAsSection_tvx4um$ = validateAsSection;
   package$section_0.AssumingSection = AssumingSection;
   package$section_0.validateAssumingSection_tvx4um$ = validateAssumingSection;
   package$section_0.AxiomSection = AxiomSection;
@@ -10676,6 +11635,8 @@
   package$section_0.validateDefinesSection_tvx4um$ = validateDefinesSection;
   package$section_0.ExistsSection = ExistsSection;
   package$section_0.validateExistsSection_tvx4um$ = validateExistsSection;
+  package$section_0.ExpandsSection = ExpandsSection;
+  package$section_0.validateExpandsSection_tvx4um$ = validateExpandsSection;
   package$section_0.ForSection = ForSection;
   package$section_0.validateForSection_tvx4um$ = validateForSection;
   package$section_0.IfSection = IfSection;
@@ -10754,6 +11715,9 @@
   Object.defineProperty(TexTalkNodeType, 'Operator', {
     get: TexTalkNodeType$Operator_getInstance
   });
+  Object.defineProperty(TexTalkNodeType, 'SyntheticGroup', {
+    get: TexTalkNodeType$SyntheticGroup_getInstance
+  });
   Object.defineProperty(TexTalkNodeType, 'ParenGroup', {
     get: TexTalkNodeType$ParenGroup_getInstance
   });
@@ -10803,6 +11767,7 @@
   package$textalk.NamedGroupTexTalkNode = NamedGroupTexTalkNode;
   package$textalk.SubSupTexTalkNode = SubSupTexTalkNode;
   package$textalk.TextTexTalkNode = TextTexTalkNode;
+  package$textalk.OperatorTexTalkNode = OperatorTexTalkNode;
   package$textalk.TexTalkToken = TexTalkToken;
   Object.defineProperty(TexTalkTokenType, 'Backslash', {
     get: TexTalkTokenType$Backslash_getInstance
@@ -10860,6 +11825,7 @@
   });
   package$textalk.TexTalkTokenType = TexTalkTokenType;
   package$textalk.getTexTalkAncestry_3b8392$ = getTexTalkAncestry;
+  package$textalk.parseOperators_4mpz2e$ = parseOperators;
   package$textalk.TexTalkLexer = TexTalkLexer;
   package$textalk.newTexTalkLexer_61zpoe$ = newTexTalkLexer;
   package$textalk.TexTalkParser = TexTalkParser;
@@ -10875,17 +11841,16 @@
   package$transform.separateIsStatements_wef8g3$ = separateIsStatements;
   package$transform.glueCommands_wef8g3$ = glueCommands;
   package$transform.glueCommands_f1ync3$ = glueCommands_0;
+  package$transform.signature_u9zylx$ = signature;
+  package$transform.signature_tlgh8b$ = signature_0;
+  package$transform.signature_fgahjx$ = signature_1;
   package$transform.Substitutions = Substitutions;
-  package$transform.getSubstitutions_hbrnxy$ = getSubstitutions;
-  package$transform.expandAsWritten_xp7hq3$ = expandAsWritten;
-  package$transform.getSignature_vwc43z$ = getSignature;
-  package$transform.getSignature_6vedv1$ = getSignature_0;
-  package$transform.getSignature_jeuz20$ = getSignature_1;
+  package$transform.getSubstitutions_tt0fr9$ = getSubstitutions;
+  package$transform.expandAsWritten_c7eyxq$ = expandAsWritten;
+  package$transform.locateAllSignatures_o1cvlb$ = locateAllSignatures;
   package$transform.findAllStatementSignatures_jeuz20$ = findAllStatementSignatures;
   package$transform.getMergedCommandSignature_4mpz2e$ = getMergedCommandSignature;
-  package$transform.getCommandSignature_1c48ss$ = getCommandSignature;
-  package$transform.locateAllSignatures_o1cvlb$ = locateAllSignatures;
-  package$transform.flattenSignature_y4putb$ = flattenSignature;
+  package$transform.getSignature_vwc43z$ = getSignature_0;
   package$transform.getKey_g67bbb$ = getKey;
   package$transform.moveInlineCommandsToIsNode_yx9fjh$ = moveInlineCommandsToIsNode;
   package$transform.moveStatementInlineCommandsToIsNode_rp9pn2$ = moveStatementInlineCommandsToIsNode;
@@ -10915,6 +11880,7 @@
   AssignmentNode.prototype.toCode_pc06dk$ = Target.prototype.toCode_pc06dk$;
   ClauseListNode.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   ExistsGroup.prototype.toCode_pc06dk$ = Clause.prototype.toCode_pc06dk$;
+  ExpandsGroup.prototype.toCode_pc06dk$ = Clause.prototype.toCode_pc06dk$;
   ForGroup.prototype.toCode_pc06dk$ = Clause.prototype.toCode_pc06dk$;
   IdStatement.prototype.toCode_pc06dk$ = Clause.prototype.toCode_pc06dk$;
   Identifier.prototype.toCode_pc06dk$ = Target.prototype.toCode_pc06dk$;
@@ -10935,11 +11901,14 @@
   SourceItemSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   StringSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   AliasSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
+  AsSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   AssumingSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   AxiomSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   ConjectureSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   DefinesSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   ExistsSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
+  ExpandsSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
+  PseudoExpandsSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   ForSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   IfSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
   IffSection.prototype.toCode_pc06dk$ = Phase2Node.prototype.toCode_pc06dk$;
@@ -10966,6 +11935,7 @@
   NamedGroupTexTalkNode.prototype.toCode_6z438g$ = TexTalkNode.prototype.toCode_6z438g$;
   SubSupTexTalkNode.prototype.toCode_6z438g$ = TexTalkNode.prototype.toCode_6z438g$;
   TextTexTalkNode.prototype.toCode_6z438g$ = TexTalkNode.prototype.toCode_6z438g$;
+  OperatorTexTalkNode.prototype.toCode_6z438g$ = TexTalkNode.prototype.toCode_6z438g$;
   TexTalkToken.prototype.toCode_6z438g$ = TexTalkNode.prototype.toCode_6z438g$;
   INVALID = new Phase1Token('INVALID', ChalkTalkTokenType$Invalid_getInstance(), -1, -1);
   CLAUSE_VALIDATORS = listOf_0([new ValidationPair(getCallableRef('isAbstraction', function (node) {
@@ -11016,6 +11986,10 @@
     return isIffGroup(node);
   }), getCallableRef('validateIffGroup', function (node, tracker) {
     return validateIffGroup(node, tracker);
+  })), new ValidationPair(getCallableRef('isExpandsGroup', function (node) {
+    return isExpandsGroup(node);
+  }), getCallableRef('validateExpandsGroup', function (rawNode, tracker) {
+    return validateExpandsGroup(rawNode, tracker);
   }))]);
   META_DATA_ITEM_CONSTRAINTS = mapOf([to('name', -1), to('classification', -1), to('tag', -1), to('author', -1), to('contributor', -1), to('written', -1), to('note', -1), to('id', 1), to('concept', 1), to('summary', 1)]);
   SOURCE_ITEM_CONSTRAINTS = mapOf([to('type', 1), to('name', 1), to('author', -1), to('date', 1), to('homepage', 1), to('url', 1), to('offset', 1), to('related', -1)]);

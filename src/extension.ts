@@ -286,11 +286,18 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     vscode.workspace.onDidSaveTextDocument(async textDoc => {
+      if (!textDoc.uri.path.endsWith('.math')) {
+        return
+      }
+      const config = vscode.workspace.getConfiguration();
+      const fontFamily = config.editor.fontFamily || 'monospace';
       const allDocs = (await getAllDocContents(true)).join('\n\n\n');
-      panel.webview.html = toHtml(textDoc.getText(), allDocs);
+      panel.webview.html = toHtml(textDoc.getText(), allDocs)
+        .replace(/font-size: 1em;/, 'font-size: 1.5em')
+        .replace(/font-family: monospace;/, `font-family: ${fontFamily}`);
     });
 
-    panel.webview.html = '<html><body><span style="font-size: 1.75em; margin-top: 2em;">' +
+    panel.webview.html = '<html><body><span style="font-size: 1.5em; margin-top: 2em;">' +
       'Whenever a MathLingua document is saved, its contents will be displayed here.</span></body></html>';
   });
 
