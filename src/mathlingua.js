@@ -6,16 +6,17 @@
   var throwCCE = Kotlin.throwCCE;
   var equals = Kotlin.equals;
   var removeSurrounding = Kotlin.kotlin.text.removeSurrounding_90ijwr$;
+  var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
+  var split = Kotlin.kotlin.text.split_ip8yn$;
   var replace = Kotlin.kotlin.text.replace_680rmw$;
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
   var LinkedHashSet_init = Kotlin.kotlin.collections.LinkedHashSet_init_287e2$;
   var LinkedHashMap_init = Kotlin.kotlin.collections.LinkedHashMap_init_q3lmfv$;
+  var isBlank = Kotlin.kotlin.text.isBlank_gw00vp$;
   var RuntimeException_init = Kotlin.kotlin.RuntimeException_init_pdl1vj$;
   var RuntimeException = Kotlin.kotlin.RuntimeException;
   var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
-  var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
-  var isBlank = Kotlin.kotlin.text.isBlank_gw00vp$;
   var CharRange = Kotlin.kotlin.ranges.CharRange;
   var endsWith = Kotlin.kotlin.text.endsWith_7epoxm$;
   var ensureNotNull = Kotlin.ensureNotNull;
@@ -425,7 +426,7 @@
     return phase2Node.transform_ql661s$(MathLingua$expandWrittenAs$lambda(patternToExpansion));
   };
   MathLingua.prototype.printExpanded_qz9155$ = function (input, supplemental, html) {
-    var tmp$, tmp$_0, tmp$_1;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2;
     var totalText = input + '\n' + '\n' + '\n' + supplemental;
     var totalTextValidation = this.parse_61zpoe$(totalText);
     if (Kotlin.isType(totalTextValidation, ValidationFailure))
@@ -442,14 +443,35 @@
     else
       tmp$_0 = Kotlin.noWhenBranchMatched();
     var represents = tmp$_0;
-    var validation = this.parse_61zpoe$(input);
-    if (Kotlin.isType(validation, ValidationFailure))
-      tmp$_1 = validationFailure(validation.errors);
-    else if (Kotlin.isType(validation, ValidationSuccess))
-      tmp$_1 = validationSuccess(this.prettyPrint_rcnm04$(validation.value, defines, represents, html));
-    else
-      tmp$_1 = Kotlin.noWhenBranchMatched();
-    return tmp$_1;
+    var result = StringBuilder_init();
+    var errors = ArrayList_init();
+    var $receiver = split(input, ['\n\n']);
+    var destination = ArrayList_init();
+    var tmp$_3;
+    tmp$_3 = $receiver.iterator();
+    while (tmp$_3.hasNext()) {
+      var element = tmp$_3.next();
+      if (!isBlank(element))
+        destination.add_11rb$(element);
+    }
+    tmp$_1 = destination.iterator();
+    while (tmp$_1.hasNext()) {
+      var part = tmp$_1.next();
+      var validation = this.parse_61zpoe$(part);
+      if (Kotlin.isType(validation, ValidationFailure))
+        errors.addAll_brywnq$(validation.errors);
+      else if (Kotlin.isType(validation, ValidationSuccess))
+        result.append_gw00v9$(this.prettyPrint_rcnm04$(validation.value, defines, represents, html));
+      else
+        Kotlin.noWhenBranchMatched();
+    }
+    if (!errors.isEmpty()) {
+      tmp$_2 = validationFailure(errors);
+    }
+     else {
+      tmp$_2 = validationSuccess(result.toString());
+    }
+    return tmp$_2;
   };
   MathLingua.prototype.prettyPrint_rcnm04$ = function (node, defines, represents, html) {
     var tmp$, tmp$_0;
@@ -10418,8 +10440,13 @@
   function expandAsWrittenImplImpl(cmd, sigToPatternExpansion) {
     return expandAsWrittenImplImpl_0(new OperatorTexTalkNode(null, cmd, null), sigToPatternExpansion);
   }
+  function expandAsWrittenImplImpl$lambda(closure$sigToPatternExpansion) {
+    return function (it) {
+      return expandAsWrittenImpl(it, closure$sigToPatternExpansion);
+    };
+  }
   function expandAsWrittenImplImpl_0(op, sigToPatternExpansion) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3;
     tmp$ = sigToPatternExpansion.get_11rb$(signature(op));
     if (tmp$ == null) {
       return null;
@@ -10432,84 +10459,121 @@
     var expansion = patternExpansion.expansion;
     tmp$_0 = subs.substitutions.entries.iterator();
     while (tmp$_0.hasNext()) {
-      var tmp$_3 = tmp$_0.next();
-      var name = tmp$_3.key;
-      var exp = tmp$_3.value;
-      var prefixRegex = Regex_init(name + '\\' + '{(.*)' + '\\' + '.' + '\\' + '.' + '\\' + '.' + '\\' + '}' + '\\' + '?');
-      var infixRegex = Regex_init(name + '\\' + '{(.*)' + '\\' + '.' + '\\' + '.' + '\\' + '.(.*)' + '\\' + '.' + '\\' + '.' + '\\' + '.(.*)' + '\\' + '}' + '\\' + '?');
-      var suffixRegex = Regex_init(name + '\\' + '{' + '\\' + '.' + '\\' + '.' + '\\' + '.(.*)' + '\\' + '}' + '\\' + '?');
-      if (infixRegex.matches_6bul2c$(expansion)) {
-        var destination = ArrayList_init_0(collectionSizeOrDefault(exp, 10));
-        var tmp$_4;
-        tmp$_4 = exp.iterator();
-        while (tmp$_4.hasNext()) {
-          var item = tmp$_4.next();
-          destination.add_11rb$(expandAsWrittenImpl(item, sigToPatternExpansion));
-        }
-        var args = destination;
-        var result = infixRegex.find_905azu$(expansion);
-        if (result != null && result.groupValues.size >= 4) {
-          var prefix = result.groupValues.get_za3lpa$(1);
-          var separator = result.groupValues.get_za3lpa$(2);
-          var suffix = result.groupValues.get_za3lpa$(3);
-          var joinedArgs = joinToString(args, separator);
-          var pattern = result.groupValues.get_za3lpa$(0);
-          expansion = replace(expansion, pattern, joinedArgs);
-          expansion = prefix + expansion + suffix;
-        }
+      var tmp$_4 = tmp$_0.next();
+      var name = tmp$_4.key;
+      var exp = tmp$_4.value;
+      if (!exp.isEmpty()) {
+        var expToString = joinToString(exp, ' ', void 0, void 0, void 0, void 0, expandAsWrittenImplImpl$lambda(sigToPatternExpansion));
+        expansion = replace(expansion, name + '?', expToString);
       }
-       else if (prefixRegex.matches_6bul2c$(expansion)) {
-        var destination_0 = ArrayList_init_0(collectionSizeOrDefault(exp, 10));
-        var tmp$_5;
-        tmp$_5 = exp.iterator();
-        while (tmp$_5.hasNext()) {
-          var item_0 = tmp$_5.next();
-          destination_0.add_11rb$(expandAsWrittenImpl(item_0, sigToPatternExpansion));
+      var startIndex = 0;
+      var target = name + '{';
+      while (true) {
+        var index = indexOf(expansion, target, startIndex);
+        if (index < 0) {
+          break;
         }
-        var args_0 = destination_0;
-        var result_0 = prefixRegex.find_905azu$(expansion);
-        if (result_0 != null && result_0.groupValues.size >= 2) {
-          var separator_0 = result_0.groupValues.get_za3lpa$(1);
-          var joinedArgsBuilder = StringBuilder_init();
-          tmp$_1 = args_0.iterator();
-          while (tmp$_1.hasNext()) {
-            var a = tmp$_1.next();
-            joinedArgsBuilder.append_gw00v9$(separator_0);
-            joinedArgsBuilder.append_gw00v9$(a);
+        startIndex = index + target.length | 0;
+        var innerTextBuffer = StringBuilder_init();
+        var isValid = false;
+        var leftCurlyCount = 1;
+        var i = index + target.length | 0;
+        while (i < expansion.length) {
+          var c = expansion.charCodeAt(i);
+          var prevNotBackslash = (i - 1 | 0) < 0 || expansion.charCodeAt(i - 1 | 0) !== 92;
+          if (c === 123 && prevNotBackslash) {
+            leftCurlyCount = leftCurlyCount + 1 | 0;
           }
-          var joinedArgs_0 = joinedArgsBuilder.toString();
-          var pattern_0 = result_0.groupValues.get_za3lpa$(0);
-          expansion = replace(expansion, pattern_0, joinedArgs_0);
-        }
-      }
-       else if (suffixRegex.matches_6bul2c$(expansion)) {
-        var destination_1 = ArrayList_init_0(collectionSizeOrDefault(exp, 10));
-        var tmp$_6;
-        tmp$_6 = exp.iterator();
-        while (tmp$_6.hasNext()) {
-          var item_1 = tmp$_6.next();
-          destination_1.add_11rb$(expandAsWrittenImpl(item_1, sigToPatternExpansion));
-        }
-        var args_1 = destination_1;
-        var result_1 = suffixRegex.find_905azu$(expansion);
-        if (result_1 != null && result_1.groupValues.size >= 2) {
-          var separator_1 = result_1.groupValues.get_za3lpa$(1);
-          var joinedArgsBuilder_0 = StringBuilder_init();
-          tmp$_2 = args_1.iterator();
-          while (tmp$_2.hasNext()) {
-            var a_0 = tmp$_2.next();
-            joinedArgsBuilder_0.append_gw00v9$(a_0);
-            joinedArgsBuilder_0.append_gw00v9$(separator_1);
+           else if (c === 125 && prevNotBackslash) {
+            tmp$_1 = leftCurlyCount, leftCurlyCount = tmp$_1 - 1 | 0;
           }
-          var joinedArgs_1 = joinedArgsBuilder_0.toString();
-          var pattern_1 = result_1.groupValues.get_za3lpa$(0);
-          expansion = replace(expansion, pattern_1, joinedArgs_1);
+          i = i + 1 | 0;
+          if (c === 125 && leftCurlyCount === 0 && i < expansion.length && expansion.charCodeAt(i) === 63) {
+            isValid = true;
+            break;
+          }
+           else {
+            innerTextBuffer.append_s8itvh$(c);
+          }
         }
-      }
-       else {
-        if (!exp.isEmpty()) {
-          var newText = expandAsWrittenImpl(first(exp), sigToPatternExpansion);
-          expansion = replace(expansion, name + '?', newText);
+        if (isValid) {
+          var innerText = innerTextBuffer.toString();
+          var expansionPrefix = expansion.substring(0, index);
+          var $receiver = expansion;
+          var startIndex_0 = index + target.length + innerText.length + 2 | 0;
+          var expansionSuffix = $receiver.substring(startIndex_0);
+          var prefixRegex = Regex_init('(.*)\\.\\.\\.');
+          var infixRegex = Regex_init('(.*)\\.\\.\\.(.*)\\.\\.\\.(.*)');
+          var suffixRegex = Regex_init('\\.\\.\\.(.*)');
+          if (infixRegex.matches_6bul2c$(innerText)) {
+            var destination = ArrayList_init_0(collectionSizeOrDefault(exp, 10));
+            var tmp$_5;
+            tmp$_5 = exp.iterator();
+            while (tmp$_5.hasNext()) {
+              var item = tmp$_5.next();
+              destination.add_11rb$(expandAsWrittenImpl(item, sigToPatternExpansion));
+            }
+            var args = destination;
+            var result = infixRegex.find_905azu$(innerText);
+            if (result != null && result.groupValues.size >= 4) {
+              var prefix = result.groupValues.get_za3lpa$(1);
+              var separator = result.groupValues.get_za3lpa$(2);
+              var suffix = result.groupValues.get_za3lpa$(3);
+              var joinedArgs = joinToString(args, separator);
+              var pattern = result.groupValues.get_za3lpa$(0);
+              innerText = replace(innerText, pattern, joinedArgs);
+              innerText = prefix + innerText + suffix;
+            }
+          }
+           else if (prefixRegex.matches_6bul2c$(innerText)) {
+            var destination_0 = ArrayList_init_0(collectionSizeOrDefault(exp, 10));
+            var tmp$_6;
+            tmp$_6 = exp.iterator();
+            while (tmp$_6.hasNext()) {
+              var item_0 = tmp$_6.next();
+              destination_0.add_11rb$(expandAsWrittenImpl(item_0, sigToPatternExpansion));
+            }
+            var args_0 = destination_0;
+            var result_0 = prefixRegex.find_905azu$(innerText);
+            if (result_0 != null && result_0.groupValues.size >= 2) {
+              var separator_0 = result_0.groupValues.get_za3lpa$(1);
+              var joinedArgsBuilder = StringBuilder_init();
+              tmp$_2 = args_0.iterator();
+              while (tmp$_2.hasNext()) {
+                var a = tmp$_2.next();
+                joinedArgsBuilder.append_gw00v9$(separator_0);
+                joinedArgsBuilder.append_gw00v9$(a);
+              }
+              var joinedArgs_0 = joinedArgsBuilder.toString();
+              var pattern_0 = result_0.groupValues.get_za3lpa$(0);
+              innerText = replace(innerText, pattern_0, joinedArgs_0);
+            }
+          }
+           else if (suffixRegex.matches_6bul2c$(innerText)) {
+            var destination_1 = ArrayList_init_0(collectionSizeOrDefault(exp, 10));
+            var tmp$_7;
+            tmp$_7 = exp.iterator();
+            while (tmp$_7.hasNext()) {
+              var item_1 = tmp$_7.next();
+              destination_1.add_11rb$(expandAsWrittenImpl(item_1, sigToPatternExpansion));
+            }
+            var args_1 = destination_1;
+            var result_1 = suffixRegex.find_905azu$(innerText);
+            if (result_1 != null && result_1.groupValues.size >= 2) {
+              var separator_1 = result_1.groupValues.get_za3lpa$(1);
+              var joinedArgsBuilder_0 = StringBuilder_init();
+              tmp$_3 = args_1.iterator();
+              while (tmp$_3.hasNext()) {
+                var a_0 = tmp$_3.next();
+                joinedArgsBuilder_0.append_gw00v9$(a_0);
+                joinedArgsBuilder_0.append_gw00v9$(separator_1);
+              }
+              var joinedArgs_1 = joinedArgsBuilder_0.toString();
+              var pattern_1 = result_1.groupValues.get_za3lpa$(0);
+              innerText = replace(innerText, pattern_1, joinedArgs_1);
+            }
+          }
+          expansion = expansionPrefix + innerText + expansionSuffix;
         }
       }
     }

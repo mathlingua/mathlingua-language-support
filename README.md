@@ -10,6 +10,11 @@ Furthermore, entering the `mathlingua` command at the command palette will open 
 
 ## Release Notes
 
+### 0.7.1 (2020-06-26)
+- Rendered views preserve item order.
+- Fixed an issue expanding "written as" forms.
+- Improved font sizes.
+
 ### 0.7.0 (2020-06-25)
 - Add support for rendering custom infix operators.  (For example render `x \set.in X` as `x \in X`).
 - Left justify rendered html.
@@ -30,14 +35,11 @@ Furthermore, entering the `mathlingua` command at the command palette will open 
 - Parse errors are now displayed within the editor on save.
 
 ### 0.2.0 (2020-05-18)
-#### Added
 - Autocomplete of `Defines:` and `Represents:` signatures has been added but only within the current file.  That is, if a signature is specified in file `a.math`, then file `b.math` does not yet know about it.
 
 ### 0.1.1 (2020-05-17)
-#### Added
 - Included more keywords to identify the extension
 
 ### 0.1.0 (2020-05-17)
-#### Added
 - Introduced syntax highlighting support
 - Introduced autocompletion for structural components (i.e. not statements within single quotes)

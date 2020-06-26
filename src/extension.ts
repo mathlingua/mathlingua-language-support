@@ -293,8 +293,11 @@ export function activate(context: vscode.ExtensionContext) {
       const fontFamily = config.editor.fontFamily || 'monospace';
       const allDocs = (await getAllDocContents(true)).join('\n\n\n');
       panel.webview.html = toHtml(textDoc.getText(), allDocs)
-        .replace(/font-size: 1em;/, 'font-size: 1.5em')
-        .replace(/font-family: monospace;/, `font-family: ${fontFamily}`);
+        .replace(/font-size: 1em;/g, 'font-size: 1.5em;') // scale the main font
+        .replace(/font-size: 0.75em;/g, 'font-size: 1.125em;') // scale the latex font
+        .replace(/font-family: monospace;/g, `font-family: ${fontFamily};`)
+        // add more padding below each entry
+        .replace(/.mathlingua-top-level \{/g, '.mathlingua-top-level {padding-bottom: 1.5em;');
     });
 
     panel.webview.html = '<html><body><span style="font-size: 1.5em; margin-top: 2em;">' +
