@@ -4,11 +4,14 @@ This is the official Visual Studio Code extension to provide language support fo
 
 ## Features
 
-Supports syntax highlighting, auto-analysis, autocomplete, and rendering of MathLingua documents.  Any parse errors are displayed within the current file on save, and any signatures that are used but have not been defined are marked with a warning.
+Supports syntax highlighting, auto-analysis, autocomplete, and rendering of MathLingua documents (with a `.math` extension).  Any parse errors are displayed within the current file on save, and any signatures that are used, but have not been defined, are marked with a warning.
 
-Furthermore, entering the `mathlingua` command at the command palette will open a preview window that renders the current MathLingua document.
+Furthermore, entering the `mathlingua` command at the command palette will manually open a preview window that renders the current MathLingua document.  In addition, when a `.math` file is opened, the preview window is automatically opened.
 
 ## Release Notes
+
+### 0.7.2 (2020-06-26)
+- The preview window is now automatically displayed when opening a `.math` file.
 
 ### 0.7.1 (2020-06-26)
 - Rendered views preserve item order.

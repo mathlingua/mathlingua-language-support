@@ -254,6 +254,52 @@ function toHtml(input: string, supplemental: string): string {
   return errHtml;
 }
 
+async function updateHtmlView(panel: vscode.WebviewPanel, textDoc: vscode.TextDocument) {
+  if (!textDoc.uri.path.endsWith('.math')) {
+    return
+  }
+  const config = vscode.workspace.getConfiguration();
+  const fontFamily = config.editor.fontFamily || 'monospace';
+  const allDocs = (await getAllDocContents(true)).join('\n\n\n');
+  panel.webview.html = toHtml(textDoc.getText(), allDocs)
+    .replace(/font-size: 1em;/g, 'font-size: 1.5em;') // scale the main font
+    .replace(/font-size: 0.75em;/g, 'font-size: 1.125em;') // scale the latex font
+    .replace(/font-family: monospace;/g, `font-family: ${fontFamily};`)
+    // add more padding below each entry
+    .replace(/.mathlingua-top-level \{/g, '.mathlingua-top-level {padding-bottom: 1.5em;');
+}
+
+function createHtmlView() {
+  const panel = vscode.window.createWebviewPanel(
+    'mathlingua',
+    'MathLingua Preview',
+    vscode.ViewColumn.Beside,
+    {
+      enableScripts: true
+    }
+  );
+
+  vscode.workspace.onDidSaveTextDocument(async textDoc => {
+    await updateHtmlView(panel, textDoc);
+  });
+
+  vscode.workspace.onDidChangeTextDocument(async event => {
+    await updateHtmlView(panel, event.document);
+  });
+
+  vscode.workspace.onDidOpenTextDocument(async doc => {
+    await updateHtmlView(panel, doc);
+  });
+
+  const doc = vscode.window.activeTextEditor?.document;
+  if (doc) {
+    updateHtmlView(panel, doc);
+  } else {
+    panel.webview.html = '<html><body><span style="font-size: 1.5em; margin-top: 2em;">' +
+      'Whenever a MathLingua document is saved, its contents will be displayed here.</span></body></html>';
+  }
+}
+
 export function activate(context: vscode.ExtensionContext) {
 
   const mathlinguaProvider = new MathlinguaProvider();
@@ -275,34 +321,10 @@ export function activate(context: vscode.ExtensionContext) {
     }
   });
 
-  const previewCommand = vscode.commands.registerCommand('mathlingua.preview', async () => {
-    const panel = vscode.window.createWebviewPanel(
-      'mathlingua',
-      'MathLingua Preview',
-      vscode.ViewColumn.Beside,
-      {
-        enableScripts: true
-      }
-    );
-
-    vscode.workspace.onDidSaveTextDocument(async textDoc => {
-      if (!textDoc.uri.path.endsWith('.math')) {
-        return
-      }
-      const config = vscode.workspace.getConfiguration();
-      const fontFamily = config.editor.fontFamily || 'monospace';
-      const allDocs = (await getAllDocContents(true)).join('\n\n\n');
-      panel.webview.html = toHtml(textDoc.getText(), allDocs)
-        .replace(/font-size: 1em;/g, 'font-size: 1.5em;') // scale the main font
-        .replace(/font-size: 0.75em;/g, 'font-size: 1.125em;') // scale the latex font
-        .replace(/font-family: monospace;/g, `font-family: ${fontFamily};`)
-        // add more padding below each entry
-        .replace(/.mathlingua-top-level \{/g, '.mathlingua-top-level {padding-bottom: 1.5em;');
-    });
-
-    panel.webview.html = '<html><body><span style="font-size: 1.5em; margin-top: 2em;">' +
-      'Whenever a MathLingua document is saved, its contents will be displayed here.</span></body></html>';
+  const previewCommand = vscode.commands.registerCommand('mathlingua.preview', () => {
+    createHtmlView();
   });
 
   context.subscriptions.push(staticCompletionProvider, previewCommand);
+  createHtmlView();
 }
