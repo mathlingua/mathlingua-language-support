@@ -10,6 +10,9 @@ Furthermore, entering the `mathlingua` command at the command palette will manua
 
 ## Release Notes
 
+### 0.7.3 (2020-06-27)
+- Fix an issue where named groups with multiple args are now supported.
+
 ### 0.7.2 (2020-06-26)
 - The preview window is now automatically displayed when opening a `.math` file.
 

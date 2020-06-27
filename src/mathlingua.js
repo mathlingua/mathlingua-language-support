@@ -8254,9 +8254,9 @@
   GroupTexTalkNode.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.type, other.type) && Kotlin.equals(this.parameters, other.parameters) && Kotlin.equals(this.isVarArg, other.isVarArg)))));
   };
-  function NamedGroupTexTalkNode(name, group) {
+  function NamedGroupTexTalkNode(name, groups) {
     this.name = name;
-    this.group = group;
+    this.groups = groups;
   }
   Object.defineProperty(NamedGroupTexTalkNode.prototype, 'type', {
     get: function () {
@@ -8264,22 +8264,42 @@
     }
   });
   NamedGroupTexTalkNode.prototype.toCode_6z438g$$default = function (interceptor) {
+    var tmp$;
     var res = interceptor(this);
     if (res != null) {
       return res;
     }
     var buffer = StringBuilder_init();
     buffer.append_gw00v9$(this.name.toCode_6z438g$(interceptor));
-    buffer.append_gw00v9$(this.group.toCode_6z438g$(interceptor));
+    tmp$ = this.groups.iterator();
+    while (tmp$.hasNext()) {
+      var grp = tmp$.next();
+      buffer.append_gw00v9$(grp.toCode_6z438g$(interceptor));
+    }
     return buffer.toString();
   };
   NamedGroupTexTalkNode.prototype.forEach_j2ps96$ = function (fn) {
     fn(this.name);
-    fn(this.group);
+    var tmp$;
+    tmp$ = this.groups.iterator();
+    while (tmp$.hasNext()) {
+      var element = tmp$.next();
+      fn(element);
+    }
   };
   NamedGroupTexTalkNode.prototype.transform_7szim8$ = function (transformer) {
     var tmp$, tmp$_0;
-    return transformer(new NamedGroupTexTalkNode(Kotlin.isType(tmp$ = this.name.transform_7szim8$(transformer), TextTexTalkNode) ? tmp$ : throwCCE(), Kotlin.isType(tmp$_0 = this.group.transform_7szim8$(transformer), GroupTexTalkNode) ? tmp$_0 : throwCCE()));
+    tmp$_0 = Kotlin.isType(tmp$ = this.name.transform_7szim8$(transformer), TextTexTalkNode) ? tmp$ : throwCCE();
+    var $receiver = this.groups;
+    var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
+    var tmp$_1;
+    tmp$_1 = $receiver.iterator();
+    while (tmp$_1.hasNext()) {
+      var item = tmp$_1.next();
+      var tmp$_2;
+      destination.add_11rb$(Kotlin.isType(tmp$_2 = item.transform_7szim8$(transformer), GroupTexTalkNode) ? tmp$_2 : throwCCE());
+    }
+    return transformer(new NamedGroupTexTalkNode(tmp$_0, destination));
   };
   NamedGroupTexTalkNode.$metadata$ = {
     kind: Kind_CLASS,
@@ -8290,22 +8310,22 @@
     return this.name;
   };
   NamedGroupTexTalkNode.prototype.component2 = function () {
-    return this.group;
+    return this.groups;
   };
-  NamedGroupTexTalkNode.prototype.copy_egec36$ = function (name, group) {
-    return new NamedGroupTexTalkNode(name === void 0 ? this.name : name, group === void 0 ? this.group : group);
+  NamedGroupTexTalkNode.prototype.copy_uy3dyf$ = function (name, groups) {
+    return new NamedGroupTexTalkNode(name === void 0 ? this.name : name, groups === void 0 ? this.groups : groups);
   };
   NamedGroupTexTalkNode.prototype.toString = function () {
-    return 'NamedGroupTexTalkNode(name=' + Kotlin.toString(this.name) + (', group=' + Kotlin.toString(this.group)) + ')';
+    return 'NamedGroupTexTalkNode(name=' + Kotlin.toString(this.name) + (', groups=' + Kotlin.toString(this.groups)) + ')';
   };
   NamedGroupTexTalkNode.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.name) | 0;
-    result = result * 31 + Kotlin.hashCode(this.group) | 0;
+    result = result * 31 + Kotlin.hashCode(this.groups) | 0;
     return result;
   };
   NamedGroupTexTalkNode.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.group, other.group)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.groups, other.groups)))));
   };
   function SubSupTexTalkNode(sub, sup) {
     this.sub = sub;
@@ -8775,7 +8795,8 @@
     var tmp$;
     try {
       var isRhsExpressions = findIsRhsExpressions(root);
-      var idPrefixOpRoot = identifySpecialPrefixOperators(root, isRhsExpressions);
+      var funcCallRoot = identifyIdentifierFunctionCalls(root);
+      var idPrefixOpRoot = identifySpecialPrefixOperators(funcCallRoot, isRhsExpressions);
       var idPostfixOpRoot = identifySpecialPostfixOperators(idPrefixOpRoot, isRhsExpressions);
       var idInfixOpRoot = identifyInfixCommandOperators(idPostfixOpRoot, isRhsExpressions);
       var final = runShuntingYard(idInfixOpRoot, isRhsExpressions);
@@ -8816,6 +8837,32 @@
       result.addAll_brywnq$(node.rhs.items);
     }
     node.forEach_j2ps96$(findIsRhsExpressionsImpl$lambda(result));
+  }
+  function identifyIdentifierFunctionCalls$lambda(it) {
+    if (Kotlin.isType(it, ExpressionTexTalkNode)) {
+      var newChildren = ArrayList_init();
+      var i = 0;
+      while (i < it.children.size) {
+        var cur = it.children.get_za3lpa$(i);
+        var next = getOrNull(it.children, i + 1 | 0);
+        if (Kotlin.isType(cur, TextTexTalkNode) && cur.tokenType === TexTalkTokenType$Identifier_getInstance() && next != null && Kotlin.isType(next, GroupTexTalkNode) && next.type === TexTalkNodeType$ParenGroup_getInstance()) {
+          newChildren.add_11rb$(new GroupTexTalkNode(TexTalkNodeType$SyntheticGroup_getInstance(), new ParametersTexTalkNode(listOf(new ExpressionTexTalkNode(listOf_0([cur, next])))), false));
+          i = i + 2 | 0;
+        }
+         else {
+          newChildren.add_11rb$(cur);
+          i = i + 1 | 0;
+        }
+      }
+      return new ExpressionTexTalkNode(newChildren);
+    }
+     else {
+      return it;
+    }
+  }
+  function identifyIdentifierFunctionCalls(root) {
+    var tmp$;
+    return Kotlin.isType(tmp$ = root.transform_7szim8$(identifyIdentifierFunctionCalls$lambda), ExpressionTexTalkNode) ? tmp$ : throwCCE();
   }
   function isSpecialOperator(node) {
     return node != null && Kotlin.isType(node, TextTexTalkNode) && (node.tokenType === TexTalkTokenType$Operator_getInstance() || node.tokenType === TexTalkTokenType$Caret_getInstance());
@@ -9589,8 +9636,16 @@
       this.addError_0('Expected a group in a named group');
       tmp$_0 = new GroupTexTalkNode(TexTalkNodeType$CurlyGroup_getInstance(), new ParametersTexTalkNode(emptyList()), false);
     }
-    var group = tmp$_0;
-    return new NamedGroupTexTalkNode(text, group);
+    var first = tmp$_0;
+    var groups = ArrayList_init();
+    groups.add_11rb$(first);
+    while (true) {
+      var grp = this.group_0(TexTalkNodeType$CurlyGroup_getInstance());
+      if (grp == null)
+        break;
+      groups.add_11rb$(grp);
+    }
+    return new NamedGroupTexTalkNode(text, groups);
   };
   TexTalkParserImpl$ParserWorker.prototype.text_0 = function (tokenType, nodeType, canBeVarArg) {
     if (!this.has_0(tokenType)) {
@@ -10270,8 +10325,63 @@
       }
     }
   }
+  function handleVariadicGroupSubstitutions$lambda(it) {
+    return it.toCode_6z438g$();
+  }
+  function handleVariadicGroupSubstitutions$lambda_0(it) {
+    return it.toCode_6z438g$();
+  }
+  function handleVariadicGroupSubstitutions(patternGroups, valueGroups, subs) {
+    var tmp$, tmp$_0, tmp$_1;
+    var isLastVarArg = !patternGroups.isEmpty() && last(patternGroups).isVarArg;
+    if (isLastVarArg) {
+      if (valueGroups.size >= patternGroups.size) {
+        for (var i = 0; i !== patternGroups.size; ++i) {
+          findSubstitutions(patternGroups.get_za3lpa$(i), valueGroups.get_za3lpa$(i), subs);
+        }
+        var variadicName = (Kotlin.isType(tmp$ = last(patternGroups).parameters.items.get_za3lpa$(0).children.get_za3lpa$(0), TextTexTalkNode) ? tmp$ : throwCCE()).text;
+        tmp$_0 = patternGroups.size;
+        tmp$_1 = valueGroups.size;
+        for (var i_0 = tmp$_0; i_0 < tmp$_1; i_0++) {
+          var items = valueGroups.get_za3lpa$(i_0).parameters.items;
+          if (items.size !== 1) {
+            subs.doesMatch = false;
+            subs.errors.add_11rb$('A variadic group can only contain a single item but found ' + items.size + " for '" + valueGroups.get_za3lpa$(i_0));
+            continue;
+          }
+          if (!subs.substitutions.containsKey_11rb$(variadicName)) {
+            var tmp$_2 = subs.substitutions;
+            var value = ArrayList_init();
+            tmp$_2.put_xwzc9p$(variadicName, value);
+          }
+          if (items.size !== 1) {
+            subs.errors.add_11rb$('A variadic group can only contain a single item but found ' + items.size + " for '" + valueGroups.get_za3lpa$(i_0).toCode_6z438g$() + "'");
+            subs.doesMatch = false;
+          }
+           else {
+            ensureNotNull(subs.substitutions.get_11rb$(variadicName)).add_11rb$(valueGroups.get_za3lpa$(i_0).parameters.items.get_za3lpa$(0));
+          }
+        }
+      }
+       else {
+        subs.doesMatch = false;
+        subs.errors.add_11rb$('Expected at least ' + patternGroups.size + ' groups but found ' + valueGroups.size + " for '" + joinToString(valueGroups, void 0, void 0, void 0, void 0, void 0, handleVariadicGroupSubstitutions$lambda) + "'");
+      }
+    }
+     else {
+      if (valueGroups.size === patternGroups.size) {
+        for (var i_1 = 0; i_1 !== patternGroups.size; ++i_1) {
+          findSubstitutions(patternGroups.get_za3lpa$(i_1), valueGroups.get_za3lpa$(i_1), subs);
+        }
+      }
+       else {
+        subs.doesMatch = false;
+        subs.errors.add_11rb$('Expected exactly ' + patternGroups.size + ' groups but found ' + valueGroups.size + " for '" + joinToString(valueGroups, void 0, void 0, void 0, void 0, void 0, handleVariadicGroupSubstitutions$lambda_0) + "'");
+      }
+    }
+  }
   function findSubstitutions_0(pattern, value, subs) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6, tmp$_7, tmp$_8, tmp$_9;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4;
     if (!((tmp$ = pattern.name) != null ? tmp$.equals(value.name) : null)) {
       subs.doesMatch = false;
       subs.errors.add_11rb$('Name mismatch.  Expected ' + pattern.name + ' but found ' + value.name);
@@ -10280,65 +10390,20 @@
     findSubstitutions(pattern.square, value.square, subs);
     findSubstitutions((tmp$_0 = pattern.subSup) != null ? tmp$_0.sub : null, (tmp$_1 = value.subSup) != null ? tmp$_1.sub : null, subs);
     findSubstitutions((tmp$_2 = pattern.subSup) != null ? tmp$_2.sup : null, (tmp$_3 = value.subSup) != null ? tmp$_3.sup : null, subs);
-    var isLastVarArg = !pattern.groups.isEmpty() && last(pattern.groups).isVarArg;
-    if (isLastVarArg) {
-      if (value.groups.size >= pattern.groups.size) {
-        tmp$_4 = pattern.groups;
-        for (var i = 0; i !== tmp$_4.size; ++i) {
-          findSubstitutions(pattern.groups.get_za3lpa$(i), value.groups.get_za3lpa$(i), subs);
-        }
-        var variadicName = (Kotlin.isType(tmp$_5 = last(pattern.groups).parameters.items.get_za3lpa$(0).children.get_za3lpa$(0), TextTexTalkNode) ? tmp$_5 : throwCCE()).text;
-        tmp$_6 = pattern.groups.size;
-        tmp$_7 = value.groups.size;
-        for (var i_0 = tmp$_6; i_0 < tmp$_7; i_0++) {
-          var items = value.groups.get_za3lpa$(i_0).parameters.items;
-          if (items.size !== 1) {
-            subs.doesMatch = false;
-            subs.errors.add_11rb$('A variadic group can only contain a single item but found ' + items.size + " for '" + value.groups.get_za3lpa$(i_0));
-            continue;
-          }
-          if (!subs.substitutions.containsKey_11rb$(variadicName)) {
-            var tmp$_10 = subs.substitutions;
-            var value_0 = ArrayList_init();
-            tmp$_10.put_xwzc9p$(variadicName, value_0);
-          }
-          if (items.size !== 1) {
-            subs.errors.add_11rb$('A variadic group can only contain a single item but found ' + items.size + " for '" + value.groups.get_za3lpa$(i_0).toCode_6z438g$() + "'");
-            subs.doesMatch = false;
-          }
-           else {
-            ensureNotNull(subs.substitutions.get_11rb$(variadicName)).add_11rb$(value.groups.get_za3lpa$(i_0).parameters.items.get_za3lpa$(0));
-          }
-        }
-      }
-       else {
-        subs.doesMatch = false;
-        subs.errors.add_11rb$('Expected at least ' + pattern.groups.size + ' groups but found ' + value.groups.size + " for '" + value.toCode_6z438g$() + "'");
-      }
-    }
-     else {
-      if (value.groups.size === pattern.groups.size) {
-        tmp$_8 = pattern.groups;
-        for (var i_1 = 0; i_1 !== tmp$_8.size; ++i_1) {
-          findSubstitutions(pattern.groups.get_za3lpa$(i_1), value.groups.get_za3lpa$(i_1), subs);
-        }
-      }
-       else {
-        subs.doesMatch = false;
-        subs.errors.add_11rb$('Expected exactly ' + pattern.groups.size + ' groups but found ' + value.groups.size + " for '" + value.toCode_6z438g$() + "'");
-      }
-    }
+    handleVariadicGroupSubstitutions(pattern.groups, value.groups, subs);
     if (pattern.namedGroups.size === value.namedGroups.size) {
-      tmp$_9 = pattern.namedGroups;
-      for (var i_2 = 0; i_2 !== tmp$_9.size; ++i_2) {
-        var tmp$_11;
-        var patternGrp = pattern.namedGroups.get_za3lpa$(i_2);
-        var valGrp = value.namedGroups.get_za3lpa$(i_2);
-        if (!((tmp$_11 = patternGrp.name) != null ? tmp$_11.equals(valGrp.name) : null)) {
+      tmp$_4 = pattern.namedGroups;
+      for (var i = 0; i !== tmp$_4.size; ++i) {
+        var tmp$_5;
+        var patternGrp = pattern.namedGroups.get_za3lpa$(i);
+        var valGrp = value.namedGroups.get_za3lpa$(i);
+        if (!((tmp$_5 = patternGrp.name) != null ? tmp$_5.equals(valGrp.name) : null)) {
           subs.doesMatch = false;
           subs.errors.add_11rb$('Mismatched named group: Expected ' + patternGrp.name + ' groups but found ' + valGrp.name + " for '" + value.toCode_6z438g$() + "'");
         }
-        findSubstitutions(patternGrp.group, valGrp.group, subs);
+         else {
+          handleVariadicGroupSubstitutions(patternGrp.groups, valGrp.groups, subs);
+        }
       }
     }
      else {
@@ -10394,7 +10459,21 @@
     }
     tmp$_2 = part.namedGroups;
     for (var i_0 = 0; i_0 !== tmp$_2.size; ++i_0) {
-      validatePatternGroupImpl(part.namedGroups.get_za3lpa$(i_0).group, false, 'A named group', errors);
+      var tmp$_4;
+      var namedGroup = part.namedGroups.get_za3lpa$(i_0);
+      tmp$_4 = namedGroup.groups;
+      for (var j = 0; j !== tmp$_4.size; ++j) {
+        var tmp$_5;
+        var canBeVarArg_0 = j === (namedGroup.groups.size - 1 | 0);
+        if (canBeVarArg_0) {
+          tmp$_5 = 'The last group of a named group';
+        }
+         else {
+          tmp$_5 = 'A named group';
+        }
+        var description_0 = tmp$_5;
+        validatePatternGroupImpl(namedGroup.groups.get_za3lpa$(j), canBeVarArg_0, description_0, errors);
+      }
     }
   }
   function validatePattern(command) {
