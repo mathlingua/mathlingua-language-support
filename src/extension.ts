@@ -326,5 +326,8 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   context.subscriptions.push(staticCompletionProvider, previewCommand);
-  createHtmlView();
+  const currentDocPath = vscode.window.activeTextEditor?.document.uri.path
+  if (currentDocPath && currentDocPath.endsWith('.math')) {
+    createHtmlView();
+  }
 }

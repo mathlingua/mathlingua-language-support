@@ -10,6 +10,11 @@ Furthermore, entering the `mathlingua` command at the command palette will manua
 
 ## Release Notes
 
+### 0.8.0 (2020-06-27)
+- In addition to statements, text entries, and written as entries are rendered as LaTeX.
+- All text and statements have tooltips that show their original unrendered text.
+- The preview window is only automatically opened if there is `.math` file open.
+
 ### 0.7.3 (2020-06-27)
 - Fix an issue where named groups with multiple args are now supported.
 
