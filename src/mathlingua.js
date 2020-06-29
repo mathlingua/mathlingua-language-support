@@ -8,7 +8,6 @@
   var removeSurrounding = Kotlin.kotlin.text.removeSurrounding_90ijwr$;
   var StringBuilder_init = Kotlin.kotlin.text.StringBuilder_init;
   var split = Kotlin.kotlin.text.split_ip8yn$;
-  var replace = Kotlin.kotlin.text.replace_680rmw$;
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
   var LinkedHashSet_init = Kotlin.kotlin.collections.LinkedHashSet_init_287e2$;
@@ -30,6 +29,7 @@
   var throwISE = Kotlin.throwISE;
   var Unit = Kotlin.kotlin.Unit;
   var Math_0 = Math;
+  var replace = Kotlin.kotlin.text.replace_680rmw$;
   var contains_0 = Kotlin.kotlin.text.contains_li3zpu$;
   var indexOf = Kotlin.kotlin.text.indexOf_l5u8uk$;
   var mutableSetOf = Kotlin.kotlin.collections.mutableSetOf_i5x0yv$;
@@ -332,7 +332,7 @@
     return fullExpandComplete(doc);
   };
   MathLingua.prototype.getPatternsToWrittenAs_r44ck5$ = function (defines, represents) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6, tmp$_7, tmp$_8;
     var result = LinkedHashMap_init();
     tmp$ = represents.iterator();
     while (tmp$.hasNext()) {
@@ -343,11 +343,11 @@
         tmp$_1 = allItems.iterator();
         while (tmp$_1.hasNext()) {
           var item = tmp$_1.next();
-          var tmp$_7 = Kotlin.isType(item, StringSectionGroup) && equals(item.section.name, 'written');
-          if (tmp$_7) {
-            tmp$_7 = !item.section.values.isEmpty();
+          var tmp$_9 = Kotlin.isType(item, StringSectionGroup) && equals(item.section.name, 'written');
+          if (tmp$_9) {
+            tmp$_9 = !item.section.values.isEmpty();
           }
-          if (tmp$_7) {
+          if (tmp$_9) {
             writtenAs = removeSurrounding(item.section.values.get_za3lpa$(0), '"', '"');
             break;
           }
@@ -364,22 +364,27 @@
           var value = writtenAs;
           result.put_xwzc9p$(key, value);
         }
+         else if (exp.children.size === 1 && Kotlin.isType(exp.children.get_za3lpa$(0), Command)) {
+          var key_0 = new OperatorTexTalkNode(null, Kotlin.isType(tmp$_3 = exp.children.get_za3lpa$(0), Command) ? tmp$_3 : throwCCE(), null);
+          var value_0 = writtenAs;
+          result.put_xwzc9p$(key_0, value_0);
+        }
       }
     }
-    tmp$_3 = defines.iterator();
-    while (tmp$_3.hasNext()) {
-      var def = tmp$_3.next();
-      var allItems_0 = (tmp$_4 = def.metaDataSection) != null ? tmp$_4.items : null;
+    tmp$_4 = defines.iterator();
+    while (tmp$_4.hasNext()) {
+      var def = tmp$_4.next();
+      var allItems_0 = (tmp$_5 = def.metaDataSection) != null ? tmp$_5.items : null;
       var writtenAs_0 = null;
       if (allItems_0 != null) {
-        tmp$_5 = allItems_0.iterator();
-        while (tmp$_5.hasNext()) {
-          var item_0 = tmp$_5.next();
-          var tmp$_8 = Kotlin.isType(item_0, StringSectionGroup) && equals(item_0.section.name, 'written');
-          if (tmp$_8) {
-            tmp$_8 = !item_0.section.values.isEmpty();
+        tmp$_6 = allItems_0.iterator();
+        while (tmp$_6.hasNext()) {
+          var item_0 = tmp$_6.next();
+          var tmp$_10 = Kotlin.isType(item_0, StringSectionGroup) && equals(item_0.section.name, 'written');
+          if (tmp$_10) {
+            tmp$_10 = !item_0.section.values.isEmpty();
           }
-          if (tmp$_8) {
+          if (tmp$_10) {
             writtenAs_0 = removeSurrounding(item_0.section.values.get_za3lpa$(0), '"', '"');
             break;
           }
@@ -391,11 +396,16 @@
       var validation_0 = def.id.texTalkRoot;
       if (Kotlin.isType(validation_0, ValidationSuccess)) {
         var exp_0 = validation_0.value;
-        if (exp_0.children.size === 1 && Kotlin.isType(exp_0.children.get_za3lpa$(0), Command)) {
-          var cmd = Kotlin.isType(tmp$_6 = exp_0.children.get_za3lpa$(0), Command) ? tmp$_6 : throwCCE();
-          var key_0 = new OperatorTexTalkNode(null, cmd, null);
-          var value_0 = writtenAs_0;
-          result.put_xwzc9p$(key_0, value_0);
+        if (exp_0.children.size === 1 && Kotlin.isType(exp_0.children.get_za3lpa$(0), OperatorTexTalkNode)) {
+          var key_1 = Kotlin.isType(tmp$_7 = exp_0.children.get_za3lpa$(0), OperatorTexTalkNode) ? tmp$_7 : throwCCE();
+          var value_1 = writtenAs_0;
+          result.put_xwzc9p$(key_1, value_1);
+        }
+         else if (exp_0.children.size === 1 && Kotlin.isType(exp_0.children.get_za3lpa$(0), Command)) {
+          var cmd = Kotlin.isType(tmp$_8 = exp_0.children.get_za3lpa$(0), Command) ? tmp$_8 : throwCCE();
+          var key_2 = new OperatorTexTalkNode(null, cmd, null);
+          var value_2 = writtenAs_0;
+          result.put_xwzc9p$(key_2, value_2);
         }
       }
     }
@@ -484,7 +494,7 @@
     var writer = tmp$;
     var code = node.toCode_pc06dk$(false, 0, writer).getCode();
     if (html) {
-      tmp$_0 = getHtml(replace(code, '<br/><br/><br/>', '<br/><br/>'));
+      tmp$_0 = getHtml(code);
     }
      else {
       tmp$_0 = code;
@@ -504,7 +514,7 @@
     return MathLingua_instance;
   }
   function getHtml(body) {
-    return '\n' + '<!DOCTYPE html>' + '\n' + '<html>' + '\n' + '    <head>' + '\n' + '        <link rel=' + '"' + 'stylesheet' + '"' + '\n' + '              href=' + '"' + 'https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css' + '"' + '\n' + '              integrity=' + '"' + 'sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq' + '"' + '\n' + '              crossorigin=' + '"' + 'anonymous' + '"' + '>' + '\n' + '        <script defer' + '\n' + '                src=' + '"' + 'https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js' + '"' + '\n' + '                integrity=' + '"' + 'sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz' + '"' + '\n' + '                crossorigin=' + '"' + 'anonymous' + '"' + '>' + '\n' + '        <\/script>' + '\n' + '        <script>' + '\n' + '            function buildMathFragment(rawText) {' + '\n' + '                var text = rawText;' + '\n' + "                if (text[0] === '" + '"' + "') {" + '\n' + '                    text = text.substring(1);' + '\n' + '                }' + '\n' + "                if (text[text.length - 1] === '" + '"' + "') {" + '\n' + '                    text = text.substring(0, text.length - 1);' + '\n' + '                }' + '\n' + '                text = text.replace(/([a-zA-Z0-9])' + '\\' + "?/g, '" + String.fromCharCode(36) + "1');" + '\n' + '                const fragment = document.createDocumentFragment();' + '\n' + "                var buffer = '';" + '\n' + '                var i = 0;' + '\n' + '                while (i < text.length) {' + '\n' + "                    if (text[i] === '" + '\\' + '\\' + "' && text[i+1] === '[') {" + '\n' + '                        i += 2; // skip over ' + '\\' + ' and [' + '\n' + '                        fragment.appendChild(document.createTextNode(buffer));' + '\n' + "                        buffer = '';" + '\n' + '\n' + "                        const span = document.createElement('span');" + '\n' + "                        var math = '';" + '\n' + '                        while (i < text.length &&' + '\n' + "                            !(text[i] === '" + '\\' + '\\' + "' && text[i+1] === ']')) {" + '\n' + '                            math += text[i++];' + '\n' + '                        }' + '\n' + "                        if (text[i] === '" + '\\' + '\\' + "') {" + '\n' + '                            i++; // move past the ' + '\\' + '\n' + '                        }' + '\n' + "                        if (text[i] === ']') {" + '\n' + '                            i++; // move past the ]' + '\n' + '                        }' + '\n' + '                        try {' + '\n' + '                            katex.render(math, span, {' + '\n' + '                                throwOnError: true,' + '\n' + '                                displayMode: true' + '\n' + '                            });' + '\n' + '                        } catch {' + '\n' + '                            span.appendChild(document.createTextNode(math));' + '\n' + '                        }' + '\n' + '                        fragment.appendChild(span);' + '\n' + "                    } else if (text[i] === '" + '\\' + '\\' + "' && text[i+1] === '(') {" + '\n' + '                        i += 2; // skip over ' + '\\' + ' and ()' + '\n' + '                        fragment.appendChild(document.createTextNode(buffer));' + '\n' + "                        buffer = '';" + '\n' + '\n' + "                        const span = document.createElement('span');" + '\n' + "                        var math = '';" + '\n' + '                        while (i < text.length &&' + '\n' + "                            !(text[i] === '" + '\\' + '\\' + "' && text[i+1] === ')')) {" + '\n' + '                            math += text[i++];' + '\n' + '                        }' + '\n' + "                        if (text[i] === '" + '\\' + '\\' + "') {" + '\n' + '                            i++; // move past the ' + '\\' + '\n' + '                        }' + '\n' + "                        if (text[i] === ')') {" + '\n' + '                            i++; // move past the )' + '\n' + '                        }' + '\n' + '                        try {' + '\n' + '                            katex.render(math, span, {' + '\n' + '                                throwOnError: true,' + '\n' + '                                displayMode: true' + '\n' + '                            });' + '\n' + '                        } catch {' + '\n' + '                            span.appendChild(document.createTextNode(math));' + '\n' + '                        }' + '\n' + '                        fragment.appendChild(span);' + '\n' + "                    } else if (text[i] === '" + String.fromCharCode(36) + "' && text[i+1] === '" + String.fromCharCode(36) + "') {" + '\n' + '                        i += 2; // skip over ' + String.fromCharCode(36) + ' and ' + String.fromCharCode(36) + '\n' + '                        fragment.appendChild(document.createTextNode(buffer));' + '\n' + "                        buffer = '';" + '\n' + '\n' + "                        const span = document.createElement('span');" + '\n' + "                        var math = '';" + '\n' + '                        while (i < text.length &&' + '\n' + "                            !(text[i] === '" + String.fromCharCode(36) + "' && text[i+1] === '" + String.fromCharCode(36) + "')) {" + '\n' + '                            math += text[i++];' + '\n' + '                        }' + '\n' + "                        if (text[i] === '" + String.fromCharCode(36) + "') {" + '\n' + '                            i++; // move past the ' + String.fromCharCode(36) + '\n' + '                        }' + '\n' + "                        if (text[i] === '" + String.fromCharCode(36) + "') {" + '\n' + '                            i++; // move past the ' + String.fromCharCode(36) + '\n' + '                        }' + '\n' + '                        try {' + '\n' + '                            katex.render(math, span, {' + '\n' + '                                throwOnError: true,' + '\n' + '                                displayMode: true' + '\n' + '                            });' + '\n' + '                        } catch {' + '\n' + '                            span.appendChild(document.createTextNode(math));' + '\n' + '                        }' + '\n' + '                        fragment.appendChild(span);' + '\n' + "                    } else if (text[i] === '" + String.fromCharCode(36) + "') {" + '\n' + '                        i++; // skip over the ' + String.fromCharCode(36) + '\n' + '                        fragment.appendChild(document.createTextNode(buffer));' + '\n' + "                        buffer = '';" + '\n' + '\n' + "                        const span = document.createElement('span');" + '\n' + "                        var math = '';" + '\n' + '                        while (i < text.length &&' + '\n' + "                             text[i] !== '" + String.fromCharCode(36) + "') {" + '\n' + '                            math += text[i++];' + '\n' + '                        }' + '\n' + "                        if (text[i] === '" + String.fromCharCode(36) + "') {" + '\n' + '                            i++; // move past the ' + String.fromCharCode(36) + '\n' + '                        }' + '\n' + '                        try {' + '\n' + '                            katex.render(math, span, {' + '\n' + '                                throwOnError: true,' + '\n' + '                                displayMode: true' + '\n' + '                            });' + '\n' + '                        } catch {' + '\n' + '                            span.appendChild(document.createTextNode(math));' + '\n' + '                        }' + '\n' + '                        fragment.appendChild(span);' + '\n' + '                    } else {' + '\n' + '                        buffer += text[i++];' + '\n' + '                    }' + '\n' + '                }' + '\n' + '\n' + '                if (buffer.length > 0) {' + '\n' + '                    fragment.appendChild(document.createTextNode(buffer));' + '\n' + '                }' + '\n' + '\n' + '                return fragment;' + '\n' + '            }' + '\n' + '\n' + '            function render(node) {' + '\n' + '                /*' + '\n' + '                 * The layout for nodes corresponding to text in a ' + '"' + 'written:' + '"' + ' section' + '\n' + "                 * looks like the following.  Determine if any child nodes of 'node'" + '\n' + '                 * that are text nodes are in a ' + '"' + 'written:' + '"' + ' section so that the text' + '\n' + '                 * can be trated as if it is in math mode.' + '\n' + '                 *' + '\n' + "                 * <span class='mathlingua'>" + '\n' + '                 *   ...' + '\n' + "                 *   <span class='mathlingua-header'>" + '\n' + '                 *     written:' + '\n' + '                 *   <\/span>' + '\n' + '                 *   ...' + '\n' + "                 *   <span class='mathlingua-text'>" + '\n' + '                 *     ' + '"' + 'some text' + '"' + '\n' + '                 *   <\/span>' + '\n' + '                 * <\/span>' + '\n' + '                 */' + '\n' + '                let isInWritten = false;' + '\n' + '                const parent = node.parentNode;' + '\n' + "                if (parent && node.className === 'mathlingua-text') {" + '\n' + '                    for (let j=0; j<parent.childNodes.length; j++) {' + '\n' + '                        const sibling = parent.childNodes[j];' + '\n' + '                        if (sibling.childNodes.length > 0 &&' + '\n' + '                            sibling.childNodes[0].nodeType === 3 &&' + '\n' + "                            sibling.childNodes[0].textContent === 'written:') {" + '\n' + '                            isInWritten = true;' + '\n' + '                            break;' + '\n' + '                        }' + '\n' + '                    }' + '\n' + '                }' + '\n' + '\n' + '                for (let i = 0; i < node.childNodes.length; i++) {' + '\n' + '                    const child = node.childNodes[i];' + '\n' + '\n' + '                    // node is an element node => nodeType === 1' + '\n' + '                    // node is an attribute node => nodeType === 2' + '\n' + '                    // node is a text node => nodeType === 3' + '\n' + '                    // node is a comment node => nodeType === 8' + '\n' + '                    if (child.nodeType === 3) {' + '\n' + '                        let text = child.textContent;' + '\n' + '                        if (text.trim()) {' + '\n' + '                            if (isInWritten) {' + '\n' + '                                // if the text is in a written: section' + '\n' + '                                // turn ' + '"' + 'some text' + '"' + ' to ' + '\\' + '[some text' + '\\' + ']' + '\n' + '                                // so the text is in math mode' + '\n' + "                                if (text[0] === '" + '"' + "') {" + '\n' + '                                    text = text.substring(1);' + '\n' + '                                }' + '\n' + "                                if (text[text.length - 1] === '" + '"' + "') {" + '\n' + '                                    text = text.substring(0, text.length - 1);' + '\n' + '                                }' + '\n' + "                                text = '" + '\\' + '\\' + "[' + text + '" + '\\' + '\\' + "]';" + '\n' + '                            }' + '\n' + '                            const fragment = buildMathFragment(text);' + '\n' + '                            i += fragment.childNodes.length - 1;' + '\n' + '                            node.replaceChild(fragment, child);' + '\n' + '                        }' + '\n' + '                    } else if (child.nodeType === 1) {' + '\n' + '                        render(child);' + '\n' + '                    }' + '\n' + '                }' + '\n' + '            }' + '\n' + '        <\/script>' + '\n' + '        <style>' + '\n' + '            .content {' + '\n' + '                margin-top: 1em;' + '\n' + '                margin-bottom: 1em;' + '\n' + '                font-size: 1em;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua {' + '\n' + '                font-family: monospace;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-header {' + '\n' + '                font-weight: bold;' + '\n' + '                color: #0055bb;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-whitespace {' + '\n' + '                padding: 0;' + '\n' + '                margin: 0;' + '\n' + '                margin-left: 1ex;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-id {' + '\n' + '                font-weight: bold;' + '\n' + '                color: #5500aa;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-text {' + '\n' + '                color: #007700;' + '\n' + '            }' + '\n' + '\n' + '            .katex {' + '\n' + '                font-size: 0.75em;' + '\n' + '            }' + '\n' + '\n' + '            .katex-display {' + '\n' + '                display: contents;' + '\n' + '            }' + '\n' + '\n' + '            .katex-display > .katex {' + '\n' + '                display: contents;' + '\n' + '            }' + '\n' + '\n' + '            .katex-display > .katex > .katex-html {' + '\n' + '                display: contents;' + '\n' + '            }' + '\n' + '        <\/style>' + '\n' + '    <\/head>' + '\n' + '    <body onload=' + '"' + 'render(document.body)' + '"' + '>' + '\n' + '        <div class=' + '"' + 'content' + '"' + '>' + '\n' + '            ' + body + '\n' + '        <\/div>' + '\n' + '    <\/body>' + '\n' + '<\/html>' + '\n';
+    return '\n' + '<!DOCTYPE html>' + '\n' + '<html>' + '\n' + '    <head>' + '\n' + '        <link rel=' + '"' + 'stylesheet' + '"' + '\n' + '              href=' + '"' + 'https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css' + '"' + '\n' + '              integrity=' + '"' + 'sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq' + '"' + '\n' + '              crossorigin=' + '"' + 'anonymous' + '"' + '>' + '\n' + '        <script defer' + '\n' + '                src=' + '"' + 'https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js' + '"' + '\n' + '                integrity=' + '"' + 'sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz' + '"' + '\n' + '                crossorigin=' + '"' + 'anonymous' + '"' + '>' + '\n' + '        <\/script>' + '\n' + '        <script>' + '\n' + '            function buildMathFragment(rawText) {' + '\n' + '                var text = rawText;' + '\n' + "                if (text[0] === '" + '"' + "') {" + '\n' + '                    text = text.substring(1);' + '\n' + '                }' + '\n' + "                if (text[text.length - 1] === '" + '"' + "') {" + '\n' + '                    text = text.substring(0, text.length - 1);' + '\n' + '                }' + '\n' + '                text = text.replace(/([a-zA-Z0-9])' + '\\' + '?' + '\\' + "??/g, '" + String.fromCharCode(36) + "1');" + '\n' + '                const fragment = document.createDocumentFragment();' + '\n' + "                var buffer = '';" + '\n' + '                var i = 0;' + '\n' + '                while (i < text.length) {' + '\n' + "                    if (text[i] === '" + '\\' + '\\' + "' && text[i+1] === '[') {" + '\n' + '                        i += 2; // skip over ' + '\\' + ' and [' + '\n' + '                        fragment.appendChild(document.createTextNode(buffer));' + '\n' + "                        buffer = '';" + '\n' + '\n' + "                        const span = document.createElement('span');" + '\n' + "                        var math = '';" + '\n' + '                        while (i < text.length &&' + '\n' + "                            !(text[i] === '" + '\\' + '\\' + "' && text[i+1] === ']')) {" + '\n' + '                            math += text[i++];' + '\n' + '                        }' + '\n' + "                        if (text[i] === '" + '\\' + '\\' + "') {" + '\n' + '                            i++; // move past the ' + '\\' + '\n' + '                        }' + '\n' + "                        if (text[i] === ']') {" + '\n' + '                            i++; // move past the ]' + '\n' + '                        }' + '\n' + '                        try {' + '\n' + '                            katex.render(math, span, {' + '\n' + '                                throwOnError: true,' + '\n' + '                                displayMode: true' + '\n' + '                            });' + '\n' + '                        } catch {' + '\n' + '                            span.appendChild(document.createTextNode(math));' + '\n' + '                        }' + '\n' + '                        fragment.appendChild(span);' + '\n' + "                    } else if (text[i] === '" + '\\' + '\\' + "' && text[i+1] === '(') {" + '\n' + '                        i += 2; // skip over ' + '\\' + ' and ()' + '\n' + '                        fragment.appendChild(document.createTextNode(buffer));' + '\n' + "                        buffer = '';" + '\n' + '\n' + "                        const span = document.createElement('span');" + '\n' + "                        var math = '';" + '\n' + '                        while (i < text.length &&' + '\n' + "                            !(text[i] === '" + '\\' + '\\' + "' && text[i+1] === ')')) {" + '\n' + '                            math += text[i++];' + '\n' + '                        }' + '\n' + "                        if (text[i] === '" + '\\' + '\\' + "') {" + '\n' + '                            i++; // move past the ' + '\\' + '\n' + '                        }' + '\n' + "                        if (text[i] === ')') {" + '\n' + '                            i++; // move past the )' + '\n' + '                        }' + '\n' + '                        try {' + '\n' + '                            katex.render(math, span, {' + '\n' + '                                throwOnError: true,' + '\n' + '                                displayMode: true' + '\n' + '                            });' + '\n' + '                        } catch {' + '\n' + '                            span.appendChild(document.createTextNode(math));' + '\n' + '                        }' + '\n' + '                        fragment.appendChild(span);' + '\n' + "                    } else if (text[i] === '" + String.fromCharCode(36) + "' && text[i+1] === '" + String.fromCharCode(36) + "') {" + '\n' + '                        i += 2; // skip over ' + String.fromCharCode(36) + ' and ' + String.fromCharCode(36) + '\n' + '                        fragment.appendChild(document.createTextNode(buffer));' + '\n' + "                        buffer = '';" + '\n' + '\n' + "                        const span = document.createElement('span');" + '\n' + "                        var math = '';" + '\n' + '                        while (i < text.length &&' + '\n' + "                            !(text[i] === '" + String.fromCharCode(36) + "' && text[i+1] === '" + String.fromCharCode(36) + "')) {" + '\n' + '                            math += text[i++];' + '\n' + '                        }' + '\n' + "                        if (text[i] === '" + String.fromCharCode(36) + "') {" + '\n' + '                            i++; // move past the ' + String.fromCharCode(36) + '\n' + '                        }' + '\n' + "                        if (text[i] === '" + String.fromCharCode(36) + "') {" + '\n' + '                            i++; // move past the ' + String.fromCharCode(36) + '\n' + '                        }' + '\n' + '                        try {' + '\n' + '                            katex.render(math, span, {' + '\n' + '                                throwOnError: true,' + '\n' + '                                displayMode: true' + '\n' + '                            });' + '\n' + '                        } catch {' + '\n' + '                            span.appendChild(document.createTextNode(math));' + '\n' + '                        }' + '\n' + '                        fragment.appendChild(span);' + '\n' + "                    } else if (text[i] === '" + String.fromCharCode(36) + "') {" + '\n' + '                        i++; // skip over the ' + String.fromCharCode(36) + '\n' + '                        fragment.appendChild(document.createTextNode(buffer));' + '\n' + "                        buffer = '';" + '\n' + '\n' + "                        const span = document.createElement('span');" + '\n' + "                        var math = '';" + '\n' + '                        while (i < text.length &&' + '\n' + "                             text[i] !== '" + String.fromCharCode(36) + "') {" + '\n' + '                            math += text[i++];' + '\n' + '                        }' + '\n' + "                        if (text[i] === '" + String.fromCharCode(36) + "') {" + '\n' + '                            i++; // move past the ' + String.fromCharCode(36) + '\n' + '                        }' + '\n' + '                        try {' + '\n' + '                            katex.render(math, span, {' + '\n' + '                                throwOnError: true,' + '\n' + '                                displayMode: true' + '\n' + '                            });' + '\n' + '                        } catch {' + '\n' + '                            span.appendChild(document.createTextNode(math));' + '\n' + '                        }' + '\n' + '                        fragment.appendChild(span);' + '\n' + '                    } else {' + '\n' + '                        buffer += text[i++];' + '\n' + '                    }' + '\n' + '                }' + '\n' + '\n' + '                if (buffer.length > 0) {' + '\n' + '                    fragment.appendChild(document.createTextNode(buffer));' + '\n' + '                }' + '\n' + '\n' + '                return fragment;' + '\n' + '            }' + '\n' + '\n' + '            function render(node) {' + '\n' + '                /*' + '\n' + '                 * The layout for nodes corresponding to text in a ' + '"' + 'written:' + '"' + ' section' + '\n' + "                 * looks like the following.  Determine if any child nodes of 'node'" + '\n' + '                 * that are text nodes are in a ' + '"' + 'written:' + '"' + ' section so that the text' + '\n' + '                 * can be trated as if it is in math mode.' + '\n' + '                 *' + '\n' + "                 * <span class='mathlingua'>" + '\n' + '                 *   ...' + '\n' + "                 *   <span class='mathlingua-header'>" + '\n' + '                 *     written:' + '\n' + '                 *   <\/span>' + '\n' + '                 *   ...' + '\n' + "                 *   <span class='mathlingua-text'>" + '\n' + '                 *     ' + '"' + 'some text' + '"' + '\n' + '                 *   <\/span>' + '\n' + '                 * <\/span>' + '\n' + '                 */' + '\n' + '                let isInWritten = false;' + '\n' + '                const parent = node.parentNode;' + '\n' + "                if (parent && node.className === 'mathlingua-text') {" + '\n' + '                    for (let j=0; j<parent.childNodes.length; j++) {' + '\n' + '                        const sibling = parent.childNodes[j];' + '\n' + '                        if (sibling.childNodes.length > 0 &&' + '\n' + '                            sibling.childNodes[0].nodeType === 3 &&' + '\n' + "                            sibling.childNodes[0].textContent === 'written:') {" + '\n' + '                            isInWritten = true;' + '\n' + '                            break;' + '\n' + '                        }' + '\n' + '                    }' + '\n' + '                }' + '\n' + '\n' + '                for (let i = 0; i < node.childNodes.length; i++) {' + '\n' + '                    const child = node.childNodes[i];' + '\n' + '\n' + '                    // node is an element node => nodeType === 1' + '\n' + '                    // node is an attribute node => nodeType === 2' + '\n' + '                    // node is a text node => nodeType === 3' + '\n' + '                    // node is a comment node => nodeType === 8' + '\n' + '                    if (child.nodeType === 3) {' + '\n' + '                        let text = child.textContent;' + '\n' + '                        if (text.trim()) {' + '\n' + '                            if (isInWritten) {' + '\n' + '                                // if the text is in a written: section' + '\n' + '                                // turn ' + '"' + 'some text' + '"' + ' to ' + '\\' + '[some text' + '\\' + ']' + '\n' + '                                // so the text is in math mode' + '\n' + "                                if (text[0] === '" + '"' + "') {" + '\n' + '                                    text = text.substring(1);' + '\n' + '                                }' + '\n' + "                                if (text[text.length - 1] === '" + '"' + "') {" + '\n' + '                                    text = text.substring(0, text.length - 1);' + '\n' + '                                }' + '\n' + "                                text = '" + '\\' + '\\' + "[' + text + '" + '\\' + '\\' + "]';" + '\n' + '                            }' + '\n' + '                            const fragment = buildMathFragment(text);' + '\n' + '                            i += fragment.childNodes.length - 1;' + '\n' + '                            node.replaceChild(fragment, child);' + '\n' + '                        }' + '\n' + '                    } else if (child.nodeType === 1) {' + '\n' + '                        render(child);' + '\n' + '                    }' + '\n' + '                }' + '\n' + '            }' + '\n' + '        <\/script>' + '\n' + '        <style>' + '\n' + '            .content {' + '\n' + '                margin-top: 1em;' + '\n' + '                margin-bottom: 1em;' + '\n' + '                font-size: 1em;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua {' + '\n' + '                font-family: monospace;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-header {' + '\n' + '                font-weight: bold;' + '\n' + '                color: #0055bb;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-whitespace {' + '\n' + '                padding: 0;' + '\n' + '                margin: 0;' + '\n' + '                margin-left: 1ex;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-id {' + '\n' + '                font-weight: bold;' + '\n' + '                color: #5500aa;' + '\n' + '            }' + '\n' + '\n' + '            .mathlingua-text {' + '\n' + '                color: #007700;' + '\n' + '            }' + '\n' + '\n' + '            .katex {' + '\n' + '                font-size: 0.75em;' + '\n' + '            }' + '\n' + '\n' + '            .katex-display {' + '\n' + '                display: contents;' + '\n' + '            }' + '\n' + '\n' + '            .katex-display > .katex {' + '\n' + '                display: contents;' + '\n' + '            }' + '\n' + '\n' + '            .katex-display > .katex > .katex-html {' + '\n' + '                display: contents;' + '\n' + '            }' + '\n' + '        <\/style>' + '\n' + '    <\/head>' + '\n' + '    <body onload=' + '"' + 'render(document.body)' + '"' + '>' + '\n' + '        <div class=' + '"' + 'content' + '"' + '>' + '\n' + '            ' + body + '\n' + '        <\/div>' + '\n' + '    <\/body>' + '\n' + '<\/html>' + '\n';
   }
   function ParseError(message, row, column) {
     RuntimeException_init(message, this);
@@ -2610,6 +2620,7 @@
   };
   HtmlCodeWriter.prototype.endTopLevel = function () {
     this.builder.append_gw00v9$('<\/span>');
+    this.builder.append_gw00v9$("<span class='end-mathlingua-top-level'/>");
   };
   HtmlCodeWriter.prototype.newCodeWriter_g8umse$ = function (defines) {
     return new HtmlCodeWriter(defines, this.represents);
@@ -10201,7 +10212,7 @@
       var value = new PatternExpansion(opPattern, expansion);
       sigToPatternExpansion.put_xwzc9p$(key, value);
     }
-    return expandAsWrittenImpl(node, sigToPatternExpansion);
+    return expandAsWrittenImpl(node, sigToPatternExpansion, false);
   }
   function MutableSubstitutions(doesMatch, substitutions, errors) {
     this.doesMatch = doesMatch;
@@ -10521,11 +10532,16 @@
   }
   function expandAsWrittenImplImpl$lambda(closure$sigToPatternExpansion) {
     return function (it) {
-      return expandAsWrittenImpl(it, closure$sigToPatternExpansion);
+      return expandAsWrittenImpl(it, closure$sigToPatternExpansion, true);
+    };
+  }
+  function expandAsWrittenImplImpl$lambda_0(closure$sigToPatternExpansion) {
+    return function (it) {
+      return expandAsWrittenImpl(it, closure$sigToPatternExpansion, false);
     };
   }
   function expandAsWrittenImplImpl_0(op, sigToPatternExpansion) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4;
     tmp$ = sigToPatternExpansion.get_11rb$(signature(op));
     if (tmp$ == null) {
       return null;
@@ -10538,13 +10554,16 @@
     var expansion = patternExpansion.expansion;
     tmp$_0 = subs.substitutions.entries.iterator();
     while (tmp$_0.hasNext()) {
-      var tmp$_4 = tmp$_0.next();
-      var name = tmp$_4.key;
-      var exp = tmp$_4.value;
+      var tmp$_5 = tmp$_0.next();
+      var name = tmp$_5.key;
+      var exp = tmp$_5.value;
       if (!exp.isEmpty()) {
-        var expToString = joinToString(exp, ' ', void 0, void 0, void 0, void 0, expandAsWrittenImplImpl$lambda(sigToPatternExpansion));
+        var expToStringParen = joinToString(exp, ' ', void 0, void 0, void 0, void 0, expandAsWrittenImplImpl$lambda(sigToPatternExpansion));
+        expansion = replace(expansion, name + '??', expToStringParen);
+        var expToString = joinToString(exp, ' ', void 0, void 0, void 0, void 0, expandAsWrittenImplImpl$lambda_0(sigToPatternExpansion));
         expansion = replace(expansion, name + '?', expToString);
       }
+      var hasDoubleQuestion = false;
       var startIndex = 0;
       var target = name + '{';
       while (true) {
@@ -10569,6 +10588,10 @@
           i = i + 1 | 0;
           if (c === 125 && leftCurlyCount === 0 && i < expansion.length && expansion.charCodeAt(i) === 63) {
             isValid = true;
+            i = i + 1 | 0;
+            if (i < expansion.length && expansion.charCodeAt(i) === 63) {
+              hasDoubleQuestion = true;
+            }
             break;
           }
            else {
@@ -10578,19 +10601,27 @@
         if (isValid) {
           var innerText = innerTextBuffer.toString();
           var expansionPrefix = expansion.substring(0, index);
+          if (hasDoubleQuestion) {
+            tmp$_2 = 3;
+          }
+           else {
+            tmp$_2 = 2;
+          }
+          var delta = tmp$_2;
           var $receiver = expansion;
-          var startIndex_0 = index + target.length + innerText.length + 2 | 0;
+          var startIndex_0 = index + target.length + innerText.length + delta | 0;
           var expansionSuffix = $receiver.substring(startIndex_0);
           var prefixRegex = Regex_init('(.*)\\.\\.\\.');
           var infixRegex = Regex_init('(.*)\\.\\.\\.(.*)\\.\\.\\.(.*)');
           var suffixRegex = Regex_init('\\.\\.\\.(.*)');
+          var addParens = hasDoubleQuestion;
           if (infixRegex.matches_6bul2c$(innerText)) {
             var destination = ArrayList_init_0(collectionSizeOrDefault(exp, 10));
-            var tmp$_5;
-            tmp$_5 = exp.iterator();
-            while (tmp$_5.hasNext()) {
-              var item = tmp$_5.next();
-              destination.add_11rb$(expandAsWrittenImpl(item, sigToPatternExpansion));
+            var tmp$_6;
+            tmp$_6 = exp.iterator();
+            while (tmp$_6.hasNext()) {
+              var item = tmp$_6.next();
+              destination.add_11rb$(expandAsWrittenImpl(item, sigToPatternExpansion, addParens));
             }
             var args = destination;
             var result = infixRegex.find_905azu$(innerText);
@@ -10606,20 +10637,20 @@
           }
            else if (prefixRegex.matches_6bul2c$(innerText)) {
             var destination_0 = ArrayList_init_0(collectionSizeOrDefault(exp, 10));
-            var tmp$_6;
-            tmp$_6 = exp.iterator();
-            while (tmp$_6.hasNext()) {
-              var item_0 = tmp$_6.next();
-              destination_0.add_11rb$(expandAsWrittenImpl(item_0, sigToPatternExpansion));
+            var tmp$_7;
+            tmp$_7 = exp.iterator();
+            while (tmp$_7.hasNext()) {
+              var item_0 = tmp$_7.next();
+              destination_0.add_11rb$(expandAsWrittenImpl(item_0, sigToPatternExpansion, addParens));
             }
             var args_0 = destination_0;
             var result_0 = prefixRegex.find_905azu$(innerText);
             if (result_0 != null && result_0.groupValues.size >= 2) {
               var separator_0 = result_0.groupValues.get_za3lpa$(1);
               var joinedArgsBuilder = StringBuilder_init();
-              tmp$_2 = args_0.iterator();
-              while (tmp$_2.hasNext()) {
-                var a = tmp$_2.next();
+              tmp$_3 = args_0.iterator();
+              while (tmp$_3.hasNext()) {
+                var a = tmp$_3.next();
                 joinedArgsBuilder.append_gw00v9$(separator_0);
                 joinedArgsBuilder.append_gw00v9$(a);
               }
@@ -10630,20 +10661,20 @@
           }
            else if (suffixRegex.matches_6bul2c$(innerText)) {
             var destination_1 = ArrayList_init_0(collectionSizeOrDefault(exp, 10));
-            var tmp$_7;
-            tmp$_7 = exp.iterator();
-            while (tmp$_7.hasNext()) {
-              var item_1 = tmp$_7.next();
-              destination_1.add_11rb$(expandAsWrittenImpl(item_1, sigToPatternExpansion));
+            var tmp$_8;
+            tmp$_8 = exp.iterator();
+            while (tmp$_8.hasNext()) {
+              var item_1 = tmp$_8.next();
+              destination_1.add_11rb$(expandAsWrittenImpl(item_1, sigToPatternExpansion, addParens));
             }
             var args_1 = destination_1;
             var result_1 = suffixRegex.find_905azu$(innerText);
             if (result_1 != null && result_1.groupValues.size >= 2) {
               var separator_1 = result_1.groupValues.get_za3lpa$(1);
               var joinedArgsBuilder_0 = StringBuilder_init();
-              tmp$_3 = args_1.iterator();
-              while (tmp$_3.hasNext()) {
-                var a_0 = tmp$_3.next();
+              tmp$_4 = args_1.iterator();
+              while (tmp$_4.hasNext()) {
+                var a_0 = tmp$_4.next();
                 joinedArgsBuilder_0.append_gw00v9$(a_0);
                 joinedArgsBuilder_0.append_gw00v9$(separator_1);
               }
@@ -10658,6 +10689,21 @@
     }
     return expansion;
   }
+  function shouldHaveParen(node) {
+    if (Kotlin.isType(node, TextTexTalkNode) || Kotlin.isType(node, Command)) {
+      return false;
+    }
+    if (Kotlin.isType(node, OperatorTexTalkNode)) {
+      return node.lhs != null || node.rhs != null;
+    }
+    if (Kotlin.isType(node, ExpressionTexTalkNode)) {
+      if (node.children.isEmpty()) {
+        return false;
+      }
+      return node.children.size > 1 || shouldHaveParen(node.children.get_za3lpa$(0));
+    }
+    return true;
+  }
   function expandAsWrittenImpl$lambda(closure$sigToPatternExpansion) {
     return function (it) {
       if (Kotlin.isType(it, Command))
@@ -10668,8 +10714,16 @@
         return null;
     };
   }
-  function expandAsWrittenImpl(node, sigToPatternExpansion) {
-    return node.toCode_6z438g$(expandAsWrittenImpl$lambda(sigToPatternExpansion));
+  function expandAsWrittenImpl(node, sigToPatternExpansion, addParens) {
+    var tmp$;
+    var code = node.toCode_6z438g$(expandAsWrittenImpl$lambda(sigToPatternExpansion));
+    if (addParens && shouldHaveParen(node)) {
+      tmp$ = '\\' + 'left ( ' + code + ' ' + '\\' + 'right )';
+    }
+     else {
+      tmp$ = code;
+    }
+    return tmp$;
   }
   function locateAllSignatures(node, locationTracker) {
     var signatures = LinkedHashSet_init();

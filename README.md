@@ -8,7 +8,14 @@ Supports syntax highlighting, auto-analysis, autocomplete, and rendering of Math
 
 Furthermore, entering the `mathlingua` command at the command palette will manually open a preview window that renders the current MathLingua document.  In addition, when a `.math` file is opened, the preview window is automatically opened.
 
+![Preview image of the extension](./images/preview.png)
+
 ## Release Notes
+
+### 0.9.0 (2020-06-29)
+- Support `A??` and `A{...}??` 'written as' forms.
+- Improve the spacing and rendering in the preview window.
+- Fixed some issues related to opening the preview window.
 
 ### 0.8.0 (2020-06-27)
 - In addition to statements, text entries, and written as entries are rendered as LaTeX.

@@ -262,15 +262,22 @@ async function updateHtmlView(panel: vscode.WebviewPanel, textDoc: vscode.TextDo
   const fontFamily = config.editor.fontFamily || 'monospace';
   const allDocs = (await getAllDocContents(true)).join('\n\n\n');
   panel.webview.html = toHtml(textDoc.getText(), allDocs)
+    .replace(/<style>/g, '<style> .end-mathlingua-top-level { display: block; border: 0.75px solid #eeeeee; margin-top: 2em; margin-bottom: 2em; } ')
     .replace(/font-size: 1em;/g, 'font-size: 1.5em;') // scale the main font
-    .replace(/font-size: 0.75em;/g, 'font-size: 1.125em;') // scale the latex font
+    .replace(/font-size: 0\.75em;/g, 'font-size: 1.125em;') // scale the latex font
     .replace(/font-family: monospace;/g, `font-family: ${fontFamily};`)
     // add more padding below each entry
-    .replace(/.mathlingua-top-level \{/g, '.mathlingua-top-level {padding-bottom: 1.5em;');
+    .replace(/\.mathlingua-top-level \{/g, '.mathlingua-top-level {padding-bottom: 1.5em;');
 }
 
-function createHtmlView() {
-  const panel = vscode.window.createWebviewPanel(
+let prevPanel: vscode.WebviewPanel|null = null;
+function maybeCreateHtmlView(document: vscode.TextDocument|null, force: boolean) {
+  const doc = document || vscode.window.activeTextEditor?.document;
+  if ((!doc || !doc.uri.path.endsWith('.math')) && !force) {
+    return;
+  }
+
+  const panel = prevPanel || vscode.window.createWebviewPanel(
     'mathlingua',
     'MathLingua Preview',
     vscode.ViewColumn.Beside,
@@ -278,6 +285,10 @@ function createHtmlView() {
       enableScripts: true
     }
   );
+  prevPanel = panel;
+  prevPanel.onDidDispose(() => {
+    prevPanel = null;
+  });
 
   vscode.workspace.onDidSaveTextDocument(async textDoc => {
     await updateHtmlView(panel, textDoc);
@@ -291,12 +302,11 @@ function createHtmlView() {
     await updateHtmlView(panel, doc);
   });
 
-  const doc = vscode.window.activeTextEditor?.document;
   if (doc) {
     updateHtmlView(panel, doc);
   } else {
     panel.webview.html = '<html><body><span style="font-size: 1.5em; margin-top: 2em;">' +
-      'Whenever a MathLingua document is saved, its contents will be displayed here.</span></body></html>';
+      'Whenever a MathLingua (.math) document is saved, its contents will be displayed here.</span></body></html>';
   }
 }
 
@@ -322,12 +332,12 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   const previewCommand = vscode.commands.registerCommand('mathlingua.preview', () => {
-    createHtmlView();
+    maybeCreateHtmlView(null, true);
   });
 
   context.subscriptions.push(staticCompletionProvider, previewCommand);
-  const currentDocPath = vscode.window.activeTextEditor?.document.uri.path
-  if (currentDocPath && currentDocPath.endsWith('.math')) {
-    createHtmlView();
-  }
+  maybeCreateHtmlView(null, false);
+  vscode.workspace.onDidOpenTextDocument(async doc => {
+    maybeCreateHtmlView(doc, false);
+  });
 }
