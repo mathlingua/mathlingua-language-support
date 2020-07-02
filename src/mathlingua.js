@@ -2527,6 +2527,7 @@
     simpleName: 'CodeWriter',
     interfaces: []
   };
+  var IS;
   function HtmlCodeWriter(defines, represents) {
     this.defines = defines;
     this.represents = represents;
@@ -2615,14 +2616,13 @@
   }
   HtmlCodeWriter.prototype.writeStatement_ytmu5s$ = function (stmtText, root) {
     this.builder.append_gw00v9$("<span class='mathlingua-statement' title='" + removeSurrounding(stmtText, "'", "'") + "'>");
-    var IS = 'is';
     if (contains_0(stmtText, IS)) {
       var index = indexOf(stmtText, IS);
       this.builder.append_gw00v9$('\\' + '[' + stmtText.substring(0, index) + '\\' + ']');
       this.writeSpace();
       this.writeDirect_61zpoe$("<span class='mathlingua-is'>is<\/span>");
       this.writeSpace();
-      var startIndex = index + IS.length | 0;
+      var startIndex = index + 4 | 0;
       var $receiver = stmtText.substring(startIndex);
       var tmp$;
       var lhs = trim(Kotlin.isCharSequence(tmp$ = $receiver) ? tmp$ : throwCCE()).toString();
@@ -11832,6 +11832,11 @@
   package$ast.getColumn_7qsl7r$ = getColumn;
   var package$phase2 = package$chalktalk.phase2 || (package$chalktalk.phase2 = {});
   package$phase2.CodeWriter = CodeWriter;
+  Object.defineProperty(package$phase2, 'IS', {
+    get: function () {
+      return IS;
+    }
+  });
   package$phase2.HtmlCodeWriter = HtmlCodeWriter;
   package$phase2.MathLinguaCodeWriter = MathLinguaCodeWriter;
   package$phase2.prettyPrintIdentifier_y4putb$ = prettyPrintIdentifier;
@@ -12242,6 +12247,7 @@
   OperatorTexTalkNode.prototype.toCode_6z438g$ = TexTalkNode.prototype.toCode_6z438g$;
   TexTalkToken.prototype.toCode_6z438g$ = TexTalkNode.prototype.toCode_6z438g$;
   INVALID = new Phase1Token('INVALID', ChalkTalkTokenType$Invalid_getInstance(), -1, -1);
+  IS = ' is ';
   CLAUSE_VALIDATORS = listOf_0([new ValidationPair(getCallableRef('isAbstraction', function (node) {
     return isAbstraction(node);
   }), getCallableRef('validateAbstractionNode', function (node, tracker) {

@@ -17,11 +17,15 @@ The following configuration options are supported:
   - Defaults to `1.5`.
 - **useBoldHeaders**
   - Specifies whether or not headers in MathLingua are rendered as bold.
-  - Defaults to `true`.
+  - Defaults to `false`.
 
 ![Preview image of the extension](images/preview.png)
 
 ## Release Notes
+
+### 0.10.1 (2020-07-02)
+- Address an issue where commands containing the text `is` (such as `\exists`) were not rendered correctly.
+- Changed the default configuration value of `mathlingua.useBoldHeaders` to `false`.
 
 ### 0.10.0 (2020-07-01)
 - Add configuration options.
