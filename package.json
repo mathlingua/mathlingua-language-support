@@ -2,7 +2,7 @@
     "name": "mathlingua-language-support",
     "displayName": "Mathlingua Language Support",
     "description": "Visual Studio Code language support for the Mathlingua language",
-    "version": "0.9.2",
+    "version": "0.10.0",
     "publisher": "dominickramer",
     "author": {
         "name": "Dominic Kramer"
@@ -53,7 +53,27 @@
                 "title": "Preview MathLingua code",
                 "category": "mathlingua"
             }
-        ]
+        ],
+        "configuration": {
+            "title": "MathLingua",
+            "properties": {
+                "mathlingua.useBoldHeaders": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Use bold fonts when rendering MathLingua headers."
+                },
+                "mathlingua.fontFamily": {
+                    "type": "string",
+                    "default": null,
+                    "description": "The font to use when rendering MathLingua code.  Defaults to the editor font."
+                },
+                "mathlingua.scale": {
+                    "type": "number",
+                    "default": "1.5",
+                    "description": "The font scale to use when rendering MathLingua code."
+                }
+            }
+        }
     },
     "activationEvents": [
         "*"

@@ -8,9 +8,23 @@ Supports syntax highlighting, auto-analysis, autocomplete, and rendering of Math
 
 Furthermore, entering the `mathlingua` command at the command palette will manually open a preview window that renders the current MathLingua document.  In addition, when a `.math` file is opened, the preview window is automatically opened.
 
+The following configuration options are supported:
+- **mathlingua.fontFamily**
+  - The font used when rendering MathLingua code.
+  - Defaults to the editor's font family.
+- **mathlingua.scale**
+  - The amount to scale the rendered MathLingua code's font.
+  - Defaults to `1.5`.
+- **useBoldHeaders**
+  - Specifies whether or not headers in MathLingua are rendered as bold.
+  - Defaults to `true`.
+
 ![Preview image of the extension](images/preview.png)
 
 ## Release Notes
+
+### 0.10.0 (2020-07-01)
+- Add configuration options.
 
 ### 0.9.2 (2020-07-01)
 - Add autocomplete for `expands:as:`.

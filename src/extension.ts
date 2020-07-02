@@ -264,15 +264,21 @@ async function updateHtmlView(panel: vscode.WebviewPanel, textDoc: vscode.TextDo
     return
   }
   const config = vscode.workspace.getConfiguration();
-  const fontFamily = config.editor.fontFamily || 'monospace';
+  const editorFontFamily = config.editor.fontFamily || 'monospace';
   const allDocs = (await getAllDocContents(true)).join('\n\n\n');
+
+  const fontFamily = config.mathlingua.fontFamily || editorFontFamily;
+  const scale = config.mathlingua.scale || 1.5;
+  const weight = config.mathlingua.useBoldHeaders ? 'bold' : 'plain';
+
   panel.webview.html = toHtml(textDoc.getText(), allDocs)
     .replace(/<style>/g, '<style> .end-mathlingua-top-level { display: block; border: 0.75px solid #eeeeee; margin-top: 2em; margin-bottom: 2em; } ')
-    .replace(/font-size: 1em;/g, 'font-size: 1.5em;') // scale the main font
-    .replace(/font-size: 0\.75em;/g, 'font-size: 1.125em;') // scale the latex font
+    .replace(/font-size: 1em;/g, `font-size: ${scale}em;`) // scale the main font
+    .replace(/font-size: 0\.75em;/g, `font-size: ${scale*0.75}em;`) // scale the latex font
     .replace(/font-family: monospace;/g, `font-family: ${fontFamily};`)
     // add more padding below each entry
-    .replace(/\.mathlingua-top-level \{/g, '.mathlingua-top-level {padding-bottom: 1.5em;');
+    .replace(/\.mathlingua-top-level \{/g, '.mathlingua-top-level {padding-bottom: 1.5em;')
+    .replace(/font-weight: bold;/g, `font-weight: ${weight};`);
 }
 
 let prevPanel: vscode.WebviewPanel|null = null;
