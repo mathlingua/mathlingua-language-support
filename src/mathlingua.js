@@ -786,7 +786,7 @@
     }
   };
   ChalkTalkLexerImpl.prototype.initialize_0 = function () {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6, tmp$_7, tmp$_8, tmp$_9, tmp$_10, tmp$_11, tmp$_12, tmp$_13, tmp$_14, tmp$_15, tmp$_16, tmp$_17, tmp$_18, tmp$_19, tmp$_20, tmp$_21, tmp$_22, tmp$_23, tmp$_24, tmp$_25, tmp$_26, tmp$_27, tmp$_28, tmp$_29, tmp$_30, tmp$_31, tmp$_32, tmp$_33, tmp$_34, tmp$_35, tmp$_36, tmp$_37, tmp$_38, tmp$_39, tmp$_40, tmp$_41, tmp$_42, tmp$_43, tmp$_44, tmp$_45, tmp$_46, tmp$_47, tmp$_48, tmp$_49;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6, tmp$_7, tmp$_8, tmp$_9, tmp$_10, tmp$_11, tmp$_12, tmp$_13, tmp$_14, tmp$_15, tmp$_16, tmp$_17, tmp$_18, tmp$_19, tmp$_20, tmp$_21, tmp$_22, tmp$_23, tmp$_24, tmp$_25, tmp$_26, tmp$_27, tmp$_28, tmp$_29, tmp$_30, tmp$_31, tmp$_32, tmp$_33, tmp$_34, tmp$_35, tmp$_36, tmp$_37, tmp$_38, tmp$_39, tmp$_40, tmp$_41, tmp$_42, tmp$_43, tmp$_44, tmp$_45, tmp$_46, tmp$_47, tmp$_48, tmp$_49, tmp$_50, tmp$_51, tmp$_52, tmp$_53;
     this.chalkTalkTokens_0 = ArrayList_init();
     if (!endsWith(this.text_0, '\n')) {
       this.text_0 = this.text_0 + '\n';
@@ -903,7 +903,7 @@
         }
         ensureNotNull(this.chalkTalkTokens_0).add_11rb$(new Phase1Token(name, ChalkTalkTokenType$Name_getInstance(), startLine, startColumn_0));
       }
-       else if (this.isNameChar_0(c)) {
+       else if (this.isNameChar_0(c) || c === 63) {
         var startLine_0 = line;
         var startColumn_1 = column;
         var name_0 = '' + String.fromCharCode(toBoxedChar(c));
@@ -915,57 +915,68 @@
           name_0 = tmp$_7 + String.fromCharCode(tmp$_6.charCodeAt(tmp$_5));
           column = column + 1 | 0;
         }
-        if (i < this.text_0.length && this.text_0.charCodeAt(i) === 35 && (i + 1 | 0) < this.text_0.length && isDigit(this.text_0.charCodeAt(i + 1 | 0))) {
+        var hasQuestionMark = false;
+        if (i < this.text_0.length && this.text_0.charCodeAt(i) === 63) {
+          hasQuestionMark = true;
           tmp$_11 = name_0;
           tmp$_10 = this.text_0;
           tmp$_9 = (tmp$_8 = i, i = tmp$_8 + 1 | 0, tmp$_8);
           name_0 = tmp$_11 + String.fromCharCode(tmp$_10.charCodeAt(tmp$_9));
           column = column + 1 | 0;
-          while (i < this.text_0.length && isDigit(this.text_0.charCodeAt(i))) {
+        }
+        if (!hasQuestionMark) {
+          if (i < this.text_0.length && this.text_0.charCodeAt(i) === 35 && (i + 1 | 0) < this.text_0.length && isDigit(this.text_0.charCodeAt(i + 1 | 0))) {
             tmp$_15 = name_0;
             tmp$_14 = this.text_0;
             tmp$_13 = (tmp$_12 = i, i = tmp$_12 + 1 | 0, tmp$_12);
             name_0 = tmp$_15 + String.fromCharCode(tmp$_14.charCodeAt(tmp$_13));
             column = column + 1 | 0;
+            while (i < this.text_0.length && isDigit(this.text_0.charCodeAt(i))) {
+              tmp$_19 = name_0;
+              tmp$_18 = this.text_0;
+              tmp$_17 = (tmp$_16 = i, i = tmp$_16 + 1 | 0, tmp$_16);
+              name_0 = tmp$_19 + String.fromCharCode(tmp$_18.charCodeAt(tmp$_17));
+              column = column + 1 | 0;
+            }
+            isComplete = true;
           }
-          isComplete = true;
-        }
-        if (!isComplete && i < this.text_0.length && this.text_0.charCodeAt(i) === 46 && (i + 1 | 0) < this.text_0.length && this.text_0.charCodeAt(i + 1 | 0) === 46 && (i + 2 | 0) < this.text_0.length && this.text_0.charCodeAt(i + 2 | 0) === 46) {
-          for (var tmp = 0; tmp < 3; tmp++) {
-            tmp$_19 = name_0;
-            tmp$_18 = this.text_0;
-            tmp$_17 = (tmp$_16 = i, i = tmp$_16 + 1 | 0, tmp$_16);
-            name_0 = tmp$_19 + String.fromCharCode(tmp$_18.charCodeAt(tmp$_17));
-            column = column + 1 | 0;
+          if (!isComplete && i < this.text_0.length && this.text_0.charCodeAt(i) === 46 && (i + 1 | 0) < this.text_0.length && this.text_0.charCodeAt(i + 1 | 0) === 46 && (i + 2 | 0) < this.text_0.length && this.text_0.charCodeAt(i + 2 | 0) === 46) {
+            for (var tmp = 0; tmp < 3; tmp++) {
+              tmp$_23 = name_0;
+              tmp$_22 = this.text_0;
+              tmp$_21 = (tmp$_20 = i, i = tmp$_20 + 1 | 0, tmp$_20);
+              name_0 = tmp$_23 + String.fromCharCode(tmp$_22.charCodeAt(tmp$_21));
+              column = column + 1 | 0;
+            }
           }
-        }
-        if (!isComplete && i < this.text_0.length && this.text_0.charCodeAt(i) === 35) {
-          tmp$_23 = name_0;
-          tmp$_22 = this.text_0;
-          tmp$_21 = (tmp$_20 = i, i = tmp$_20 + 1 | 0, tmp$_20);
-          name_0 = tmp$_23 + String.fromCharCode(tmp$_22.charCodeAt(tmp$_21));
-          column = column + 1 | 0;
-          while (i < this.text_0.length && this.isNameChar_0(this.text_0.charCodeAt(i))) {
+          if (!isComplete && i < this.text_0.length && this.text_0.charCodeAt(i) === 35) {
             tmp$_27 = name_0;
             tmp$_26 = this.text_0;
             tmp$_25 = (tmp$_24 = i, i = tmp$_24 + 1 | 0, tmp$_24);
             name_0 = tmp$_27 + String.fromCharCode(tmp$_26.charCodeAt(tmp$_25));
             column = column + 1 | 0;
-          }
-          if (endsWith(name_0, '#')) {
-            this.errors_0.add_11rb$(new ParseError('If a name contains a # is must be of the form ' + ("<identifier>...#<identifier>... but found '" + name_0 + "' ") + " (missing the name after '#')", startLine_0, startColumn_1));
-          }
-          if (i < this.text_0.length && this.text_0.charCodeAt(i) === 46 && (i + 1 | 0) < this.text_0.length && this.text_0.charCodeAt(i + 1 | 0) === 46 && (i + 2 | 0) < this.text_0.length && this.text_0.charCodeAt(i + 2 | 0) === 46) {
-            for (var tmp_0 = 0; tmp_0 < 3; tmp_0++) {
+            while (i < this.text_0.length && this.isNameChar_0(this.text_0.charCodeAt(i))) {
               tmp$_31 = name_0;
               tmp$_30 = this.text_0;
               tmp$_29 = (tmp$_28 = i, i = tmp$_28 + 1 | 0, tmp$_28);
               name_0 = tmp$_31 + String.fromCharCode(tmp$_30.charCodeAt(tmp$_29));
               column = column + 1 | 0;
             }
-          }
-          if (!endsWith(name_0, '...')) {
-            this.errors_0.add_11rb$(new ParseError('If a name contains a # is must be of the form ' + ("<identifier>...#<identifier>... but found '" + name_0 + "' ") + "(missing the trailing '...')", startLine_0, startColumn_1));
+            if (endsWith(name_0, '#')) {
+              this.errors_0.add_11rb$(new ParseError('If a name contains a # is must be of the form ' + ("<identifier>...#<identifier>... but found '" + name_0 + "' ") + " (missing the name after '#')", startLine_0, startColumn_1));
+            }
+            if (i < this.text_0.length && this.text_0.charCodeAt(i) === 46 && (i + 1 | 0) < this.text_0.length && this.text_0.charCodeAt(i + 1 | 0) === 46 && (i + 2 | 0) < this.text_0.length && this.text_0.charCodeAt(i + 2 | 0) === 46) {
+              for (var tmp_0 = 0; tmp_0 < 3; tmp_0++) {
+                tmp$_35 = name_0;
+                tmp$_34 = this.text_0;
+                tmp$_33 = (tmp$_32 = i, i = tmp$_32 + 1 | 0, tmp$_32);
+                name_0 = tmp$_35 + String.fromCharCode(tmp$_34.charCodeAt(tmp$_33));
+                column = column + 1 | 0;
+              }
+            }
+            if (!endsWith(name_0, '...')) {
+              this.errors_0.add_11rb$(new ParseError('If a name contains a # is must be of the form ' + ("<identifier>...#<identifier>... but found '" + name_0 + "' ") + "(missing the trailing '...')", startLine_0, startColumn_1));
+            }
           }
         }
         ensureNotNull(this.chalkTalkTokens_0).add_11rb$(new Phase1Token(name_0, ChalkTalkTokenType$Name_getInstance(), startLine_0, startColumn_1));
@@ -975,10 +986,10 @@
         var startColumn_2 = column;
         var str = '' + String.fromCharCode(toBoxedChar(c));
         while (i < this.text_0.length && this.text_0.charCodeAt(i) !== 34) {
-          tmp$_35 = str;
-          tmp$_34 = this.text_0;
-          tmp$_33 = (tmp$_32 = i, i = tmp$_32 + 1 | 0, tmp$_32);
-          str = tmp$_35 + String.fromCharCode(tmp$_34.charCodeAt(tmp$_33));
+          tmp$_39 = str;
+          tmp$_38 = this.text_0;
+          tmp$_37 = (tmp$_36 = i, i = tmp$_36 + 1 | 0, tmp$_36);
+          str = tmp$_39 + String.fromCharCode(tmp$_38.charCodeAt(tmp$_37));
           column = column + 1 | 0;
         }
         if (i === this.text_0.length) {
@@ -986,10 +997,10 @@
           str += '"';
         }
          else {
-          tmp$_39 = str;
-          tmp$_38 = this.text_0;
-          tmp$_37 = (tmp$_36 = i, i = tmp$_36 + 1 | 0, tmp$_36);
-          str = tmp$_39 + String.fromCharCode(tmp$_38.charCodeAt(tmp$_37));
+          tmp$_43 = str;
+          tmp$_42 = this.text_0;
+          tmp$_41 = (tmp$_40 = i, i = tmp$_40 + 1 | 0, tmp$_40);
+          str = tmp$_43 + String.fromCharCode(tmp$_42.charCodeAt(tmp$_41));
           column = column + 1 | 0;
         }
         ensureNotNull(this.chalkTalkTokens_0).add_11rb$(new Phase1Token(str, ChalkTalkTokenType$String_getInstance(), startLine_1, startColumn_2));
@@ -999,10 +1010,10 @@
         var startColumn_3 = column;
         var stmt = '' + String.fromCharCode(toBoxedChar(c));
         while (i < this.text_0.length && this.text_0.charCodeAt(i) !== 39) {
-          tmp$_43 = stmt;
-          tmp$_42 = this.text_0;
-          tmp$_41 = (tmp$_40 = i, i = tmp$_40 + 1 | 0, tmp$_40);
-          stmt = tmp$_43 + String.fromCharCode(tmp$_42.charCodeAt(tmp$_41));
+          tmp$_47 = stmt;
+          tmp$_46 = this.text_0;
+          tmp$_45 = (tmp$_44 = i, i = tmp$_44 + 1 | 0, tmp$_44);
+          stmt = tmp$_47 + String.fromCharCode(tmp$_46.charCodeAt(tmp$_45));
           column = column + 1 | 0;
         }
         if (i === this.text_0.length) {
@@ -1010,10 +1021,10 @@
           stmt += "'";
         }
          else {
-          tmp$_47 = stmt;
-          tmp$_46 = this.text_0;
-          tmp$_45 = (tmp$_44 = i, i = tmp$_44 + 1 | 0, tmp$_44);
-          stmt = tmp$_47 + String.fromCharCode(tmp$_46.charCodeAt(tmp$_45));
+          tmp$_51 = stmt;
+          tmp$_50 = this.text_0;
+          tmp$_49 = (tmp$_48 = i, i = tmp$_48 + 1 | 0, tmp$_48);
+          stmt = tmp$_51 + String.fromCharCode(tmp$_50.charCodeAt(tmp$_49));
           column = column + 1 | 0;
         }
         ensureNotNull(this.chalkTalkTokens_0).add_11rb$(new Phase1Token(stmt, ChalkTalkTokenType$Statement_getInstance(), startLine_2, startColumn_3));
@@ -1024,14 +1035,14 @@
         var id = '' + String.fromCharCode(toBoxedChar(c));
         var braceCount = 1;
         while (i < this.text_0.length && this.text_0.charCodeAt(i) !== 10) {
-          var next = this.text_0.charCodeAt((tmp$_48 = i, i = tmp$_48 + 1 | 0, tmp$_48));
+          var next = this.text_0.charCodeAt((tmp$_52 = i, i = tmp$_52 + 1 | 0, tmp$_52));
           id += String.fromCharCode(next);
           column = column + 1 | 0;
           if (next === 91) {
             braceCount = braceCount + 1 | 0;
           }
            else if (next === 93) {
-            tmp$_49 = braceCount, braceCount = tmp$_49 - 1 | 0;
+            tmp$_53 = braceCount, braceCount = tmp$_53 - 1 | 0;
           }
           if (braceCount === 0) {
             break;
@@ -1364,7 +1375,22 @@
       names = this.nameList_0(ChalkTalkTokenType$RParen_getInstance());
       this.expect_0(ChalkTalkTokenType$RParen_getInstance());
     }
-    return new AbstractionPart(id, subParams, names);
+    var tail = null;
+    var dotDotDot = '...';
+    if (endsWith(id.text, dotDotDot)) {
+      tail = this.abstractionPart_0();
+      if (tail != null) {
+        var tmp$ = id;
+        var $receiver = id.text;
+        var endIndex = id.text.length - dotDotDot.length | 0;
+        id = tmp$.copy_m2738k$($receiver.substring(0, endIndex));
+      }
+    }
+    if (this.has_0(ChalkTalkTokenType$DotDotDot_getInstance()) && !this.hasHas_0(ChalkTalkTokenType$DotDotDot_getInstance(), ChalkTalkTokenType$RCurly_getInstance()) && !this.hasHas_0(ChalkTalkTokenType$DotDotDot_getInstance(), ChalkTalkTokenType$Comma_getInstance())) {
+      this.expect_0(ChalkTalkTokenType$DotDotDot_getInstance());
+      tail = this.abstractionPart_0();
+    }
+    return new AbstractionPart(id, subParams, names, tail);
   };
   ChalkTalkParserImpl$ParserWorker.prototype.name_0 = function () {
     if (!this.has_0(ChalkTalkTokenType$Name_getInstance())) {
@@ -2294,11 +2320,12 @@
   Abstraction.prototype.equals = function (other) {
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.isEnclosed, other.isEnclosed) && Kotlin.equals(this.isVarArgs, other.isVarArgs) && Kotlin.equals(this.parts, other.parts) && Kotlin.equals(this.subParams, other.subParams)))));
   };
-  function AbstractionPart(name, subParams, params) {
+  function AbstractionPart(name, subParams, params, tail) {
     AssignmentRhs.call(this);
     this.name = name;
     this.subParams = subParams;
     this.params = params;
+    this.tail = tail;
   }
   AbstractionPart.prototype.forEach_t0jmzf$ = function (fn) {
     var tmp$, tmp$_0;
@@ -2318,6 +2345,9 @@
         var element_0 = tmp$_2.next();
         fn(element_0);
       }
+    }
+    if (this.tail != null) {
+      fn(this.tail);
     }
   };
   AbstractionPart.prototype.toCode = function () {
@@ -2352,44 +2382,48 @@
       }
       builder.append_s8itvh$(41);
     }
+    if (this.tail != null) {
+      builder.append_gw00v9$(' ... ');
+      builder.append_gw00v9$(this.tail.toCode());
+    }
     return builder.toString();
   };
   AbstractionPart.prototype.resolve = function () {
     return this;
   };
   AbstractionPart.prototype.transform_w8pxcw$ = function (transformer) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5;
     tmp$_0 = Kotlin.isType(tmp$ = this.name.transform_w8pxcw$(transformer), Phase1Token) ? tmp$ : throwCCE();
-    var tmp$_4;
+    var tmp$_6;
     if ((tmp$_1 = this.subParams) != null) {
       var destination = ArrayList_init_0(collectionSizeOrDefault(tmp$_1, 10));
-      var tmp$_5;
-      tmp$_5 = tmp$_1.iterator();
-      while (tmp$_5.hasNext()) {
-        var item = tmp$_5.next();
-        var tmp$_6;
-        destination.add_11rb$(Kotlin.isType(tmp$_6 = item.transform_w8pxcw$(transformer), Phase1Token) ? tmp$_6 : throwCCE());
+      var tmp$_7;
+      tmp$_7 = tmp$_1.iterator();
+      while (tmp$_7.hasNext()) {
+        var item = tmp$_7.next();
+        var tmp$_8;
+        destination.add_11rb$(Kotlin.isType(tmp$_8 = item.transform_w8pxcw$(transformer), Phase1Token) ? tmp$_8 : throwCCE());
       }
-      tmp$_4 = destination;
+      tmp$_6 = destination;
     }
      else
-      tmp$_4 = null;
-    tmp$_2 = tmp$_4;
-    var tmp$_7;
+      tmp$_6 = null;
+    tmp$_2 = tmp$_6;
+    var tmp$_9;
     if ((tmp$_3 = this.params) != null) {
       var destination_0 = ArrayList_init_0(collectionSizeOrDefault(tmp$_3, 10));
-      var tmp$_8;
-      tmp$_8 = tmp$_3.iterator();
-      while (tmp$_8.hasNext()) {
-        var item_0 = tmp$_8.next();
-        var tmp$_9;
-        destination_0.add_11rb$(Kotlin.isType(tmp$_9 = item_0.transform_w8pxcw$(transformer), Phase1Token) ? tmp$_9 : throwCCE());
+      var tmp$_10;
+      tmp$_10 = tmp$_3.iterator();
+      while (tmp$_10.hasNext()) {
+        var item_0 = tmp$_10.next();
+        var tmp$_11;
+        destination_0.add_11rb$(Kotlin.isType(tmp$_11 = item_0.transform_w8pxcw$(transformer), Phase1Token) ? tmp$_11 : throwCCE());
       }
-      tmp$_7 = destination_0;
+      tmp$_9 = destination_0;
     }
      else
-      tmp$_7 = null;
-    return transformer(new AbstractionPart(tmp$_0, tmp$_2, tmp$_7));
+      tmp$_9 = null;
+    return transformer(new AbstractionPart(tmp$_0, tmp$_2, tmp$_9, (tmp$_5 = (tmp$_4 = this.tail) != null ? tmp$_4.transform_w8pxcw$(transformer) : null) == null || Kotlin.isType(tmp$_5, AbstractionPart) ? tmp$_5 : throwCCE()));
   };
   AbstractionPart.$metadata$ = {
     kind: Kind_CLASS,
@@ -2405,21 +2439,25 @@
   AbstractionPart.prototype.component3 = function () {
     return this.params;
   };
-  AbstractionPart.prototype.copy_k9cflt$ = function (name, subParams, params) {
-    return new AbstractionPart(name === void 0 ? this.name : name, subParams === void 0 ? this.subParams : subParams, params === void 0 ? this.params : params);
+  AbstractionPart.prototype.component4 = function () {
+    return this.tail;
+  };
+  AbstractionPart.prototype.copy_qa5xlj$ = function (name, subParams, params, tail) {
+    return new AbstractionPart(name === void 0 ? this.name : name, subParams === void 0 ? this.subParams : subParams, params === void 0 ? this.params : params, tail === void 0 ? this.tail : tail);
   };
   AbstractionPart.prototype.toString = function () {
-    return 'AbstractionPart(name=' + Kotlin.toString(this.name) + (', subParams=' + Kotlin.toString(this.subParams)) + (', params=' + Kotlin.toString(this.params)) + ')';
+    return 'AbstractionPart(name=' + Kotlin.toString(this.name) + (', subParams=' + Kotlin.toString(this.subParams)) + (', params=' + Kotlin.toString(this.params)) + (', tail=' + Kotlin.toString(this.tail)) + ')';
   };
   AbstractionPart.prototype.hashCode = function () {
     var result = 0;
     result = result * 31 + Kotlin.hashCode(this.name) | 0;
     result = result * 31 + Kotlin.hashCode(this.subParams) | 0;
     result = result * 31 + Kotlin.hashCode(this.params) | 0;
+    result = result * 31 + Kotlin.hashCode(this.tail) | 0;
     return result;
   };
   AbstractionPart.prototype.equals = function (other) {
-    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.subParams, other.subParams) && Kotlin.equals(this.params, other.params)))));
+    return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.name, other.name) && Kotlin.equals(this.subParams, other.subParams) && Kotlin.equals(this.params, other.params) && Kotlin.equals(this.tail, other.tail)))));
   };
   function buildIndent(level, isArg) {
     var buffer = StringBuilder_init();
@@ -2563,6 +2601,18 @@
     this.builder.append_s8itvh$(34);
     this.builder.append_gw00v9$('<\/span>');
   };
+  function HtmlCodeWriter$writeStatement$lambda(it) {
+    if (Kotlin.isType(it, TextTexTalkNode))
+      return it.copy_e4igys$(void 0, void 0, prettyPrintIdentifier(it.text));
+    else
+      return it;
+  }
+  function HtmlCodeWriter$writeStatement$lambda_0(it) {
+    if (Kotlin.isType(it, TextTexTalkNode))
+      return it.copy_e4igys$(void 0, void 0, prettyPrintIdentifier(it.text));
+    else
+      return it;
+  }
   HtmlCodeWriter.prototype.writeStatement_ytmu5s$ = function (stmtText, root) {
     this.builder.append_gw00v9$("<span class='mathlingua-statement' title='" + removeSurrounding(stmtText, "'", "'") + "'>");
     var IS = 'is';
@@ -2579,7 +2629,7 @@
       var lhsParsed = newTexTalkParser().parse_2mg13h$(newTexTalkLexer(lhs));
       if (lhsParsed.errors.isEmpty()) {
         var patternsToWrittenAs = MathLingua_getInstance().getPatternsToWrittenAs_r44ck5$(this.defines, this.represents);
-        this.builder.append_gw00v9$('\\' + '[' + expandAsWritten(lhsParsed.root, patternsToWrittenAs) + '\\' + ']');
+        this.builder.append_gw00v9$('\\' + '[' + expandAsWritten(lhsParsed.root.transform_7szim8$(HtmlCodeWriter$writeStatement$lambda), patternsToWrittenAs) + '\\' + ']');
       }
        else {
         this.writeDirect_61zpoe$(lhs);
@@ -2596,7 +2646,7 @@
       }
       if (tmp$_0) {
         var patternsToWrittenAs_0 = MathLingua_getInstance().getPatternsToWrittenAs_r44ck5$(this.defines, this.represents);
-        this.builder.append_gw00v9$('\\' + '[' + expandAsWritten(root.value, patternsToWrittenAs_0) + '\\' + ']');
+        this.builder.append_gw00v9$('\\' + '[' + expandAsWritten(root.value.transform_7szim8$(HtmlCodeWriter$writeStatement$lambda_0), patternsToWrittenAs_0) + '\\' + ']');
       }
        else {
         this.builder.append_gw00v9$('\\' + '[' + stmtText + '\\' + ']');
@@ -8876,7 +8926,7 @@
     return Kotlin.isType(tmp$ = root.transform_7szim8$(identifyIdentifierFunctionCalls$lambda), ExpressionTexTalkNode) ? tmp$ : throwCCE();
   }
   function isSpecialOperator(node) {
-    return node != null && Kotlin.isType(node, TextTexTalkNode) && (node.tokenType === TexTalkTokenType$Operator_getInstance() || node.tokenType === TexTalkTokenType$Caret_getInstance());
+    return node != null && Kotlin.isType(node, TextTexTalkNode) && (node.tokenType === TexTalkTokenType$Operator_getInstance() || node.tokenType === TexTalkTokenType$Caret_getInstance() || node.tokenType === TexTalkTokenType$DotDotDot_getInstance());
   }
   function identifySpecialPrefixOperators$lambda(closure$isNodeRhsExpressions) {
     return function (it) {
@@ -9057,12 +9107,16 @@
         return 2;
       else if (equals(op, '^'))
         return 3;
+      else if (contains_0(op, '...'))
+        return 5;
+      else if (equals(op, '='))
+        return 6;
+      else if (equals(op, ':='))
+        return 7;
       else
-        return 0;
+        return 4;
     }
-     else if (Kotlin.isType(node, Command))
-      return 0;
-    else
+     else
       throw new ParseException(new ParseError("Cannot get precedence of node '" + node.toCode_6z438g$() + "'", -1, -1));
   }
   function getAssociativity(node) {
@@ -9177,7 +9231,7 @@
     this.errors_rts390$_0 = ArrayList_init();
     this.tokens_0 = ArrayList_init();
     this.index_0 = 0;
-    var tmp$, tmp$_0, tmp$_1, tmp$_2;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6;
     var i = 0;
     var line = 0;
     var column = -1;
@@ -9206,7 +9260,22 @@
         var startColumn = column;
         i = i + 2 | 0;
         column = column + 2 | 0;
-        this.tokens_0.add_11rb$(new TexTalkToken('...', TexTalkTokenType$DotDotDot_getInstance(), startLine, startColumn));
+        var builder = new StringBuilder('...');
+        var isOp = false;
+        while (i < text.length && this.isOpChar_0(text.charCodeAt(i))) {
+          isOp = true;
+          builder.append_s8itvh$(text.charCodeAt((tmp$_0 = i, i = tmp$_0 + 1 | 0, tmp$_0)));
+          column = column + 1 | 0;
+        }
+        tmp$_3 = this.tokens_0;
+        tmp$_1 = builder.toString();
+        if (isOp) {
+          tmp$_2 = TexTalkTokenType$Operator_getInstance();
+        }
+         else {
+          tmp$_2 = TexTalkTokenType$DotDotDot_getInstance();
+        }
+        tmp$_3.add_11rb$(new TexTalkToken(tmp$_1, tmp$_2, startLine, startColumn));
       }
        else if (c === 58) {
         this.tokens_0.add_11rb$(new TexTalkToken('' + String.fromCharCode(toBoxedChar(c)), TexTalkTokenType$Colon_getInstance(), line, column));
@@ -9249,11 +9318,11 @@
         var startColumn_0 = column;
         var id = new StringBuilder('' + String.fromCharCode(toBoxedChar(c)));
         while (i < text.length && this.isIdentifierChar_0(text.charCodeAt(i))) {
-          id.append_s8itvh$(text.charCodeAt((tmp$_0 = i, i = tmp$_0 + 1 | 0, tmp$_0)));
+          id.append_s8itvh$(text.charCodeAt((tmp$_4 = i, i = tmp$_4 + 1 | 0, tmp$_4)));
           column = column + 1 | 0;
         }
         if (i < text.length && text.charCodeAt(i) === 63) {
-          id.append_s8itvh$(text.charCodeAt((tmp$_1 = i, i = tmp$_1 + 1 | 0, tmp$_1)));
+          id.append_s8itvh$(text.charCodeAt((tmp$_5 = i, i = tmp$_5 + 1 | 0, tmp$_5)));
           column = column + 1 | 0;
         }
         this.tokens_0.add_11rb$(new TexTalkToken(id.toString(), TexTalkTokenType$Identifier_getInstance(), startLine_0, startColumn_0));
@@ -9263,8 +9332,13 @@
         var startColumn_1 = column;
         var op = new StringBuilder('' + String.fromCharCode(toBoxedChar(c)));
         while (i < text.length && this.isOpChar_0(text.charCodeAt(i))) {
-          op.append_s8itvh$(text.charCodeAt((tmp$_2 = i, i = tmp$_2 + 1 | 0, tmp$_2)));
+          op.append_s8itvh$(text.charCodeAt((tmp$_6 = i, i = tmp$_6 + 1 | 0, tmp$_6)));
           column = column + 1 | 0;
+        }
+        if (i < text.length && text.charCodeAt(i) === 46 && (i + 1 | 0) < text.length && text.charCodeAt(i + 1 | 0) === 46 && (i + 2 | 0) < text.length && text.charCodeAt(i + 2 | 0) === 46) {
+          i = i + 3 | 0;
+          column = column + 3 | 0;
+          op.append_gw00v9$('...');
         }
         this.tokens_0.add_11rb$(new TexTalkToken(op.toString(), TexTalkTokenType$Operator_getInstance(), startLine_1, startColumn_1));
       }
@@ -9663,7 +9737,7 @@
       return null;
     }
     var textToken = this.next_0();
-    var nextIsDotDotDot = this.has_0(TexTalkTokenType$DotDotDot_getInstance());
+    var nextIsDotDotDot = this.has_0(TexTalkTokenType$DotDotDot_getInstance()) && !this.hasHas_0(TexTalkTokenType$DotDotDot_getInstance(), TexTalkTokenType$Identifier_getInstance());
     var isVarArg = false;
     if (canBeVarArg) {
       if (nextIsDotDotDot) {
@@ -9681,10 +9755,10 @@
     return new TextTexTalkNode(nodeType, tokenType, textToken.text, isVarArg);
   };
   TexTalkParserImpl$ParserWorker.prototype.expression_0 = function (terminators) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6, tmp$_7, tmp$_8;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6, tmp$_7, tmp$_8, tmp$_9;
     var nodes = ArrayList_init();
     while (this.hasNext_0() && (terminators == null || !terminators.contains_11rb$(this.texTalkLexer_0.peek().tokenType))) {
-      var child = (tmp$_7 = (tmp$_6 = (tmp$_5 = (tmp$_4 = (tmp$_3 = (tmp$_2 = (tmp$_1 = (tmp$_0 = (tmp$ = this.command_0()) != null ? tmp$ : this.group_0(TexTalkNodeType$ParenGroup_getInstance())) != null ? tmp$_0 : this.group_0(TexTalkNodeType$CurlyGroup_getInstance())) != null ? tmp$_1 : this.text_0(TexTalkTokenType$Is_getInstance(), TexTalkNodeType$Is_getInstance(), false)) != null ? tmp$_2 : this.text_0(TexTalkTokenType$Identifier_getInstance(), TexTalkNodeType$Identifier_getInstance(), true)) != null ? tmp$_3 : this.text_0(TexTalkTokenType$Operator_getInstance(), TexTalkNodeType$Operator_getInstance(), false)) != null ? tmp$_4 : this.text_0(TexTalkTokenType$Comma_getInstance(), TexTalkNodeType$Comma_getInstance(), false)) != null ? tmp$_5 : this.text_0(TexTalkTokenType$Caret_getInstance(), TexTalkNodeType$Operator_getInstance(), false)) != null ? tmp$_6 : this.text_0(TexTalkTokenType$Underscore_getInstance(), TexTalkNodeType$Operator_getInstance(), false)) != null ? tmp$_7 : this.text_0(TexTalkTokenType$ColonEquals_getInstance(), TexTalkNodeType$ColonEquals_getInstance(), false);
+      var child = (tmp$_8 = (tmp$_7 = (tmp$_6 = (tmp$_5 = (tmp$_4 = (tmp$_3 = (tmp$_2 = (tmp$_1 = (tmp$_0 = (tmp$ = this.command_0()) != null ? tmp$ : this.group_0(TexTalkNodeType$ParenGroup_getInstance())) != null ? tmp$_0 : this.group_0(TexTalkNodeType$CurlyGroup_getInstance())) != null ? tmp$_1 : this.text_0(TexTalkTokenType$Is_getInstance(), TexTalkNodeType$Is_getInstance(), false)) != null ? tmp$_2 : this.text_0(TexTalkTokenType$Identifier_getInstance(), TexTalkNodeType$Identifier_getInstance(), true)) != null ? tmp$_3 : this.text_0(TexTalkTokenType$Operator_getInstance(), TexTalkNodeType$Operator_getInstance(), false)) != null ? tmp$_4 : this.text_0(TexTalkTokenType$Comma_getInstance(), TexTalkNodeType$Comma_getInstance(), false)) != null ? tmp$_5 : this.text_0(TexTalkTokenType$Caret_getInstance(), TexTalkNodeType$Operator_getInstance(), false)) != null ? tmp$_6 : this.text_0(TexTalkTokenType$Underscore_getInstance(), TexTalkNodeType$Operator_getInstance(), false)) != null ? tmp$_7 : this.text_0(TexTalkTokenType$ColonEquals_getInstance(), TexTalkNodeType$ColonEquals_getInstance(), false)) != null ? tmp$_8 : this.text_0(TexTalkTokenType$DotDotDot_getInstance(), TexTalkNodeType$Operator_getInstance(), false);
       if (child == null) {
         var peek = this.texTalkLexer_0.peek();
         this.addError_1('Unexpected token ' + peek.text, peek);
@@ -9695,11 +9769,11 @@
       }
     }
     if (nodes.isEmpty()) {
-      tmp$_8 = null;
+      tmp$_9 = null;
     }
      else
-      tmp$_8 = new ExpressionTexTalkNode(nodes);
-    return tmp$_8;
+      tmp$_9 = new ExpressionTexTalkNode(nodes);
+    return tmp$_9;
   };
   TexTalkParserImpl$ParserWorker.prototype.expect_0 = function (tokenType) {
     var tmp$;
@@ -10330,9 +10404,14 @@
       }
       for (var i_1 = 0; i_1 !== paramNames.size; ++i_1) {
         var exps_0 = mutableListOf([values.get_za3lpa$(i_1)]);
-        var $receiver_2 = subs.substitutions;
-        var key_1 = paramNames.get_za3lpa$(i_1);
-        $receiver_2.put_xwzc9p$(key_1, exps_0);
+        if (asDotDotDotOperator(exps_0) != null) {
+          subs.doesMatch = false;
+        }
+         else {
+          var $receiver_2 = subs.substitutions;
+          var key_1 = paramNames.get_za3lpa$(i_1);
+          $receiver_2.put_xwzc9p$(key_1, exps_0);
+        }
       }
     }
   }
@@ -10530,6 +10609,27 @@
   function expandAsWrittenImplImpl(cmd, sigToPatternExpansion) {
     return expandAsWrittenImplImpl_0(new OperatorTexTalkNode(null, cmd, null), sigToPatternExpansion);
   }
+  function asDotDotDotOperator(nodes) {
+    var tmp$, tmp$_0, tmp$_1;
+    if (nodes.size !== 1 || !Kotlin.isType(nodes.get_za3lpa$(0), ExpressionTexTalkNode)) {
+      return null;
+    }
+    var exp = Kotlin.isType(tmp$ = nodes.get_za3lpa$(0), ExpressionTexTalkNode) ? tmp$ : throwCCE();
+    if (exp.children.size !== 1 || !Kotlin.isType(exp.children.get_za3lpa$(0), OperatorTexTalkNode)) {
+      return null;
+    }
+    var op = Kotlin.isType(tmp$_0 = exp.children.get_za3lpa$(0), OperatorTexTalkNode) ? tmp$_0 : throwCCE();
+    if (!Kotlin.isType(op.command, TextTexTalkNode)) {
+      return null;
+    }
+    if (equals(op.command.text, '...')) {
+      tmp$_1 = op;
+    }
+     else {
+      tmp$_1 = null;
+    }
+    return tmp$_1;
+  }
   function expandAsWrittenImplImpl$lambda(closure$sigToPatternExpansion) {
     return function (it) {
       return expandAsWrittenImpl(it, closure$sigToPatternExpansion, true);
@@ -10541,7 +10641,7 @@
     };
   }
   function expandAsWrittenImplImpl_0(op, sigToPatternExpansion) {
-    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4;
+    var tmp$, tmp$_0, tmp$_1, tmp$_2, tmp$_3, tmp$_4, tmp$_5, tmp$_6, tmp$_7, tmp$_8, tmp$_9;
     tmp$ = sigToPatternExpansion.get_11rb$(signature(op));
     if (tmp$ == null) {
       return null;
@@ -10554,9 +10654,9 @@
     var expansion = patternExpansion.expansion;
     tmp$_0 = subs.substitutions.entries.iterator();
     while (tmp$_0.hasNext()) {
-      var tmp$_5 = tmp$_0.next();
-      var name = tmp$_5.key;
-      var exp = tmp$_5.value;
+      var tmp$_10 = tmp$_0.next();
+      var name = tmp$_10.key;
+      var exp = tmp$_10.value;
       if (!exp.isEmpty()) {
         var expToStringParen = joinToString(exp, ' ', void 0, void 0, void 0, void 0, expandAsWrittenImplImpl$lambda(sigToPatternExpansion));
         expansion = replace(expansion, name + '??', expToStringParen);
@@ -10617,10 +10717,10 @@
           var addParens = hasDoubleQuestion;
           if (infixRegex.matches_6bul2c$(innerText)) {
             var destination = ArrayList_init_0(collectionSizeOrDefault(exp, 10));
-            var tmp$_6;
-            tmp$_6 = exp.iterator();
-            while (tmp$_6.hasNext()) {
-              var item = tmp$_6.next();
+            var tmp$_11;
+            tmp$_11 = exp.iterator();
+            while (tmp$_11.hasNext()) {
+              var item = tmp$_11.next();
               destination.add_11rb$(expandAsWrittenImpl(item, sigToPatternExpansion, addParens));
             }
             var args = destination;
@@ -10629,7 +10729,14 @@
               var prefix = result.groupValues.get_za3lpa$(1);
               var separator = result.groupValues.get_za3lpa$(2);
               var suffix = result.groupValues.get_za3lpa$(3);
-              var joinedArgs = joinToString(args, separator);
+              var opNode = asDotDotDotOperator(exp);
+              if (opNode != null) {
+                tmp$_7 = ((tmp$_4 = (tmp$_3 = opNode.lhs) != null ? tmp$_3.toCode_6z438g$() : null) != null ? tmp$_4 : '') + separator + opNode.command.toCode_6z438g$() + separator + ((tmp$_6 = (tmp$_5 = opNode.rhs) != null ? tmp$_5.toCode_6z438g$() : null) != null ? tmp$_6 : '');
+              }
+               else {
+                tmp$_7 = joinToString(args, separator);
+              }
+              var joinedArgs = tmp$_7;
               var pattern = result.groupValues.get_za3lpa$(0);
               innerText = replace(innerText, pattern, joinedArgs);
               innerText = prefix + innerText + suffix;
@@ -10637,10 +10744,10 @@
           }
            else if (prefixRegex.matches_6bul2c$(innerText)) {
             var destination_0 = ArrayList_init_0(collectionSizeOrDefault(exp, 10));
-            var tmp$_7;
-            tmp$_7 = exp.iterator();
-            while (tmp$_7.hasNext()) {
-              var item_0 = tmp$_7.next();
+            var tmp$_12;
+            tmp$_12 = exp.iterator();
+            while (tmp$_12.hasNext()) {
+              var item_0 = tmp$_12.next();
               destination_0.add_11rb$(expandAsWrittenImpl(item_0, sigToPatternExpansion, addParens));
             }
             var args_0 = destination_0;
@@ -10648,9 +10755,9 @@
             if (result_0 != null && result_0.groupValues.size >= 2) {
               var separator_0 = result_0.groupValues.get_za3lpa$(1);
               var joinedArgsBuilder = StringBuilder_init();
-              tmp$_3 = args_0.iterator();
-              while (tmp$_3.hasNext()) {
-                var a = tmp$_3.next();
+              tmp$_8 = args_0.iterator();
+              while (tmp$_8.hasNext()) {
+                var a = tmp$_8.next();
                 joinedArgsBuilder.append_gw00v9$(separator_0);
                 joinedArgsBuilder.append_gw00v9$(a);
               }
@@ -10661,10 +10768,10 @@
           }
            else if (suffixRegex.matches_6bul2c$(innerText)) {
             var destination_1 = ArrayList_init_0(collectionSizeOrDefault(exp, 10));
-            var tmp$_8;
-            tmp$_8 = exp.iterator();
-            while (tmp$_8.hasNext()) {
-              var item_1 = tmp$_8.next();
+            var tmp$_13;
+            tmp$_13 = exp.iterator();
+            while (tmp$_13.hasNext()) {
+              var item_1 = tmp$_13.next();
               destination_1.add_11rb$(expandAsWrittenImpl(item_1, sigToPatternExpansion, addParens));
             }
             var args_1 = destination_1;
@@ -10672,9 +10779,9 @@
             if (result_1 != null && result_1.groupValues.size >= 2) {
               var separator_1 = result_1.groupValues.get_za3lpa$(1);
               var joinedArgsBuilder_0 = StringBuilder_init();
-              tmp$_4 = args_1.iterator();
-              while (tmp$_4.hasNext()) {
-                var a_0 = tmp$_4.next();
+              tmp$_9 = args_1.iterator();
+              while (tmp$_9.hasNext()) {
+                var a_0 = tmp$_9.next();
                 joinedArgsBuilder_0.append_gw00v9$(a_0);
                 joinedArgsBuilder_0.append_gw00v9$(separator_1);
               }

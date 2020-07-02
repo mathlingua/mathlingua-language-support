@@ -12,6 +12,10 @@ Furthermore, entering the `mathlingua` command at the command palette will manua
 
 ## Release Notes
 
+### 0.9.2 (2020-07-01)
+- Add autocomplete for `expands:as:`.
+- Greek letters and names with subscripts are rendered correctly in TexTalk.
+
 ### 0.9.1 (2020-06-29)
 - Update the preview image path in the readme.
 

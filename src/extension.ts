@@ -89,6 +89,11 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
     text: 'or: ${1}'
   },
   {
+    name: 'expands:',
+    documentation: 'Specifies how a variadic argument should be expanded in a definition.',
+    text: 'expands: ${1}\nas: ${2}'
+  },
+  {
     name: 'Metadata:',
     documentation: 'Specifies additional metadata for a mathematical item.',
     text: 'Metadata:\n. written: "${1}"\n. name: "${2}"\n. reference:\n  . source: "@${3}"\n    page: "${4}"\n. tag: "${5}"'
