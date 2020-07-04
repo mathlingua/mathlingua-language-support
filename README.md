@@ -1,6 +1,6 @@
 # Mathlingua Language Support
 
-This is the official Visual Studio Code extension to provide language support for the [Mathlingua](https://www.mathlingua.org/) language.
+This is the official Visual Studio Code extension to provide language support for the [Mathlingua](https://www.mathlingua.org/) language.  It is the recommended tool for contributing math knowledge to the [Mathlore Vault](https://github.com/DominicKramer/mathlore-vault).
 
 ## Features
 
@@ -22,6 +22,9 @@ The following configuration options are supported:
 ![Preview image of the extension](images/preview.png)
 
 ## Release Notes
+
+### 0.10.2 (2020-07-04)
+- Update the readme to describe how to use this extension with mathlore.org.
 
 ### 0.10.1 (2020-07-02)
 - Address an issue where commands containing the text `is` (such as `\exists`) were not rendered correctly.
