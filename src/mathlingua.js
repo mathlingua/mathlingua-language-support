@@ -3,6 +3,10 @@
   var Kind_CLASS = Kotlin.Kind.CLASS;
   var toList = Kotlin.kotlin.collections.toList_7wnvza$;
   var emptyList = Kotlin.kotlin.collections.emptyList_287e2$;
+  var RuntimeException_init = Kotlin.kotlin.RuntimeException_init_pdl1vj$;
+  var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
+  var emptySet = Kotlin.kotlin.collections.emptySet_287e2$;
+  var toSet = Kotlin.kotlin.collections.toSet_7wnvza$;
   var throwCCE = Kotlin.throwCCE;
   var equals = Kotlin.equals;
   var removeSurrounding = Kotlin.kotlin.text.removeSurrounding_90ijwr$;
@@ -10,10 +14,11 @@
   var split = Kotlin.kotlin.text.split_ip8yn$;
   var Kind_OBJECT = Kotlin.Kind.OBJECT;
   var ArrayList_init = Kotlin.kotlin.collections.ArrayList_init_287e2$;
+  var collectionSizeOrDefault = Kotlin.kotlin.collections.collectionSizeOrDefault_ba2ldo$;
+  var ArrayList_init_0 = Kotlin.kotlin.collections.ArrayList_init_ww73n8$;
   var LinkedHashSet_init = Kotlin.kotlin.collections.LinkedHashSet_init_287e2$;
   var LinkedHashMap_init = Kotlin.kotlin.collections.LinkedHashMap_init_q3lmfv$;
   var isBlank = Kotlin.kotlin.text.isBlank_gw00vp$;
-  var RuntimeException_init = Kotlin.kotlin.RuntimeException_init_pdl1vj$;
   var RuntimeException = Kotlin.kotlin.RuntimeException;
   var Kind_INTERFACE = Kotlin.Kind.INTERFACE;
   var CharRange = Kotlin.kotlin.ranges.CharRange;
@@ -23,8 +28,6 @@
   var contains = Kotlin.kotlin.text.contains_sgbm27$;
   var Regex_init = Kotlin.kotlin.text.Regex_init_61zpoe$;
   var listOf = Kotlin.kotlin.collections.listOf_mh5how$;
-  var collectionSizeOrDefault = Kotlin.kotlin.collections.collectionSizeOrDefault_ba2ldo$;
-  var ArrayList_init_0 = Kotlin.kotlin.collections.ArrayList_init_ww73n8$;
   var Enum = Kotlin.kotlin.Enum;
   var throwISE = Kotlin.throwISE;
   var Unit = Kotlin.kotlin.Unit;
@@ -62,10 +65,7 @@
   var toMutableList = Kotlin.kotlin.collections.toMutableList_4c7yge$;
   var emptyMap = Kotlin.kotlin.collections.emptyMap_q3lmfv$;
   var toString = Kotlin.toString;
-  var joinToString = Kotlin.kotlin.collections.joinToString_fmv235$;
-  var emptySet = Kotlin.kotlin.collections.emptySet_287e2$;
   var filterNotNull_0 = Kotlin.kotlin.collections.filterNotNull_m3lr2h$;
-  var toSet = Kotlin.kotlin.collections.toSet_7wnvza$;
   var iterator = Kotlin.kotlin.text.iterator_gw00vp$;
   var unboxChar = Kotlin.unboxChar;
   ParseError.prototype = Object.create(RuntimeException.prototype);
@@ -242,19 +242,134 @@
     return signature_0(command);
   };
   MathLingua.prototype.findAllSignatures_capiq$ = function (node, locationTracker) {
-    return toList(locateAllSignatures(node, locationTracker));
+    return locateAllSignatures(node, locationTracker);
   };
   MathLingua.prototype.findAllCommands_2v05ti$ = function (node) {
     return toList(locateAllCommands(node));
   };
-  MathLingua.prototype.findUndefinedSignatures_kwv3np$ = function (input, supplemental) {
+  MathLingua.prototype.getContent_0 = function (group) {
+    var tmp$;
+    if (Kotlin.isType(group, RepresentsGroup))
+      tmp$ = group.copy_mryz0n$(void 0, new IdStatement('', validationSuccess(new ExpressionTexTalkNode(emptyList()))), void 0, void 0, void 0, void 0, null);
+    else if (Kotlin.isType(group, DefinesGroup))
+      tmp$ = group.copy_enqujh$(void 0, new IdStatement('', validationSuccess(new ExpressionTexTalkNode(emptyList()))), void 0, void 0, void 0, void 0, null);
+    else if (Kotlin.isType(group, ResourceGroup))
+      tmp$ = group.copy_qt568v$('', void 0, null);
+    else if (Kotlin.isType(group, TheoremGroup))
+      tmp$ = group.copy_1c0w1$(void 0, void 0, null);
+    else if (Kotlin.isType(group, AxiomGroup))
+      tmp$ = group.copy_n1u9md$(void 0, void 0, null);
+    else if (Kotlin.isType(group, ConjectureGroup))
+      tmp$ = group.copy_pbcma3$(void 0, void 0, null);
+    else if (Kotlin.isType(group, ProtoGroup))
+      tmp$ = new ProtoGroup(group.textSection, null);
+    else
+      throw RuntimeException_init('Unknown group: ' + group.toCode_pc06dk$(false, 0).getCode());
+    return tmp$.toCode_pc06dk$(false, 0).getCode();
+  };
+  MathLingua.prototype.findDuplicateContent_kwv3np$ = function (input, supplemental) {
     var tmp$, tmp$_0, tmp$_1;
-    var definedSignatures = LinkedHashSet_init();
-    definedSignatures.addAll_brywnq$(this.getAllDefinedSignatures_0(input));
+    var validation = this.parse_61zpoe$(joinToString(supplemental, '\n\n\n'));
+    if (Kotlin.isType(validation, ValidationFailure))
+      tmp$ = emptySet();
+    else if (Kotlin.isType(validation, ValidationSuccess)) {
+      var $receiver = validation.value.all();
+      var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
+      var tmp$_2;
+      tmp$_2 = $receiver.iterator();
+      while (tmp$_2.hasNext()) {
+        var item = tmp$_2.next();
+        destination.add_11rb$(this.getContent_0(item));
+      }
+      tmp$ = toSet(destination);
+    }
+     else
+      tmp$ = Kotlin.noWhenBranchMatched();
+    var suppContent = tmp$;
+    var validation_0 = this.parseWithLocations_61zpoe$(input);
+    if (Kotlin.isType(validation_0, ValidationFailure))
+      tmp$_1 = emptyList();
+    else if (Kotlin.isType(validation_0, ValidationSuccess)) {
+      var doc = validation_0.value.document;
+      var tracker = validation_0.value.tracker;
+      var result = ArrayList_init();
+      var inputContentSet = LinkedHashSet_init();
+      tmp$_0 = doc.all().iterator();
+      while (tmp$_0.hasNext()) {
+        var group = tmp$_0.next();
+        var content = this.getContent_0(group);
+        var location = tracker.getLocationOf_2v05ti$(group);
+        if (location != null && (suppContent.contains_11rb$(content) || inputContentSet.contains_11rb$(content))) {
+          result.add_11rb$(location);
+        }
+        inputContentSet.add_11rb$(content);
+      }
+      tmp$_1 = result;
+    }
+     else
+      tmp$_1 = Kotlin.noWhenBranchMatched();
+    return tmp$_1;
+  };
+  MathLingua.prototype.findDuplicateSignatures_kwv3np$ = function (input, supplemental) {
+    var tmp$, tmp$_0, tmp$_1;
+    var suppSignatures = LinkedHashSet_init();
     tmp$ = supplemental.iterator();
     while (tmp$.hasNext()) {
       var sup = tmp$.next();
-      definedSignatures.addAll_brywnq$(this.getAllDefinedSignatures_0(sup));
+      var $receiver = this.getAllDefinedSignatures_0(sup);
+      var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
+      var tmp$_2;
+      tmp$_2 = $receiver.iterator();
+      while (tmp$_2.hasNext()) {
+        var item = tmp$_2.next();
+        destination.add_11rb$(item.form);
+      }
+      suppSignatures.addAll_brywnq$(destination);
+    }
+    var result = ArrayList_init();
+    var signatures = this.getAllDefinedSignatures_0(input);
+    var dupSet = LinkedHashSet_init();
+    tmp$_0 = signatures.iterator();
+    while (tmp$_0.hasNext()) {
+      var sig = tmp$_0.next();
+      if (dupSet.contains_11rb$(sig.form)) {
+        result.add_11rb$(sig);
+      }
+      dupSet.add_11rb$(sig.form);
+    }
+    tmp$_1 = signatures.iterator();
+    while (tmp$_1.hasNext()) {
+      var sig_0 = tmp$_1.next();
+      if (suppSignatures.contains_11rb$(sig_0.form)) {
+        result.add_11rb$(sig_0);
+      }
+    }
+    return result;
+  };
+  MathLingua.prototype.findUndefinedSignatures_kwv3np$ = function (input, supplemental) {
+    var tmp$, tmp$_0, tmp$_1;
+    var definedSignatures = LinkedHashSet_init();
+    var $receiver = this.getAllDefinedSignatures_0(input);
+    var destination = ArrayList_init_0(collectionSizeOrDefault($receiver, 10));
+    var tmp$_2;
+    tmp$_2 = $receiver.iterator();
+    while (tmp$_2.hasNext()) {
+      var item = tmp$_2.next();
+      destination.add_11rb$(item.form);
+    }
+    definedSignatures.addAll_brywnq$(destination);
+    tmp$ = supplemental.iterator();
+    while (tmp$.hasNext()) {
+      var sup = tmp$.next();
+      var $receiver_0 = this.getAllDefinedSignatures_0(sup);
+      var destination_0 = ArrayList_init_0(collectionSizeOrDefault($receiver_0, 10));
+      var tmp$_3;
+      tmp$_3 = $receiver_0.iterator();
+      while (tmp$_3.hasNext()) {
+        var item_0 = tmp$_3.next();
+        destination_0.add_11rb$(item_0.form);
+      }
+      definedSignatures.addAll_brywnq$(destination_0);
     }
     var validation = this.parseWithLocations_61zpoe$(input);
     if (Kotlin.isType(validation, ValidationSuccess)) {
@@ -277,10 +392,11 @@
   };
   MathLingua.prototype.getAllDefinedSignatures_0 = function (input) {
     var tmp$;
-    var validation = this.parse_61zpoe$(input);
+    var validation = this.parseWithLocations_61zpoe$(input);
     if (Kotlin.isType(validation, ValidationSuccess)) {
       var result = ArrayList_init();
-      var document = validation.value;
+      var document = validation.value.document;
+      var tracker = validation.value.tracker;
       var $receiver = document.defines;
       var destination = ArrayList_init();
       var tmp$_0;
@@ -288,19 +404,35 @@
       while (tmp$_0.hasNext()) {
         var element = tmp$_0.next();
         var tmp$_0_0;
-        if ((tmp$_0_0 = element.signature) != null) {
+        var transform$result;
+        var tmp$_1;
+        if (element.signature == null) {
+          transform$result = null;
+        }
+         else {
+          transform$result = new Signature(element.signature, (tmp$_1 = tracker.getLocationOf_2v05ti$(element)) != null ? tmp$_1 : new Location(-1, -1));
+        }
+        if ((tmp$_0_0 = transform$result) != null) {
           destination.add_11rb$(tmp$_0_0);
         }
       }
       result.addAll_brywnq$(destination);
       var $receiver_0 = document.represents;
       var destination_0 = ArrayList_init();
-      var tmp$_1;
-      tmp$_1 = $receiver_0.iterator();
-      while (tmp$_1.hasNext()) {
-        var element_0 = tmp$_1.next();
+      var tmp$_2;
+      tmp$_2 = $receiver_0.iterator();
+      while (tmp$_2.hasNext()) {
+        var element_0 = tmp$_2.next();
         var tmp$_0_1;
-        if ((tmp$_0_1 = element_0.signature) != null) {
+        var transform$result_0;
+        var tmp$_3;
+        if (element_0.signature == null) {
+          transform$result_0 = null;
+        }
+         else {
+          transform$result_0 = new Signature(element_0.signature, (tmp$_3 = tracker.getLocationOf_2v05ti$(element_0)) != null ? tmp$_3 : new Location(-1, -1));
+        }
+        if ((tmp$_0_1 = transform$result_0) != null) {
           destination_0.add_11rb$(tmp$_0_1);
         }
       }

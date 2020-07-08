@@ -35,6 +35,51 @@ interface MathlinguaSignature {
   column: number;
 }
 
+function findDuplicateContent(input: string,
+                              supplemental: string[]): MathlinguaDiagnostic[] {
+  const suppList = kotlin.kotlin.collections.listOf_i5x0yv$(supplemental);
+  const res = mlg.mathlingua.common.MathLingua.findDuplicateContent_kwv3np$(input, suppList);
+  const resArray = res.array_hd7ov6$_0;
+  if (!resArray) {
+    return [];
+  }
+
+  const result: MathlinguaDiagnostic[] = [];
+  for (let i=0; i<resArray.length; i++) {
+    const location = resArray[i];
+    const loc: MathlinguaDiagnostic = {
+      message: 'Duplicate content detected',
+      row: location.row,
+      column: location.column
+    };
+    result.push(loc);
+  }
+
+  return result;
+}
+
+function findDuplicateSignatures(input: string,
+                                 supplemental: string[]): MathlinguaSignature[] {
+  const suppList = kotlin.kotlin.collections.listOf_i5x0yv$(supplemental);
+  const res = mlg.mathlingua.common.MathLingua.findDuplicateSignatures_kwv3np$(input, suppList);
+  const resArray = res.array_hd7ov6$_0;
+  if (!resArray) {
+    return [];
+  }
+
+  const signatures: MathlinguaSignature[] = [];
+  for (let i=0; i<resArray.length; i++) {
+    const sig = resArray[i];
+    const mathSig: MathlinguaSignature = {
+      form: sig.form,
+      row: sig.location.row,
+      column: sig.location.column
+    };
+    signatures.push(mathSig);
+  }
+  return signatures;
+}
+
 function findUndefinedSignatures(input: string,
                                  supplemental: string[]): MathlinguaSignature[] {
   const suppList = kotlin.kotlin.collections.listOf_i5x0yv$(supplemental);
@@ -194,6 +239,30 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
       const severity = vscode.DiagnosticSeverity.Error;
 
       diagnostics.push(new vscode.Diagnostic(range, message, severity));
+    }
+
+    const dupSigs = findDuplicateSignatures(text, otherDocs);
+    for (const sig of dupSigs) {
+      const message = `'${sig.form}' is already defined`;
+      const row = sig.row;
+      const col = sig.column;
+
+      const line = lines[row] || '';
+      const range = new vscode.Range(row, col, row, line.length);
+      const severity = vscode.DiagnosticSeverity.Error;
+
+      diagnostics.push(new vscode.Diagnostic(range, message, severity));
+    }
+
+    const dupContentDiagnostics = findDuplicateContent(text, otherDocs);
+    for (const diag of dupContentDiagnostics) {
+      const row = diag.row;
+      const col = 0;
+
+      const line = lines[row] || '';
+      const range = new vscode.Range(row, col, row, line.length);
+      const severity = vscode.DiagnosticSeverity.Error;
+      diagnostics.push(new vscode.Diagnostic(range, diag.message, severity));
     }
 
     this.diagnosticCollection.set(textDocument.uri, diagnostics);
