@@ -2,7 +2,7 @@
     "name": "mathlingua-language-support",
     "displayName": "Mathlingua Language Support",
     "description": "Visual Studio Code language support for the Mathlingua language",
-    "version": "0.10.2",
+    "version": "0.11.0",
     "publisher": "dominickramer",
     "author": {
         "name": "Dominic Kramer"
@@ -71,6 +71,11 @@
                     "type": "number",
                     "default": "1.5",
                     "description": "The font scale to use when rendering MathLingua code."
+                },
+                "mathlingua.autoOpenPreview": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Automatically open the preview panel when opening a .math file."
                 }
             }
         }

@@ -347,8 +347,13 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   context.subscriptions.push(staticCompletionProvider, previewCommand);
-  maybeCreateHtmlView(null, false);
-  vscode.workspace.onDidOpenTextDocument(async doc => {
-    maybeCreateHtmlView(doc, false);
-  });
+
+  const config = vscode.workspace.getConfiguration();
+  const showPreview = !!config && !!config.mathlingua && config.mathlingua.autoOpenPreview === true;
+  if (showPreview) {
+    maybeCreateHtmlView(null, false);
+    vscode.workspace.onDidOpenTextDocument(async doc => {
+      maybeCreateHtmlView(doc, false);
+    });
+  }
 }
