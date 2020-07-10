@@ -265,7 +265,7 @@ async function updateHtmlView(panel: vscode.WebviewPanel, textDoc: vscode.TextDo
   }
   const config = vscode.workspace.getConfiguration();
   const editorFontFamily = config.editor.fontFamily || 'monospace';
-  const allDocs = (await getAllDocContents(true)).join('\n\n\n');
+  const allDocs = (await getAllDocContents()).join('\n\n\n');
 
   const fontFamily = config.mathlingua.fontFamily || editorFontFamily;
   const scale = config.mathlingua.scale || 1.5;

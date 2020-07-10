@@ -35,9 +35,17 @@ interface MathlinguaSignature {
   column: number;
 }
 
-function findDuplicateContent(input: string,
-                              supplemental: string[]): MathlinguaDiagnostic[] {
-  const suppList = kotlin.kotlin.collections.listOf_i5x0yv$(supplemental);
+async function findDuplicateContent(textDocument: vscode.TextDocument,
+                                    docs: Map<string, string>): Promise<MathlinguaDiagnostic[]> {
+  const input = textDocument.getText()
+
+  const fullPath = textDocument.uri.fsPath;
+  const base = path.basename(fullPath);
+  const otherDocs = await filterDocContents(docs, (filepath: string) => {
+      return path.basename(filepath) === base && filepath !== fullPath;
+  });
+
+  const suppList = kotlin.kotlin.collections.listOf_i5x0yv$(otherDocs);
   const res = mlg.mathlingua.common.MathLingua.findDuplicateContent_kwv3np$(input, suppList);
   const resArray = res.array_hd7ov6$_0;
   if (!resArray) {
@@ -58,9 +66,17 @@ function findDuplicateContent(input: string,
   return result;
 }
 
-function findDuplicateSignatures(input: string,
-                                 supplemental: string[]): MathlinguaSignature[] {
-  const suppList = kotlin.kotlin.collections.listOf_i5x0yv$(supplemental);
+async function findDuplicateSignatures(textDocument: vscode.TextDocument,
+                                       docs: Map<string, string>): Promise<MathlinguaSignature[]> {
+  const input = textDocument.getText();
+
+  const fullPath = textDocument.uri.fsPath;
+  const base = path.basename(fullPath);
+  const otherDocs = await filterDocContents(docs, (filepath: string) => {
+      return path.basename(filepath) === base && filepath !== fullPath;
+  });
+
+  const suppList = kotlin.kotlin.collections.listOf_i5x0yv$(otherDocs);
   const res = mlg.mathlingua.common.MathLingua.findDuplicateSignatures_kwv3np$(input, suppList);
   const resArray = res.array_hd7ov6$_0;
   if (!resArray) {
@@ -80,9 +96,17 @@ function findDuplicateSignatures(input: string,
   return signatures;
 }
 
-function findUndefinedSignatures(input: string,
-                                 supplemental: string[]): MathlinguaSignature[] {
-  const suppList = kotlin.kotlin.collections.listOf_i5x0yv$(supplemental);
+async function findUndefinedSignatures(textDocument: vscode.TextDocument,
+                                       docs: Map<string, string>): Promise<MathlinguaSignature[]> {
+  const input = textDocument.getText();
+
+  const fullPath = textDocument.uri.fsPath;
+  const base = path.basename(fullPath);
+  const otherDocs = await filterDocContents(docs, (filepath: string) => {
+      return path.basename(filepath) === base && filepath !== fullPath;
+  });
+
+  const suppList = kotlin.kotlin.collections.listOf_i5x0yv$(otherDocs);
   const res = mlg.mathlingua.common.MathLingua.findUndefinedSignatures_kwv3np$(input, suppList);
   const resArray = res.array_hd7ov6$_0;
   if (!resArray) {
@@ -131,35 +155,47 @@ function analyze(input: string): MathlinguaDiagnostic[] {
   return res;
 }
 
-async function processFileRecusrively(fullPath: string, fileContents: string[]) {
+async function findFilesRecusrively(fullPath: string,
+                                      fileMap: Map<string, string>) {
   const stat = await fs.promises.stat(fullPath);
   if (stat.isFile() && fullPath.endsWith('.math')) {
     const content = await fs.promises.readFile(fullPath, 'utf8');
-    fileContents.push(content);
+    fileMap.set(fullPath, content);
   } else if (stat.isDirectory()) {
     const files = await fs.promises.readdir(fullPath);
     await Promise.all(files.map(it =>
-      processFileRecusrively(path.join(fullPath, it), fileContents)));
+      findFilesRecusrively(path.join(fullPath, it), fileMap)));
   }
 }
 
-export async function getAllDocContents(readFilesystem: boolean) {
-  let docs: string[];
-    if (readFilesystem) {
-      docs = [];
-      await Promise.all(
-        vscode.workspace.workspaceFolders?.map(it =>
-          processFileRecusrively(it.uri.fsPath, docs)) || []);
-    } else {
-      docs = vscode.workspace.textDocuments.map(it => it.getText());
+async function getAllDocuments(): Promise<Map<string, string>> {
+  const fileMap: Map<string, string> = new Map();
+  await Promise.all(
+    vscode.workspace.workspaceFolders?.map(it =>
+      findFilesRecusrively(it.uri.fsPath, fileMap)) || []);
+  return fileMap;
+}
+
+export async function getAllDocContents(): Promise<string[]> {
+  return Array.from((await getAllDocuments()).values());
+}
+
+function filterDocContents(docs: Map<string, string>,
+                           shouldProcess: (filepath: string) => boolean): string[] {
+  const result: string[] = [];
+  for (const key of docs.keys()) {
+    if (shouldProcess(key)) {
+      result.push(docs.get(key)!);
     }
-    return docs;
+  }
+  return result;
 }
 
 export class MathlinguaProvider implements vscode.CodeActionProvider {
 
   private command!: vscode.Disposable;
   private diagnosticCollection!: vscode.DiagnosticCollection;
+  private processing = false;
 
   async activate(subscriptions: vscode.Disposable[]) {
     this.command = vscode.commands.registerCommand(commandId, () => {}, this);
@@ -176,7 +212,7 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
 
     const textDoc = vscode.workspace.textDocuments[0];
     if (textDoc) {
-      await this.doProcessImpl(textDoc, true);
+      await this.doProcessImpl(textDoc);
     }
   }
 
@@ -191,11 +227,16 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
   }
 
   private async doProcess(textDocument: vscode.TextDocument) {
-    return this.doProcessImpl(textDocument, false);
+    if (this.processing) {
+      return;
+    }
+    this.processing = true;
+    let result = await this.doProcessImpl(textDocument);
+    this.processing = false;
+    return result;
   }
 
-  private async doProcessImpl(textDocument: vscode.TextDocument,
-                              readFilesystem: boolean) {
+  private async doProcessImpl(textDocument: vscode.TextDocument) {
     if (textDocument.languageId !== 'mathlingua') {
       return;
     }
@@ -217,18 +258,9 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
       diagnostics.push(new vscode.Diagnostic(range, message, severity));
     }
 
-    let otherDocs: string[];
-    if (readFilesystem) {
-      otherDocs = [];
-      await Promise.all(
-        vscode.workspace.workspaceFolders?.map(it =>
-          processFileRecusrively(it.uri.fsPath, otherDocs)) || []);
-    } else {
-      otherDocs = vscode.workspace.textDocuments.filter(it => it.uri !== textDocument.uri)
-                                                .map(it => it.getText());
-    }
+    const allDocs = await getAllDocuments();
 
-    const undefSigs = findUndefinedSignatures(text, otherDocs);
+    const undefSigs = await findUndefinedSignatures(textDocument, allDocs);
     for (const sig of undefSigs) {
       const message = `'${sig.form}' is not defined`;
       const row = sig.row;
@@ -241,7 +273,7 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
       diagnostics.push(new vscode.Diagnostic(range, message, severity));
     }
 
-    const dupSigs = findDuplicateSignatures(text, otherDocs);
+    const dupSigs = await findDuplicateSignatures(textDocument, allDocs);
     for (const sig of dupSigs) {
       const message = `'${sig.form}' is already defined`;
       const row = sig.row;
@@ -254,7 +286,7 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
       diagnostics.push(new vscode.Diagnostic(range, message, severity));
     }
 
-    const dupContentDiagnostics = findDuplicateContent(text, otherDocs);
+    const dupContentDiagnostics = await findDuplicateContent(textDocument, allDocs);
     for (const diag of dupContentDiagnostics) {
       const row = diag.row;
       const col = 0;

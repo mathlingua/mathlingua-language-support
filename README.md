@@ -26,6 +26,9 @@ The following configuration options are supported:
 
 ## Release Notes
 
+### 0.12.1 (2020-07-09)
+- Improve performance of detecting duplicate content and signatures.
+
 ### 0.12.0 (2020-07-08)
 - Support identifying duplicate content.
 - Support identifying duplicate signatures.
