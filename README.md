@@ -6,9 +6,15 @@ This is the official Visual Studio Code extension to provide language support fo
 
 Supports syntax highlighting, auto-analysis, autocomplete, rendering of MathLingua documents (with a `.math` extension), and identifying duplicate content and signatures.  Any parse errors are displayed within the current file on save, and any signatures that are used, but have not been defined, are marked with a warning.
 
-Furthermore, entering the `mathlingua` command at the command palette will open a preview panel that renders the current MathLingua document.
+Furthermore, the follow command palette commands are supported:
+- **mathlingua.preview**
+  - Open a preview panel that renders the current MathLingua document.
+- **mathlingua.duplicates**
+  - Identify duplicate signatures and content in the current document.
+- **mathlingua.undefined**
+  - Identify signatures used in the current document that do not have a definition.
 
-The following configuration options are supported:
+The following configuration options are also supported:
 - **mathlingua.fontFamily**
   - The font used when rendering MathLingua code.
   - Defaults to the editor's font family.
@@ -25,6 +31,9 @@ The following configuration options are supported:
 ![Preview image of the extension](images/preview.png)
 
 ## Release Notes
+
+### 0.13.0 (2020-07-11)
+- The `mathlingua.duplicates` and `mathlingua.undefined` commands have been added.  The identification of duplicate content and undefined signatures noew occurs when those commands are entered instead of on each file save.
 
 ### 0.12.1 (2020-07-09)
 - Improve performance of detecting duplicate content and signatures.

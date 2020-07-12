@@ -2,7 +2,7 @@
     "name": "mathlingua-language-support",
     "displayName": "Mathlingua Language Support",
     "description": "Visual Studio Code language support for the Mathlingua language",
-    "version": "0.12.1",
+    "version": "0.13.0",
     "publisher": "dominickramer",
     "author": {
         "name": "Dominic Kramer"
@@ -51,6 +51,16 @@
             {
                 "command": "mathlingua.preview",
                 "title": "Preview MathLingua code",
+                "category": "mathlingua"
+            },
+            {
+                "command": "mathlingua.duplicates",
+                "title": "Identify duplicate content and defined signatures.",
+                "category": "mathlingua"
+            },
+            {
+                "command": "mathlingua.undefined",
+                "title": "Identify undefined signatures (those used but not defined).",
                 "category": "mathlingua"
             }
         ],

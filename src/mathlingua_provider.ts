@@ -156,28 +156,29 @@ function analyze(input: string): MathlinguaDiagnostic[] {
 }
 
 async function findFilesRecusrively(fullPath: string,
-                                      fileMap: Map<string, string>) {
+                                    fileMap: Map<string, string>,
+                                    shouldProcess: (fullPath: string) => boolean) {
   const stat = await fs.promises.stat(fullPath);
-  if (stat.isFile() && fullPath.endsWith('.math')) {
+  if (stat.isFile() && fullPath.endsWith('.math') && shouldProcess(fullPath)) {
     const content = await fs.promises.readFile(fullPath, 'utf8');
     fileMap.set(fullPath, content);
   } else if (stat.isDirectory()) {
     const files = await fs.promises.readdir(fullPath);
     await Promise.all(files.map(it =>
-      findFilesRecusrively(path.join(fullPath, it), fileMap)));
+      findFilesRecusrively(path.join(fullPath, it), fileMap, shouldProcess)));
   }
 }
 
-async function getAllDocuments(): Promise<Map<string, string>> {
+async function getAllDocuments(shouldProcess: (fullPath: string) => boolean): Promise<Map<string, string>> {
   const fileMap: Map<string, string> = new Map();
   await Promise.all(
     vscode.workspace.workspaceFolders?.map(it =>
-      findFilesRecusrively(it.uri.fsPath, fileMap)) || []);
+      findFilesRecusrively(it.uri.fsPath, fileMap, shouldProcess)) || []);
   return fileMap;
 }
 
-export async function getAllDocContents(): Promise<string[]> {
-  return Array.from((await getAllDocuments()).values());
+export async function getAllDocContents(shouldProcess: (fullPath: string) => boolean): Promise<string[]> {
+  return Array.from((await getAllDocuments(shouldProcess)).values());
 }
 
 function filterDocContents(docs: Map<string, string>,
@@ -207,6 +208,14 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
     vscode.workspace.onDidCloseTextDocument(textDocument => {
       this.diagnosticCollection.delete(textDocument.uri);
     }, null, subscriptions);
+
+    vscode.commands.registerCommand('mathlingua.duplicates', () => {
+      vscode.workspace.textDocuments.forEach(doc => this.identifyDuplicates(doc));
+    });
+
+    vscode.commands.registerCommand('mathlingua.undefined', () => {
+      vscode.workspace.textDocuments.forEach(doc => this.identifyUndefinedSignatures(doc));
+    });
 
     vscode.workspace.textDocuments.forEach(this.doProcess, this);
 
@@ -258,20 +267,19 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
       diagnostics.push(new vscode.Diagnostic(range, message, severity));
     }
 
-    const allDocs = await getAllDocuments();
+    this.diagnosticCollection.set(textDocument.uri, diagnostics);
+  }
 
-    const undefSigs = await findUndefinedSignatures(textDocument, allDocs);
-    for (const sig of undefSigs) {
-      const message = `'${sig.form}' is not defined`;
-      const row = sig.row;
-      const col = sig.column;
-
-      const line = lines[row] || '';
-      const range = new vscode.Range(row, col, row, line.length);
-      const severity = vscode.DiagnosticSeverity.Error;
-
-      diagnostics.push(new vscode.Diagnostic(range, message, severity));
+  private async identifyDuplicates(textDocument: vscode.TextDocument) {
+    if (textDocument.languageId !== 'mathlingua') {
+      return;
     }
+
+    const text = textDocument.getText();
+    const lines = text.split('\n');
+
+    const diagnostics: vscode.Diagnostic[] = [];
+    const allDocs = await getAllDocuments(() => true);
 
     const dupSigs = await findDuplicateSignatures(textDocument, allDocs);
     for (const sig of dupSigs) {
@@ -295,6 +303,33 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
       const range = new vscode.Range(row, col, row, line.length);
       const severity = vscode.DiagnosticSeverity.Error;
       diagnostics.push(new vscode.Diagnostic(range, diag.message, severity));
+    }
+
+    this.diagnosticCollection.set(textDocument.uri, diagnostics);
+  }
+
+  private async identifyUndefinedSignatures(textDocument: vscode.TextDocument) {
+    if (textDocument.languageId !== 'mathlingua') {
+      return;
+    }
+
+    const text = textDocument.getText();
+    const lines = text.split('\n');
+
+    const diagnostics: vscode.Diagnostic[] = [];
+    const allDocs = await getAllDocuments(() => true);
+
+    const undefSigs = await findUndefinedSignatures(textDocument, allDocs);
+    for (const sig of undefSigs) {
+      const message = `'${sig.form}' is not defined`;
+      const row = sig.row;
+      const col = sig.column;
+
+      const line = lines[row] || '';
+      const range = new vscode.Range(row, col, row, line.length);
+      const severity = vscode.DiagnosticSeverity.Error;
+
+      diagnostics.push(new vscode.Diagnostic(range, message, severity));
     }
 
     this.diagnosticCollection.set(textDocument.uri, diagnostics);

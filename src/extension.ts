@@ -261,11 +261,19 @@ function toHtml(input: string, supplemental: string): string {
 
 async function updateHtmlView(panel: vscode.WebviewPanel, textDoc: vscode.TextDocument) {
   if (!textDoc.uri.path.endsWith('.math')) {
-    return
+    return;
   }
+
+  panel.webview.html = '<html><body><span style="font-size: 1.5em; margin-top: 2em;">' +
+     'Processing...</span></body></html>';
+
   const config = vscode.workspace.getConfiguration();
   const editorFontFamily = config.editor.fontFamily || 'monospace';
-  const allDocs = (await getAllDocContents()).join('\n\n\n');
+
+  const allDocs = (await getAllDocContents((fullPath: string) => {
+    return fullPath.toLowerCase().endsWith('defines.math') ||
+      fullPath.toLowerCase().endsWith('represents.math');
+  })).join('\n\n\n');
 
   const fontFamily = config.mathlingua.fontFamily || editorFontFamily;
   const scale = config.mathlingua.scale || 1.5;
@@ -288,7 +296,16 @@ function maybeCreateHtmlView(document: vscode.TextDocument|null, force: boolean)
     return;
   }
 
-  const panel = prevPanel || vscode.window.createWebviewPanel(
+  if (prevPanel != null) {
+    if (!force) {
+      return;
+    }
+
+    prevPanel.dispose();
+    prevPanel = null;
+  }
+
+  const panel = vscode.window.createWebviewPanel(
     'mathlingua',
     'MathLingua Preview',
     vscode.ViewColumn.Beside,
@@ -297,20 +314,31 @@ function maybeCreateHtmlView(document: vscode.TextDocument|null, force: boolean)
     }
   );
   prevPanel = panel;
+  var isDisposed = false;
   prevPanel.onDidDispose(() => {
+    isDisposed = true;
     prevPanel = null;
   });
 
-  vscode.workspace.onDidSaveTextDocument(async textDoc => {
-    await updateHtmlView(panel, textDoc);
+  vscode.workspace.onDidSaveTextDocument(textDoc => {
+    if (isDisposed) {
+      return;
+    }
+    return updateHtmlView(panel, textDoc);
   });
 
-  vscode.workspace.onDidChangeTextDocument(async event => {
-    await updateHtmlView(panel, event.document);
+  vscode.workspace.onDidChangeTextDocument(event => {
+    if (isDisposed) {
+      return;
+    }
+    return updateHtmlView(panel, event.document);
   });
 
-  vscode.workspace.onDidOpenTextDocument(async doc => {
-    await updateHtmlView(panel, doc);
+  vscode.workspace.onDidOpenTextDocument(doc => {
+    if (isDisposed) {
+      return;
+    }
+    return updateHtmlView(panel, doc);
   });
 
   if (doc) {
