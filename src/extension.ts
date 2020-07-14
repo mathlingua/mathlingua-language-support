@@ -15,11 +15,11 @@
  */
 
 import * as vscode from 'vscode';
+import * as path from 'path';
 
-import {MathlinguaProvider, getAllDocContents} from './mathlingua_provider';
+import {MathlinguaProvider } from './mathlingua_provider';
 
-const mlg = require('./mathlingua');
-
+import * as cp from 'child_process';
 
 interface StaticCompletion {
   name: string;
@@ -228,65 +228,40 @@ function getDynamicIdCompletions(text: string): vscode.CompletionItem[] {
   return result;
 }
 
-function toHtml(input: string, supplemental: string): string {
-  const validation = mlg.mathlingua.common.MathLingua.printExpanded_qz9155$(input, supplemental, true);
-  if (validation.value != null) {
-    return validation.value;
-  }
-
-  const errors = validation.errors;
-  if (!errors) {
-    return '';
-  }
-
-  const errorArr = errors.array_hd7ov6$_0;
-  if (!errorArr) {
-    return '';
-  }
-
-  let errHtml = '<html><body><ul style="margin: 2em;">';
-  for (let i=0; i<errorArr.length; i++) {
-    const err = errorArr[i];
-    const message = err.message;
-    const row = err.row;
-    // there seems to be a bug in the Mathlingua parser
-    // where the column is off by 1
-    const column = Math.max(0, err.column - 1);
-    errHtml += `<li style="font-size: 1.75em;"><span style="color: red">ERROR(${row}, ${column}):</span> ${message}</li>`;
-  }
-  errHtml += '</ul></body></html>';
-
-  return errHtml;
-}
-
 async function updateHtmlView(panel: vscode.WebviewPanel, textDoc: vscode.TextDocument) {
   if (!textDoc.uri.path.endsWith('.math')) {
     return;
   }
 
-  panel.webview.html = '<html><body><span style="font-size: 1.5em; margin-top: 2em;">' +
-     'Processing...</span></body></html>';
-
   const config = vscode.workspace.getConfiguration();
   const editorFontFamily = config.editor.fontFamily || 'monospace';
-
-  const allDocs = (await getAllDocContents((fullPath: string) => {
-    return fullPath.toLowerCase().endsWith('defines.math') ||
-      fullPath.toLowerCase().endsWith('represents.math');
-  })).join('\n\n\n');
 
   const fontFamily = config.mathlingua.fontFamily || editorFontFamily;
   const scale = config.mathlingua.scale || 1.5;
   const weight = config.mathlingua.useBoldHeaders ? 'bold' : 'plain';
 
-  panel.webview.html = toHtml(textDoc.getText(), allDocs)
-    .replace(/<style>/g, '<style> .end-mathlingua-top-level { display: block; border: 0.75px solid #eeeeee; margin-top: 2em; margin-bottom: 2em; } ')
-    .replace(/font-size: 1em;/g, `font-size: ${scale}em;`) // scale the main font
-    .replace(/font-size: 0\.75em;/g, `font-size: ${scale*0.75}em;`) // scale the latex font
-    .replace(/font-family: monospace;/g, `font-family: ${fontFamily};`)
-    // add more padding below each entry
-    .replace(/\.mathlingua-top-level \{/g, '.mathlingua-top-level {padding-bottom: 1.5em;')
-    .replace(/font-weight: bold;/g, `font-weight: ${weight};`);
+  cp.execFile('java', [
+    '-jar',
+    path.join(__dirname, '..', 'jar', 'mathlingua.jar'),
+    'render',
+    '--filter', 'defines.math,represents.math',
+    '--output', 'html',
+    '--expand',
+    textDoc.uri.fsPath
+  ], (err, stdout, stderr) => {
+    if (err) {
+      panel.webview.html = err.message;
+    } else {
+      panel.webview.html = stdout
+            .replace(/<style>/g, '<style> .end-mathlingua-top-level { display: block; height: 1em; } ')
+            .replace(/font-size: 1em;/g, `font-size: ${scale}em;`) // scale the main font
+            .replace(/font-size: 0\.75em;/g, `font-size: ${scale*0.75}em;`) // scale the latex font
+            .replace(/font-family: monospace;/g, `font-family: ${fontFamily};`)
+            // add more padding below each entry
+            .replace(/\.mathlingua-top-level \{/g, '.mathlingua-top-level {padding-bottom: 1.5em;')
+            .replace(/font-weight: bold;/g, `font-weight: ${weight};`);
+    }
+  });
 }
 
 let prevPanel: vscode.WebviewPanel|null = null;
@@ -325,13 +300,6 @@ function maybeCreateHtmlView(document: vscode.TextDocument|null, force: boolean)
       return;
     }
     return updateHtmlView(panel, textDoc);
-  });
-
-  vscode.workspace.onDidChangeTextDocument(event => {
-    if (isDisposed) {
-      return;
-    }
-    return updateHtmlView(panel, event.document);
   });
 
   vscode.workspace.onDidOpenTextDocument(doc => {

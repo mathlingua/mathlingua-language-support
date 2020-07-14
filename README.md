@@ -28,9 +28,16 @@ The following configuration options are also supported:
   - Specifies whether the preview panel should be automatically displayed when opening a `.math` file.
   - Defaults to `false`.
 
+## Requirements
+
+A Java virtual machine supporting Java 1.8 or higher is required to use this extension.
+
 ![Preview image of the extension](images/preview.png)
 
 ## Release Notes
+
+### 0.14.0 (2020-07-13)
+- A Mathlingua Java subprocess is now used to perform operations for the extension.
 
 ### 0.13.0 (2020-07-11)
 - The `mathlingua.duplicates` and `mathlingua.undefined` commands have been added.  The identification of duplicate content and undefined signatures noew occurs when those commands are entered instead of on each file save.
