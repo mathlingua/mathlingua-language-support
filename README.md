@@ -36,6 +36,10 @@ A Java virtual machine supporting Java 1.8 or higher is required to use this ext
 
 ## Release Notes
 
+### 0.15.0 (2020-07-14)
+- Fix an issue with the display of parse errors sometimes not appearing.
+- Add a preview button in the top right corner of vscode used to activate the preview of the current Mathlingua document.
+
 ### 0.14.0 (2020-07-13)
 - A Mathlingua Java subprocess is now used to perform operations for the extension.
 

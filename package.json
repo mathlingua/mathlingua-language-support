@@ -2,7 +2,7 @@
     "name": "mathlingua-language-support",
     "displayName": "Mathlingua Language Support",
     "description": "Visual Studio Code language support for the Mathlingua language",
-    "version": "0.14.0",
+    "version": "0.15.0",
     "publisher": "dominickramer",
     "author": {
         "name": "Dominic Kramer"
@@ -51,7 +51,11 @@
             {
                 "command": "mathlingua.preview",
                 "title": "Preview MathLingua code",
-                "category": "mathlingua"
+                "category": "mathlingua",
+                "icon": {
+                    "dark": "./vscode-icons/icons/dark/preview.svg",
+                    "light": "./vscode-icons/icons/light/preview.svg"
+                }
             },
             {
                 "command": "mathlingua.duplicates",
@@ -64,6 +68,15 @@
                 "category": "mathlingua"
             }
         ],
+        "menus": {
+            "editor/title": [
+                {
+                    "command": "mathlingua.preview",
+                    "when": "true",
+                    "group": "navigation"
+                }
+            ]
+        },
         "configuration": {
             "title": "MathLingua",
             "properties": {
@@ -107,7 +120,5 @@
         "typescript": "^3.8.3",
         "vscode": "^1.1.37"
     },
-    "dependencies": {
-        "kotlin": "^1.3.72"
-    }
+    "dependencies": {}
 }

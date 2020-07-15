@@ -91,11 +91,6 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
   private command!: vscode.Disposable;
   private diagnosticCollection!: vscode.DiagnosticCollection;
 
-  private checkDiagnostics: MathlinguaDiagnostic[] = [];
-  private dupContentDiagnostics: MathlinguaDiagnostic[] = [];
-  private dupSigDiagnostics: MathlinguaDiagnostic[] = [];
-  private undefSigDiagnostics: MathlinguaDiagnostic[] = [];
-
   async activate(subscriptions: vscode.Disposable[]) {
     this.command = vscode.commands.registerCommand(commandId, () => {}, this);
     subscriptions.push(this);
@@ -111,9 +106,20 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
       vscode.workspace.textDocuments.forEach(async doc => {
         const lines = (await fs.promises.readFile(doc.uri.fsPath))
                         .toString().split('\n');
-        return Promise.all([
-          this.identifyDuplicateContent(lines, doc).catch(console.error),
-          this.identifyDuplicateSignatures(lines, doc).catch(console.error)
+        const allDiagnostics: vscode.Diagnostic[] = [];
+        await Promise.all([
+          this.identifyDuplicateContent(lines, doc).then(diag => {
+            for (const d of toVscodeDiagnostics(lines, diag)) {
+              allDiagnostics.push(d);
+            }
+            this.diagnosticCollection.set(doc.uri, allDiagnostics);
+          }),
+          this.identifyDuplicateSignatures(lines, doc).then(diag => {
+            for (const d of toVscodeDiagnostics(lines, diag)) {
+              allDiagnostics.push(d);
+            }
+            this.diagnosticCollection.set(doc.uri, allDiagnostics);
+          })
         ]);
       });
     });
@@ -122,7 +128,8 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
       vscode.workspace.textDocuments.forEach(async doc => {
         const lines = (await fs.promises.readFile(doc.uri.fsPath))
                         .toString().split('\n');
-        return this.identifyUndefinedSignatures(lines, doc);
+        const allDiagnostics = await this.identifyUndefinedSignatures(lines, doc);
+        this.diagnosticCollection.set(doc.uri, toVscodeDiagnostics(lines, allDiagnostics));
       });
     });
 
@@ -158,15 +165,37 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
 
     const lines = (await fs.promises.readFile(textDocument.uri.fsPath))
                         .toString().split('\n');
-    return Promise.all([
-      this.check(lines, textDocument),
-      this.identifyDuplicateContent(lines, textDocument),
-      this.identifyDuplicateSignatures(lines, textDocument)
-      // this.identifyUndefinedSignatures(lines, textDocument)
+
+    const allDiagnostics: vscode.Diagnostic[] = [];
+    const diagnosticsForCheck = await this.check(lines, textDocument);
+    for (const d of toVscodeDiagnostics(lines, diagnosticsForCheck)) {
+      allDiagnostics.push(d);
+    }
+    this.diagnosticCollection.set(textDocument.uri, allDiagnostics);
+
+    await Promise.all([
+      this.identifyDuplicateContent(lines, textDocument).then(diag => {
+        for (const d of toVscodeDiagnostics(lines, diag)) {
+          allDiagnostics.push(d);
+        }
+        this.diagnosticCollection.set(textDocument.uri, allDiagnostics);
+      }),
+      this.identifyDuplicateSignatures(lines, textDocument).then(diag => {
+        for (const d of toVscodeDiagnostics(lines, diag)) {
+          allDiagnostics.push(d);
+        }
+        this.diagnosticCollection.set(textDocument.uri, allDiagnostics);
+      }),
+      //this.identifyUndefinedSignatures(lines, textDocument).then(diag => {
+      //  for (const d of toVscodeDiagnostics(lines, diag)) {
+      //    allDiagnostics.push(d);
+      //  }
+      //  this.diagnosticCollection.set(textDocument.uri, allDiagnostics);
+      //})
     ]);
   }
 
-  private async check(lines: string[], textDocument: vscode.TextDocument): Promise<void> {
+  private async check(lines: string[], textDocument: vscode.TextDocument): Promise<MathlinguaDiagnostic[]> {
     return new Promise((resolve, reject) => {
       cp.execFile('java', [
         '-jar',
@@ -192,23 +221,12 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
           };
           diagnostics.push(diag);
         }
-  
-        this.checkDiagnostics = diagnostics;
-        const allDiagnostics =
-          toVscodeDiagnostics(lines, this.checkDiagnostics)
-          .concat(toVscodeDiagnostics(lines, this.dupContentDiagnostics))
-          .concat(toVscodeDiagnostics(lines, this.dupSigDiagnostics))
-          .concat(toVscodeDiagnostics(lines, this.undefSigDiagnostics));
-
-        this.diagnosticCollection.clear();
-        this.diagnosticCollection.set(textDocument.uri, allDiagnostics);
-
-        resolve();
+        resolve(diagnostics);
       });
     });
   }
 
-  private async identifyDuplicateContent(lines: string[], textDocument: vscode.TextDocument): Promise<void> {
+  private async identifyDuplicateContent(lines: string[], textDocument: vscode.TextDocument): Promise<MathlinguaDiagnostic[]> {
     return new Promise((resolve, reject) => {
       cp.execFile('java', [
         '-jar',
@@ -233,23 +251,12 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
           };
           diagnostics.push(diag);
         }
-        this.dupContentDiagnostics = diagnostics;
-
-        const allDiagnostics =
-          toVscodeDiagnostics(lines, this.checkDiagnostics)
-          .concat(toVscodeDiagnostics(lines, this.dupContentDiagnostics))
-          .concat(toVscodeDiagnostics(lines, this.dupSigDiagnostics))
-          .concat(toVscodeDiagnostics(lines, this.undefSigDiagnostics));
-
-        this.diagnosticCollection.clear();
-        this.diagnosticCollection.set(textDocument.uri, allDiagnostics);
-
-        resolve();
+        resolve(diagnostics)
       });
     });
   }
 
-  private async identifyDuplicateSignatures(lines: string[], textDocument: vscode.TextDocument): Promise<void> {
+  private async identifyDuplicateSignatures(lines: string[], textDocument: vscode.TextDocument): Promise<MathlinguaDiagnostic[]> {
     return new Promise((resolve, reject) => {
       cp.execFile('java', [
         '-jar',
@@ -274,23 +281,12 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
           };
           diagnostics.push(diag);
         }
-        this.dupSigDiagnostics = diagnostics;
-
-        const allDiagnostics =
-          toVscodeDiagnostics(lines, this.checkDiagnostics)
-          .concat(toVscodeDiagnostics(lines, this.dupContentDiagnostics))
-          .concat(toVscodeDiagnostics(lines, this.dupSigDiagnostics))
-          .concat(toVscodeDiagnostics(lines, this.undefSigDiagnostics));
-
-        this.diagnosticCollection.clear();
-        this.diagnosticCollection.set(textDocument.uri, allDiagnostics);
-
-        resolve();
+        resolve(diagnostics);
       });
     });
   }
 
-  private async identifyUndefinedSignatures(lines: string[], textDocument: vscode.TextDocument): Promise<void> {
+  private async identifyUndefinedSignatures(lines: string[], textDocument: vscode.TextDocument): Promise<MathlinguaDiagnostic[]> {
     return new Promise((resolve, reject) => {
       cp.execFile('java', [
         '-jar',
@@ -315,18 +311,7 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
           };
           diagnostics.push(diag);
         }
-        this.undefSigDiagnostics = diagnostics;
-
-        const allDiagnostics =
-          toVscodeDiagnostics(lines, this.checkDiagnostics)
-          .concat(toVscodeDiagnostics(lines, this.dupContentDiagnostics))
-          .concat(toVscodeDiagnostics(lines, this.dupSigDiagnostics))
-          .concat(toVscodeDiagnostics(lines, this.undefSigDiagnostics));
-
-        this.diagnosticCollection.clear();
-        this.diagnosticCollection.set(textDocument.uri, allDiagnostics);
-
-        resolve();
+        resolve(diagnostics);
       });
     });
   }
