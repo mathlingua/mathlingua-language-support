@@ -36,6 +36,9 @@ A Java virtual machine supporting Java 1.8 or higher is required to use this ext
 
 ## Release Notes
 
+## 0.16.1 (2020-07-15)
+- Render `\term{...}` text in italics.
+
 ### 0.16.0 (2020-07-15)
 - Simplify the syntax definition.
 

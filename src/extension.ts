@@ -259,7 +259,8 @@ async function updateHtmlView(panel: vscode.WebviewPanel, textDoc: vscode.TextDo
             .replace(/font-family: monospace;/g, `font-family: ${fontFamily};`)
             // add more padding below each entry
             .replace(/\.mathlingua-top-level \{/g, '.mathlingua-top-level {padding-bottom: 1.5em;')
-            .replace(/font-weight: bold;/g, `font-weight: ${weight};`);
+            .replace(/font-weight: bold;/g, `font-weight: ${weight};`)
+            .replace(/\\term\{(.*)\}/g, '$\\textit{$1}$');
     }
   });
 }
