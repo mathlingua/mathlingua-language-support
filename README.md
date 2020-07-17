@@ -36,6 +36,10 @@ A Java virtual machine supporting Java 1.8 or higher is required to use this ext
 
 ## Release Notes
 
+## 0.17.0 (2020-07-17)
+- Text can contain Mathlingua code enclosed in single quotes and it will be expanded when rendered.
+- Fixed an issue where document rendering wasn't able to use defined signatures.
+
 ## 0.16.1 (2020-07-15)
 - Render `\term{...}` text in italics.
 

@@ -240,7 +240,7 @@ async function updateHtmlView(panel: vscode.WebviewPanel, textDoc: vscode.TextDo
   const scale = config.mathlingua.scale || 1.5;
   const weight = config.mathlingua.useBoldHeaders ? 'bold' : 'plain';
 
-  cp.execFile('java', [
+  const args = [
     '-jar',
     path.join(__dirname, '..', 'jar', 'mathlingua.jar'),
     'render',
@@ -248,7 +248,9 @@ async function updateHtmlView(panel: vscode.WebviewPanel, textDoc: vscode.TextDo
     '--output', 'html',
     '--expand',
     textDoc.uri.fsPath
-  ], (err, stdout, stderr) => {
+  ];
+  const cwd = vscode.workspace.getWorkspaceFolder(textDoc.uri)?.uri.fsPath;
+  cp.execFile('java', args, { cwd }, (err, stdout, stderr) => {
     if (err) {
       panel.webview.html = err.message;
     } else {

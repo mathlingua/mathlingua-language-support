@@ -196,6 +196,7 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
   }
 
   private async check(lines: string[], textDocument: vscode.TextDocument): Promise<MathlinguaDiagnostic[]> {
+    const cwd = vscode.workspace.getWorkspaceFolder(textDocument.uri)?.uri.fsPath;
     return new Promise((resolve, reject) => {
       cp.execFile('java', [
         '-jar',
@@ -203,7 +204,7 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
         'check',
         '--json',
         textDocument.uri.fsPath
-      ], async (err, stdout, stderr) => {
+      ], { cwd }, async (err, stdout, stderr) => {
         const parseResults: ParseResult[] = JSON.parse(stdout);
         const diagnostics: MathlinguaDiagnostic[] = [];
         for (const err of parseResults) {
@@ -227,13 +228,14 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
   }
 
   private async identifyDuplicateContent(lines: string[], textDocument: vscode.TextDocument): Promise<MathlinguaDiagnostic[]> {
+    const cwd = vscode.workspace.getWorkspaceFolder(textDocument.uri)?.uri.fsPath;
     return new Promise((resolve, reject) => {
       cp.execFile('java', [
         '-jar',
         path.join(__dirname, '..', 'jar', 'mathlingua.jar'),
         'dup-content',
         '--json'
-      ], async (err, stdout, stderr) => {
+      ], { cwd }, async (err, stdout, stderr) => {
         const results: PathLocation[] = JSON.parse(stdout);
         const diagnostics: MathlinguaDiagnostic[] = [];
         for (const err of results) {
@@ -257,13 +259,14 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
   }
 
   private async identifyDuplicateSignatures(lines: string[], textDocument: vscode.TextDocument): Promise<MathlinguaDiagnostic[]> {
+    const cwd = vscode.workspace.getWorkspaceFolder(textDocument.uri)?.uri.fsPath;
     return new Promise((resolve, reject) => {
       cp.execFile('java', [
         '-jar',
         path.join(__dirname, '..', 'jar', 'mathlingua.jar'),
         'dup-sig',
         '--json'
-      ], async (err, stdout, stderr) => {
+      ], { cwd }, async (err, stdout, stderr) => {
         const results: PathLocation[] = JSON.parse(stdout);
         const diagnostics: MathlinguaDiagnostic[] = [];
         for (const err of results) {
@@ -287,13 +290,14 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
   }
 
   private async identifyUndefinedSignatures(lines: string[], textDocument: vscode.TextDocument): Promise<MathlinguaDiagnostic[]> {
+    const cwd = vscode.workspace.getWorkspaceFolder(textDocument.uri)?.uri.fsPath;
     return new Promise((resolve, reject) => {
       cp.execFile('java', [
         '-jar',
         path.join(__dirname, '..', 'jar', 'mathlingua.jar'),
         'undef-sig',
         '--json'
-      ], async (err, stdout, stderr) => {
+      ], { cwd }, async (err, stdout, stderr) => {
         const results: PathLocation[] = JSON.parse(stdout);
         const diagnostics: MathlinguaDiagnostic[] = [];
         for (const err of results) {
