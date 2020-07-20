@@ -36,6 +36,11 @@ A Java virtual machine supporting Java 1.8 or higher is required to use this ext
 
 ## Release Notes
 
+## 0.18.0 (2020-07-19)
+- Addressed issues with rendering content that contained subscripts.
+- If the expansion of a command could not be done, the html tooltip for the command contains the errors preventing the expansion to occur.
+- Support for `Proto` groups has been removed.  Instead of `ProtoTheorem` or `ProtoResult` use `Theorem` instead.  Instead of using `ProtoDefines` use `Definition`.  Instead of `ProtoAxiom` and `ProtoConjecture` use `Axiom` and `Conjecture`.
+
 ## 0.17.0 (2020-07-17)
 - Text can contain Mathlingua code enclosed in single quotes and it will be expanded when rendered.
 - Fixed an issue where document rendering wasn't able to use defined signatures.

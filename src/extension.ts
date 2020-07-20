@@ -49,6 +49,21 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
     text: 'Theorem: ${1}\nAlias: ${2}\nMetadata: ${3}'
   },
   {
+    name: 'Note:',
+    documentation: 'Describes knowledge that is not a definition, theorem, axiom, or conjecture.',
+    text: 'Note: ${1}\nAlias: ${2}\nMetadata: ${3}'
+  },
+  {
+    name: 'Problem:',
+    documentation: 'Describes a mathematical problem or example.',
+    text: 'Problem: ${1}\nAlias: ${2}\nMetadata: ${3}'
+  },
+  {
+    name: 'Definition:',
+    documentation: 'Describes a mathematical definition that does not have a signature.',
+    text: 'Definition: ${1}\nAlias: ${2}\nMetadata: ${3}'
+  },
+  {
     name: 'Axiom:',
     documentation: 'Describes a mathematical axiom.',
     text: 'Axiom:\nAlias: ${1}\nMetadata: ${2}'
@@ -244,7 +259,6 @@ async function updateHtmlView(panel: vscode.WebviewPanel, textDoc: vscode.TextDo
     '-jar',
     path.join(__dirname, '..', 'jar', 'mathlingua.jar'),
     'render',
-    '--filter', 'defines.math,represents.math',
     '--output', 'html',
     '--expand',
     textDoc.uri.fsPath
