@@ -34,54 +34,94 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
     text: '[${1}]\nResource:\n. type: "${2}"\n. name: "${3}"\n. author: "${4}"\n. homepage: "${5}"\n. url: "${6}"\n. offset: "${7}"\nMetadata: ${8}'
   },
   {
-    name: 'Defines:',
-    documentation: 'Describes a mathematical definition.',
-    text: '[${1}]\nDefines: ${2}\nassuming: ${3}\nmeans: ${4}'
+    name: 'Defines:means:',
+    documentation: 'Makes an abstract definition.',
+    text: '[${1}]\nDefines: ${2}\nwhere: ${3}\nwhen: ${4}\nmeans: ${5}\nusing: ${6}\nwritten: "${7}"'
   },
   {
-    name: 'Represents:',
-    documentation: 'Describes a mathematical representation such `x \\in y` or `x < y`.',
-    text: '[${1}]\nRepresents:\nassuming: ${2}\nthat: ${3}\nAlias: ${4}\nMetadata: ${5}'
+    name: 'Defines:maps:',
+    documentation: 'Specifies a map.',
+    text: '[${1}]\nDefines: ${2}\nwhere: ${3}\nwhen: ${4}\nmaps: ${5}\n. from: ${6}\n  to: ${7}\nusing: ${8}\nwritten: "${9}"'
+  },
+  {
+    name: 'from:to:',
+    documentation: 'Specifies the domain and range of a mapping.',
+    text: 'from: ${1}\nto: ${2}'
+  },
+  {
+    name: 'Defines:instantiated:',
+    documentation: 'Creates an instance of an abstract definition.',
+    text: '[${1}]\nDefines: ${2}\ninstantiated: ${3}\nusing: ${4}\nwritten: "${5}"'
+  },
+  {
+    name: 'Defines:generated:',
+    documentation: 'Specifies a generated structure.',
+    text: '[${1}]\nDefines: ${2}\nwhere: ${3}\nwhen: ${4}\ngenerated:\n. inductively:\n  from:\n  . constant: ${5}\n  . constructor: ${6}\n    from: ${7}\nusing: ${8}\nwritten: "${9}"'
+  },
+  {
+    name: 'Defines:collects:',
+    documentation: 'Specifies a collection of objects.',
+    text: '[${1}]\nDefines: ${2}\nwhere: ${3}\nwhen: ${4}\ncollects:\n. given: ${5}\n  where: ${6}\n  all: ${7}\n  suchThat: ${8}\nusing: ${9}\nwritten: "${10}"'
+  },
+  {
+    name: 'Defines:evaluated:',
+    documentation: 'Defines a function.',
+    text: '[${1}]\nDefines: ${1}\nwhere: ${2}\nwhen: ${3}\nevaluated:\n. ${4}\nusing: ${5}\nwritten: ${6}'
+  },
+  {
+    name: 'States:',
+    documentation: 'Describes a mathematical statement such `x \\in y` or `x < y`.',
+    text: '[${1}]\nStates:\nwhen: ${2}\nthat: ${3}\nusing: ${4}\nwritten: "${5}"'
+  },
+  {
+    name: 'Evaluates',
+    documentation: 'Describes how an infix operator should be evaluated based on the input',
+    text: '[${1}]\nEvaluates:\nwhen: ${2}\nthen: ${3}\nelse: ${4}\nusing: ${5}\nwritten: "${6}"'
+  },
+  {
+    name: 'Mutually',
+    documentation: 'Used to define two constructs that are mutually related',
+    text: 'Mutually:\n. ${1}'
+  },
+  {
+    name: 'Foundation',
+    documentation: 'Describes a definition that is foundationally true',
+    text: 'Foundation:\n. ${1}'
+  },
+  {
+    name: 'Views',
+    documentation: 'Describes how to view a mathematical object as another. (For example, an integer as a rational number).',
+    text: '[${1}]\nViews:\nfrom: ${2}\nto: ${3}\nas: ${4}\nusing: ${5}'
+  },
+  {
+    name: 'Entry',
+    documentation: 'Used to give a description of a mathematical concept informally.',
+    text: 'Entry:\ntype: "${1}"\ncontent: "${2}"'
   },
   {
     name: 'Theorem:',
     documentation: 'Describes a proven mathematical result such as a theorem, proposition, corollary, or lemma.',
-    text: 'Theorem: ${1}\nAlias: ${2}\nMetadata: ${3}'
-  },
-  {
-    name: 'Note:',
-    documentation: 'Describes knowledge that is not a definition, theorem, axiom, or conjecture.',
-    text: 'Note: ${1}\nAlias: ${2}\nMetadata: ${3}'
-  },
-  {
-    name: 'Problem:',
-    documentation: 'Describes a mathematical problem or example.',
-    text: 'Problem: ${1}\nAlias: ${2}\nMetadata: ${3}'
-  },
-  {
-    name: 'Definition:',
-    documentation: 'Describes a mathematical definition that does not have a signature.',
-    text: 'Definition: ${1}\nAlias: ${2}\nMetadata: ${3}'
+    text: 'Theorem: ${1}\ngiven: ${2}\nwhere: ${3}\nthen: ${4}\nusing: "${5}"'
   },
   {
     name: 'Axiom:',
     documentation: 'Describes a mathematical axiom.',
-    text: 'Axiom:\nAlias: ${1}\nMetadata: ${2}'
+    text: 'Axiom: ${1}\ngiven: ${2}\nwhere: ${3}\nthen: ${4}\nusing: "${5}"'
   },
   {
     name: 'Conjecture:',
     documentation: 'Describe a mathematical conjecture.',
-    text: 'Conjecture:\nAlias: ${1}\nMetadata: ${2}'
+    text: 'Conjecture: ${1}\ngiven: ${2}\nwhere: ${3}\nthen: ${4}\nusing: "${5}"'
   },
   {
-    name: 'for:',
-    documentation: 'Introduces a new mathematical object satisfying some (optional) properties.',
-    text: 'for: ${1}\nwhere: ${2}\nthen: ${3}'
+    name: 'forAll:',
+    documentation: 'Introduces a new mathematical object satisfying some properties.',
+    text: 'forAll: ${1}\nwhere: ${2}\nthen: ${3}'
   },
   {
     name: 'exists:',
     documentation: 'Introduces a statement that mathematical object exists.',
-    text: 'exists: ${1}\nsuchThat: ${2}'
+    text: 'exists: ${1}\nwhere: ${2}\nsuchThat: ${3}'
   },
   {
     name: 'if:',
@@ -104,19 +144,44 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
     text: 'or: ${1}'
   },
   {
+    name: 'and:',
+    documentation: 'Specifies that all of the properties are true.',
+    text: 'and: ${1}'
+  },
+  {
     name: 'expands:',
     documentation: 'Specifies how a variadic argument should be expanded in a definition.',
     text: 'expands: ${1}\nas: ${2}'
   },
   {
+    name: 'constructor',
+    documentation: 'Describes a constructor of an inductively defined construct.',
+    text: 'constructor: ${1}\nfrom: ${2}'
+  },
+  {
+    name: 'constant',
+    documentation: 'Describes a constant of an inductively defined construct.',
+    text: 'constant: ${1}'
+  },
+  {
+    name: 'inductively',
+    documentation: 'Used in a Defines to inductively define a concept.',
+    text: 'inductively:\nfrom:\n. ${1}'
+  },
+  {
+    name: 'matching',
+    documentation: 'Used to define a function through pattern matching',
+    text: 'matching:\n. ${1}'
+  },
+  {
+    name: 'piecewise',
+    documentation: 'Used to define a function piecewise',
+    text: 'piecewise:\nwhen: ${1}\nthen: ${2}\nelse: ${3}'
+  },
+  {
     name: 'Metadata:',
     documentation: 'Specifies additional metadata for a mathematical item.',
     text: 'Metadata:\n. written: "${1}"\n. name: "${2}"\n. reference:\n  . source: "@${3}"\n    page: "${4}"\n. tag: "${5}"'
-  },
-  {
-    name: 'Alias:',
-    documentation: 'Specifies alias(es) for a mathematical item.',
-    text: 'Alias: ${1} = "${2}"'
   }
 ];
 
@@ -259,8 +324,8 @@ async function updateHtmlView(panel: vscode.WebviewPanel, textDoc: vscode.TextDo
     '-jar',
     path.join(__dirname, '..', 'jar', 'mathlingua.jar'),
     'render',
-    '--output', 'html',
-    '--expand',
+    '--format', 'html',
+    '--stdout',
     textDoc.uri.fsPath
   ];
   const cwd = vscode.workspace.getWorkspaceFolder(textDoc.uri)?.uri.fsPath;

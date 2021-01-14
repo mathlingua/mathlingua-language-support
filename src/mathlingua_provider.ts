@@ -202,8 +202,7 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
         '-jar',
         path.join(__dirname, '..', 'jar', 'mathlingua.jar'),
         'check',
-        '--json',
-        textDocument.uri.fsPath
+        '--json'
       ], { cwd }, async (err, stdout, stderr) => {
         const parseResults: ParseResult[] = JSON.parse(stdout);
         const diagnostics: MathlinguaDiagnostic[] = [];
