@@ -36,6 +36,9 @@ A Java virtual machine supporting Java 1.8 or higher is required to use this ext
 
 ## Release Notes
 
+## 0.19.0 (2021-01-13)
+- Support the new MathLingua syntax.
+
 ## 0.18.0 (2020-07-19)
 - Addressed issues with rendering content that contained subscripts.
 - If the expansion of a command could not be done, the html tooltip for the command contains the errors preventing the expansion to occur.
