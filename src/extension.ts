@@ -16,6 +16,7 @@
 
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as fs from 'fs';
 
 import {MathlinguaProvider } from './mathlingua_provider';
 
@@ -322,7 +323,7 @@ async function updateHtmlView(panel: vscode.WebviewPanel, textDoc: vscode.TextDo
 
   const args = [
     '-jar',
-    path.join(__dirname, '..', 'jar', 'mathlingua.jar'),
+    MATHLINGUA_JAR,
     'render',
     '--format', 'html',
     '--stdout',
@@ -399,11 +400,23 @@ function maybeCreateHtmlView(document: vscode.TextDocument|null, force: boolean)
   }
 }
 
+const MATHLINGUA_JAR_NAME = 'mathlingua.jar';
+export let MATHLINGUA_JAR = path.join(__dirname, '..', 'jar', MATHLINGUA_JAR_NAME);
+
 export function activate(context: vscode.ExtensionContext) {
+
+  const workspaceFolders = vscode.workspace.workspaceFolders ?? [];
+  for (const f of workspaceFolders) {
+    const jarPath = path.join(f.uri.fsPath, 'bin', MATHLINGUA_JAR_NAME);
+    if (fs.existsSync(jarPath)) {
+      MATHLINGUA_JAR = jarPath;
+      break;
+    }
+  }
 
   const mathlinguaProvider = new MathlinguaProvider();
   vscode.languages.registerCodeActionsProvider('mathlingua', mathlinguaProvider);
-  mathlinguaProvider.activate(context.subscriptions);
+  mathlinguaProvider.activate(context.subscriptions, MATHLINGUA_JAR);
 
   const staticCompletionProvider = vscode.languages.registerCompletionItemProvider('mathlingua', {
     provideCompletionItems(document: vscode.TextDocument,

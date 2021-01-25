@@ -1,6 +1,6 @@
 # Mathlingua Language Support
 
-This is the official Visual Studio Code extension to provide language support for the [Mathlingua](https://www.mathlingua.org/) language.  It is the recommended tool for contributing math knowledge to the [Mathlore Vault](https://github.com/DominicKramer/mathlore-vault).
+This is the official Visual Studio Code extension to provide language support for the [Mathlingua](https://www.mathlingua.org/) language.  It is the recommended tool for contributing math knowledge to the [Mathlore Vault](https://github.com/DominicKramer/mathlore-vault) or [Codex](https://github.com/DominicKramer/codex).
 
 ## Features
 
@@ -9,10 +9,6 @@ Supports syntax highlighting, auto-analysis, autocomplete, rendering of MathLing
 Furthermore, the follow command palette commands are supported:
 - **mathlingua.preview**
   - Open a preview panel that renders the current MathLingua document.
-- **mathlingua.duplicates**
-  - Identify duplicate signatures and content in the current document.
-- **mathlingua.undefined**
-  - Identify signatures used in the current document that do not have a definition.
 
 The following configuration options are also supported:
 - **mathlingua.fontFamily**

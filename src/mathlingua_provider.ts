@@ -87,11 +87,13 @@ export async function getAllDocContents(shouldProcess: (fullPath: string) => boo
 }
 
 export class MathlinguaProvider implements vscode.CodeActionProvider {
+  private mlgJarPath = '';
 
   private command!: vscode.Disposable;
   private diagnosticCollection!: vscode.DiagnosticCollection;
 
-  async activate(subscriptions: vscode.Disposable[]) {
+  async activate(subscriptions: vscode.Disposable[], mlgJarPath: string) {
+    this.mlgJarPath = mlgJarPath;
     this.command = vscode.commands.registerCommand(commandId, () => {}, this);
     subscriptions.push(this);
     this.diagnosticCollection = vscode.languages.createDiagnosticCollection();
@@ -101,37 +103,6 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
     vscode.workspace.onDidCloseTextDocument(textDocument => {
       this.diagnosticCollection.delete(textDocument.uri);
     }, null, subscriptions);
-
-    vscode.commands.registerCommand('mathlingua.duplicates', () => {
-      vscode.workspace.textDocuments.forEach(async doc => {
-        const lines = (await fs.promises.readFile(doc.uri.fsPath))
-                        .toString().split('\n');
-        const allDiagnostics: vscode.Diagnostic[] = [];
-        await Promise.all([
-          this.identifyDuplicateContent(lines, doc).then(diag => {
-            for (const d of toVscodeDiagnostics(lines, diag)) {
-              allDiagnostics.push(d);
-            }
-            this.diagnosticCollection.set(doc.uri, allDiagnostics);
-          }),
-          this.identifyDuplicateSignatures(lines, doc).then(diag => {
-            for (const d of toVscodeDiagnostics(lines, diag)) {
-              allDiagnostics.push(d);
-            }
-            this.diagnosticCollection.set(doc.uri, allDiagnostics);
-          })
-        ]);
-      });
-    });
-
-    vscode.commands.registerCommand('mathlingua.undefined', () => {
-      vscode.workspace.textDocuments.forEach(async doc => {
-        const lines = (await fs.promises.readFile(doc.uri.fsPath))
-                        .toString().split('\n');
-        const allDiagnostics = await this.identifyUndefinedSignatures(lines, doc);
-        this.diagnosticCollection.set(doc.uri, toVscodeDiagnostics(lines, allDiagnostics));
-      });
-    });
 
     vscode.workspace.textDocuments.forEach(this.doProcess, this);
 
@@ -167,40 +138,19 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
                         .toString().split('\n');
 
     const allDiagnostics: vscode.Diagnostic[] = [];
-    const diagnosticsForCheck = await this.check(lines, textDocument);
+    const diagnosticsForCheck = await this.check(this.mlgJarPath, lines, textDocument);
     for (const d of toVscodeDiagnostics(lines, diagnosticsForCheck)) {
       allDiagnostics.push(d);
     }
     this.diagnosticCollection.set(textDocument.uri, allDiagnostics);
-
-    await Promise.all([
-      this.identifyDuplicateContent(lines, textDocument).then(diag => {
-        for (const d of toVscodeDiagnostics(lines, diag)) {
-          allDiagnostics.push(d);
-        }
-        this.diagnosticCollection.set(textDocument.uri, allDiagnostics);
-      }),
-      this.identifyDuplicateSignatures(lines, textDocument).then(diag => {
-        for (const d of toVscodeDiagnostics(lines, diag)) {
-          allDiagnostics.push(d);
-        }
-        this.diagnosticCollection.set(textDocument.uri, allDiagnostics);
-      }),
-      //this.identifyUndefinedSignatures(lines, textDocument).then(diag => {
-      //  for (const d of toVscodeDiagnostics(lines, diag)) {
-      //    allDiagnostics.push(d);
-      //  }
-      //  this.diagnosticCollection.set(textDocument.uri, allDiagnostics);
-      //})
-    ]);
   }
 
-  private async check(lines: string[], textDocument: vscode.TextDocument): Promise<MathlinguaDiagnostic[]> {
+  private async check(mlgJarPath: string, lines: string[], textDocument: vscode.TextDocument): Promise<MathlinguaDiagnostic[]> {
     const cwd = vscode.workspace.getWorkspaceFolder(textDocument.uri)?.uri.fsPath;
     return new Promise((resolve, reject) => {
       cp.execFile('java', [
         '-jar',
-        path.join(__dirname, '..', 'jar', 'mathlingua.jar'),
+        mlgJarPath,
         'check',
         '--json'
       ], { cwd }, async (err, stdout, stderr) => {
@@ -212,99 +162,6 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
           }
 
           const message = err.message;
-          const row = Math.max(0, err.row);
-          // there seems to be a bug in the Mathlingua parser
-          // where the column is off by 1
-          const column = Math.max(0, err.column - 1);
-          const diag: MathlinguaDiagnostic = {
-            message, row, column
-          };
-          diagnostics.push(diag);
-        }
-        resolve(diagnostics);
-      });
-    });
-  }
-
-  private async identifyDuplicateContent(lines: string[], textDocument: vscode.TextDocument): Promise<MathlinguaDiagnostic[]> {
-    const cwd = vscode.workspace.getWorkspaceFolder(textDocument.uri)?.uri.fsPath;
-    return new Promise((resolve, reject) => {
-      cp.execFile('java', [
-        '-jar',
-        path.join(__dirname, '..', 'jar', 'mathlingua.jar'),
-        'dup-content',
-        '--json'
-      ], { cwd }, async (err, stdout, stderr) => {
-        const results: PathLocation[] = JSON.parse(stdout);
-        const diagnostics: MathlinguaDiagnostic[] = [];
-        for (const err of results) {
-          if (err.path !== textDocument.uri.fsPath) {
-            continue;
-          }
-
-          const message = 'Duplicate content detected';
-          const row = Math.max(0, err.row);
-          // there seems to be a bug in the Mathlingua parser
-          // where the column is off by 1
-          const column = Math.max(0, err.column - 1);
-          const diag: MathlinguaDiagnostic = {
-            message, row, column
-          };
-          diagnostics.push(diag);
-        }
-        resolve(diagnostics)
-      });
-    });
-  }
-
-  private async identifyDuplicateSignatures(lines: string[], textDocument: vscode.TextDocument): Promise<MathlinguaDiagnostic[]> {
-    const cwd = vscode.workspace.getWorkspaceFolder(textDocument.uri)?.uri.fsPath;
-    return new Promise((resolve, reject) => {
-      cp.execFile('java', [
-        '-jar',
-        path.join(__dirname, '..', 'jar', 'mathlingua.jar'),
-        'dup-sig',
-        '--json'
-      ], { cwd }, async (err, stdout, stderr) => {
-        const results: PathLocation[] = JSON.parse(stdout);
-        const diagnostics: MathlinguaDiagnostic[] = [];
-        for (const err of results) {
-          if (err.path !== textDocument.uri.fsPath) {
-            continue;
-          }
-
-          const message = 'Duplicate signature detected';
-          const row = Math.max(0, err.row);
-          // there seems to be a bug in the Mathlingua parser
-          // where the column is off by 1
-          const column = Math.max(0, err.column - 1);
-          const diag: MathlinguaDiagnostic = {
-            message, row, column
-          };
-          diagnostics.push(diag);
-        }
-        resolve(diagnostics);
-      });
-    });
-  }
-
-  private async identifyUndefinedSignatures(lines: string[], textDocument: vscode.TextDocument): Promise<MathlinguaDiagnostic[]> {
-    const cwd = vscode.workspace.getWorkspaceFolder(textDocument.uri)?.uri.fsPath;
-    return new Promise((resolve, reject) => {
-      cp.execFile('java', [
-        '-jar',
-        path.join(__dirname, '..', 'jar', 'mathlingua.jar'),
-        'undef-sig',
-        '--json'
-      ], { cwd }, async (err, stdout, stderr) => {
-        const results: PathLocation[] = JSON.parse(stdout);
-        const diagnostics: MathlinguaDiagnostic[] = [];
-        for (const err of results) {
-          if (err.path !== textDocument.uri.fsPath) {
-            continue;
-          }
-
-          const message = 'Undefined signature';
           const row = Math.max(0, err.row);
           // there seems to be a bug in the Mathlingua parser
           // where the column is off by 1
