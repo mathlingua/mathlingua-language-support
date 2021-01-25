@@ -102,17 +102,17 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
   {
     name: 'Theorem:',
     documentation: 'Describes a proven mathematical result such as a theorem, proposition, corollary, or lemma.',
-    text: 'Theorem: ${1}\ngiven: ${2}\nwhere: ${3}\nthen: ${4}\nusing: "${5}"'
+    text: 'Theorem: ${1}\ngiven: ${2}\nwhere: ${3}\nthen: ${4}\nusing: ${5}'
   },
   {
     name: 'Axiom:',
     documentation: 'Describes a mathematical axiom.',
-    text: 'Axiom: ${1}\ngiven: ${2}\nwhere: ${3}\nthen: ${4}\nusing: "${5}"'
+    text: 'Axiom: ${1}\ngiven: ${2}\nwhere: ${3}\nthen: ${4}\nusing: ${5}'
   },
   {
     name: 'Conjecture:',
     documentation: 'Describe a mathematical conjecture.',
-    text: 'Conjecture: ${1}\ngiven: ${2}\nwhere: ${3}\nthen: ${4}\nusing: "${5}"'
+    text: 'Conjecture: ${1}\ngiven: ${2}\nwhere: ${3}\nthen: ${4}\nusing: ${5}'
   },
   {
     name: 'forAll:',
