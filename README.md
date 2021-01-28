@@ -32,6 +32,9 @@ A Java virtual machine supporting Java 1.8 or higher is required to use this ext
 
 ## Release Notes
 
+## 0.21.0 (2021-01-27)
+- Now if the current workspace has a `bin/mathlingua.jar` file it will be used.  Otherwise if it has a `.bin/mathlingua.jar` file it will be used.  Last the `mathlingua.jar` file bundled with the extension will be used.
+
 ## 0.20.0 (2021-01-24)
 - Remove support for the `mathlingua.duplicates` and `mathlingua.undefined` commands since those checks are done whenever a file is saved.
 - If the workspace directory contains a `bin/mathlingua.jar` file, then the extension uses that file.  Otherwise, the `mathlingua.jar` file bundled with the extension is used.
