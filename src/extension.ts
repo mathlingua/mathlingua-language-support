@@ -407,9 +407,15 @@ export function activate(context: vscode.ExtensionContext) {
 
   const workspaceFolders = vscode.workspace.workspaceFolders ?? [];
   for (const f of workspaceFolders) {
-    const jarPath = path.join(f.uri.fsPath, 'bin', MATHLINGUA_JAR_NAME);
-    if (fs.existsSync(jarPath)) {
-      MATHLINGUA_JAR = jarPath;
+    const binJarPath = path.join(f.uri.fsPath, 'bin', MATHLINGUA_JAR_NAME);
+    if (fs.existsSync(binJarPath)) {
+      MATHLINGUA_JAR = binJarPath;
+      break;
+    }
+
+    const dotBinJarPath = path.join(f.uri.fsPath, '.bin', MATHLINGUA_JAR_NAME);
+    if (fs.existsSync(dotBinJarPath)) {
+      MATHLINGUA_JAR = dotBinJarPath;
       break;
     }
   }
