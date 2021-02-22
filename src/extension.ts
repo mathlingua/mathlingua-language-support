@@ -37,12 +37,12 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
   {
     name: 'Defines:means:',
     documentation: 'Makes an abstract definition.',
-    text: '[${1}]\nDefines: ${2}\nwhere: ${3}\nwhen: ${4}\nmeans: ${5}\nusing: ${6}\nwritten: "${7}"'
+    text: '[${1}]\nDefines: ${2}\nrequiring: ${3}\nwhen: ${4}\nmeans: ${5}\nsatisfying: ${6}\nusing: ${7}\nwritten: "${8}"'
   },
   {
     name: 'Defines:maps:',
     documentation: 'Specifies a map.',
-    text: '[${1}]\nDefines: ${2}\nwhere: ${3}\nwhen: ${4}\nmaps: ${5}\n. from: ${6}\n  to: ${7}\nusing: ${8}\nwritten: "${9}"'
+    text: '[${1}]\nDefines: ${2}\nrequiring: ${3}\nwhen: ${4}\nmeans: ${5}\nmaps: ${6}\n. from: ${7}\n  to: ${8}\nusing: ${9}\nwritten: "${10}"'
   },
   {
     name: 'from:to:',
@@ -62,17 +62,17 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
   {
     name: 'Defines:collects:',
     documentation: 'Specifies a collection of objects.',
-    text: '[${1}]\nDefines: ${2}\nwhere: ${3}\nwhen: ${4}\ncollects:\n. given: ${5}\n  where: ${6}\n  all: ${7}\n  suchThat: ${8}\nusing: ${9}\nwritten: "${10}"'
+    text: '[${1}]\nDefines: ${2}\nrequiring: ${3}\nwhen: ${4}\nmeans: ${5}\ncollects:\n. given: ${6}\n  where: ${7}\n  all: ${8}\n  suchThat: ${9}\nusing: ${10}\nwritten: "${11}"'
   },
   {
     name: 'Defines:evaluated:',
     documentation: 'Defines a function.',
-    text: '[${1}]\nDefines: ${1}\nwhere: ${2}\nwhen: ${3}\nevaluated:\n. ${4}\nusing: ${5}\nwritten: ${6}'
+    text: '[${1}]\nDefines: ${1}\nrequiring: ${2}\nwhen: ${3}\nmeans: ${4}\nevaluated:\n. ${5}\nusing: ${6}\nwritten: ${7}'
   },
   {
     name: 'States:',
     documentation: 'Describes a mathematical statement such `x \\in y` or `x < y`.',
-    text: '[${1}]\nStates:\nwhen: ${2}\nthat: ${3}\nusing: ${4}\nwritten: "${5}"'
+    text: '[${1}]\nStates:\nrequiring: ${2}\nwhen: ${3}\nthat: ${4}\nusing: ${5}\nwritten: "${6}"'
   },
   {
     name: 'Evaluates',
