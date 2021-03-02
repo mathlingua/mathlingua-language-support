@@ -32,6 +32,12 @@ A Java virtual machine supporting Java 1.8 or higher is required to use this ext
 
 ## Release Notes
 
+## 0.22.0 (2021-03-01)
+Incorporate MathLingua changes in pull requests:
+- [https://github.com/DominicKramer/mathlingua/pull/305](https://github.com/DominicKramer/mathlingua/pull/305)
+- [https://github.com/DominicKramer/mathlingua/pull/306](https://github.com/DominicKramer/mathlingua/pull/306)
+- [https://github.com/DominicKramer/mathlingua/pull/307](https://github.com/DominicKramer/mathlingua/pull/307)
+
 ## 0.21.0 (2021-01-27)
 - Now if the current workspace has a `bin/mathlingua.jar` file it will be used.  Otherwise if it has a `.bin/mathlingua.jar` file it will be used.  Last the `mathlingua.jar` file bundled with the extension will be used.
 
