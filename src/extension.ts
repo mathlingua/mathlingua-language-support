@@ -35,14 +35,14 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
     text: '[${1}]\nResource:\n. type: "${2}"\n. name: "${3}"\n. author: "${4}"\n. homepage: "${5}"\n. url: "${6}"\n. offset: "${7}"\nMetadata: ${8}'
   },
   {
-    name: 'Defines:means:',
+    name: 'Defines:satisfying:',
     documentation: 'Makes an abstract definition.',
-    text: '[${1}]\nDefines: ${2}\nrequiring: ${3}\nwhen: ${4}\nmeans: ${5}\nsatisfying: ${6}\nusing: ${7}\nwritten: "${8}"'
+    text: '[${1}]\nDefines: ${2}\nrequiring: ${3}\nwhen: ${4}\nmeans: ${5}\nsatisfying: ${6}\nviewed:\n. as: ${7}\n  via: ${8}\n. membership:\n  through: ${9}\nusing: ${10}\nwritten: "${11}"'
   },
   {
     name: 'Defines:maps:',
     documentation: 'Specifies a map.',
-    text: '[${1}]\nDefines: ${2}\nrequiring: ${3}\nwhen: ${4}\nmeans: ${5}\nmaps: ${6}\n. from: ${7}\n  to: ${8}\nusing: ${9}\nwritten: "${10}"'
+    text: '[${1}]\nDefines: ${2}\nrequiring: ${3}\nwhen: ${4}\nmeans: ${5}\nmaps: ${6}\n. from: ${7}\n  to: ${8}\nviewed:\n. as: ${9}\n  via: ${10}\n. membership:\n  through: ${11}\nusing: ${12}\nwritten: "${13}"'
   },
   {
     name: 'from:to:',
@@ -52,22 +52,22 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
   {
     name: 'Defines:instantiated:',
     documentation: 'Creates an instance of an abstract definition.',
-    text: '[${1}]\nDefines: ${2}\ninstantiated: ${3}\nusing: ${4}\nwritten: "${5}"'
+    text: '[${1}]\nDefines: ${2}\ninstantiated: ${3}\nviewed:\n. as: ${4}\n  via: ${5}\n. membership:\n  through: ${6}\nusing: ${7}\nwritten: "${8}"'
   },
   {
     name: 'Defines:generated:',
     documentation: 'Specifies a generated structure.',
-    text: '[${1}]\nDefines: ${2}\nwhere: ${3}\nwhen: ${4}\ngenerated:\n. inductively:\n  from:\n  . constant: ${5}\n  . constructor: ${6}\n    from: ${7}\nusing: ${8}\nwritten: "${9}"'
+    text: '[${1}]\nDefines: ${2}\nwhere: ${3}\nwhen: ${4}\ngenerated:\n. inductively:\n  from:\n  . constant: ${5}\n  . constructor: ${6}\n    from: ${7}\nviewed:\n. as: ${8}\n  via: ${9}\n. membership:\n  through: ${10}\nusing: ${11}\nwritten: "${12}"'
   },
   {
     name: 'Defines:collects:',
     documentation: 'Specifies a collection of objects.',
-    text: '[${1}]\nDefines: ${2}\nrequiring: ${3}\nwhen: ${4}\nmeans: ${5}\ncollects:\n. given: ${6}\n  where: ${7}\n  all: ${8}\n  suchThat: ${9}\nusing: ${10}\nwritten: "${11}"'
+    text: '[${1}]\nDefines: ${2}\nrequiring: ${3}\nwhen: ${4}\nmeans: ${5}\ncollects:\n. given: ${6}\n  where: ${7}\n  all: ${8}\n  suchThat: ${9}\nviewed:\n. as: ${10}\n  via: ${11}\n. membership:\n  through: ${12}\nusing: ${13}\nwritten: "${14}"'
   },
   {
     name: 'Defines:evaluated:',
     documentation: 'Defines a function.',
-    text: '[${1}]\nDefines: ${1}\nrequiring: ${2}\nwhen: ${3}\nmeans: ${4}\nevaluated:\n. ${5}\nusing: ${6}\nwritten: ${7}'
+    text: '[${1}]\nDefines: ${1}\nrequiring: ${2}\nwhen: ${3}\nmeans: ${4}\nevaluated:\n. ${5}\nviewed:\n. as: ${6}\n  via: ${7}\n. membership:\n  through: ${8}\nusing: ${9}\nwritten: ${10}'
   },
   {
     name: 'States:',
@@ -88,11 +88,6 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
     name: 'Foundation',
     documentation: 'Describes a definition that is foundationally true',
     text: 'Foundation:\n. ${1}'
-  },
-  {
-    name: 'Views',
-    documentation: 'Describes how to view a mathematical object as another. (For example, an integer as a rational number).',
-    text: '[${1}]\nViews:\nfrom: ${2}\nto: ${3}\nas: ${4}\nusing: ${5}'
   },
   {
     name: 'Entry',
