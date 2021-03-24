@@ -175,10 +175,25 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
     text: 'piecewise:\nwhen: ${1}\nthen: ${2}\nelse: ${3}'
   },
   {
-    name: 'Metadata:',
-    documentation: 'Specifies additional metadata for a mathematical item.',
-    text: 'Metadata:\n. written: "${1}"\n. name: "${2}"\n. reference:\n  . source: "@${3}"\n    page: "${4}"\n. tag: "${5}"'
-  }
+    name: 'source:',
+    documentation: 'Specifies a source such as a book or an article.',
+    text: 'source: "@${1}"\npage: "${2}"\noffset: "${3}"\ncontent: "${4}"'
+  },
+  {
+    name: 'Metadata:source:',
+    documentation: 'Specifies additional metadata for a mathematical item with a book or article reference.',
+    text: 'Metadata:\n. reference:\n  . source: "@${1}"\n    page: "${2}"\n    offset: "${3}"\n    content: "${4}"'
+  },
+  {
+    name: 'site:',
+    documentation: 'Specifies a website source URL.',
+    text: 'site: "${1}"\nname: "${2}"'
+  },
+  {
+    name: 'Metadata:site:',
+    documentation: 'Specifies additional metadata for a mathematical item with a website reference.',
+    text: 'Metadata:\n. reference:\n  . site: "${1}"\n    name: "${2}"'
+  },
 ];
 
 function buildIndentedCompletion(completion: StaticCompletion,
@@ -330,14 +345,15 @@ async function updateHtmlView(panel: vscode.WebviewPanel, textDoc: vscode.TextDo
       panel.webview.html = err.message;
     } else {
       panel.webview.html = stdout
-            .replace(/<style>/g, '<style> .end-mathlingua-top-level { display: block; height: 1em; } ')
-            .replace(/font-size: 1em;/g, `font-size: ${scale}em;`) // scale the main font
-            .replace(/font-size: 0\.75em;/g, `font-size: ${scale*0.75}em;`) // scale the latex font
-            .replace(/font-family: monospace;/g, `font-family: ${fontFamily};`)
-            // add more padding below each entry
-            .replace(/\.mathlingua-top-level \{/g, '.mathlingua-top-level {padding-bottom: 1.5em;')
-            .replace(/font-weight: bold;/g, `font-weight: ${weight};`)
-            .replace(/\\term\{(.*)\}/g, '$\\textit{$1}$');
+        .replace(/font-size: 1em;/g, `font-size: ${scale}em;`) // scale the main font
+        .replace(/font-size: 0\.9em;/g, `font-size: ${scale*0.9}em;`) // scale the latex font
+        .replace(/font-size: 80%;/g, `font-size: ${scale*80}%;`)
+        .replace(/font-family: monospace;/g, `font-family: ${fontFamily};`)
+        .replace(/font-weight: bold;/g, `font-weight: ${weight};`)
+        .replace(/width: 50%;/g, 'width: 100%;')
+        .replace(/margin-left: auto; \/\* for centering content \*\//g, 'margin-left: unset;')
+        .replace(/margin-right: auto; \/\* for centering content \*\//g, 'margin-right: unset;')
+        .replace(/\\term\{(.*)\}/g, '$\\textit{$1}$');
     }
   });
 }

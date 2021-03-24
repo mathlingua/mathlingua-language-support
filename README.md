@@ -1,14 +1,16 @@
 # Mathlingua Language Support
 
-This is the official Visual Studio Code extension to provide language support for the [Mathlingua](https://www.mathlingua.org/) language.  It is the recommended tool for contributing math knowledge to the [Mathlore Vault](https://github.com/DominicKramer/mathlore-vault) or [Codex](https://github.com/DominicKramer/codex).
+This is the official Visual Studio Code extension to provide language support for the [Mathlingua](https://www.mathlingua.org/) language.  It is the recommended tool for contributing math knowledge to the [Mathlore Vault](https://github.com/DominicKramer/mathlore-vault) or the [Math Codex](https://github.com/DominicKramer/codex).
 
 ## Features
 
-Supports syntax highlighting, auto-analysis, autocomplete, rendering of MathLingua documents (with a `.math` extension), and identifying duplicate content and signatures.  Any parse errors are displayed within the current file on save, and any signatures that are used, but have not been defined, are marked with a warning.
+Supports syntax highlighting, auto-analysis, autocomplete, rendering of MathLingua documents (with a `.math` extension), and identifying errors such as duplicate definitions, usage of undefined definitions, or invalid use of definitions.  Any parse errors are displayed within the current file on save.
 
 Furthermore, the follow command palette commands are supported:
 - **mathlingua.preview**
   - Open a preview panel that renders the current MathLingua document.
+  - This command can also be activated with the keyboard shortcut
+    `Ctrl+Shift+R` or `Cmd+Shift+R`.
 
 The following configuration options are also supported:
 - **mathlingua.fontFamily**
@@ -31,6 +33,11 @@ A Java virtual machine supporting Java 1.8 or higher is required to use this ext
 ![Preview image of the extension](images/preview.png)
 
 ## Release Notes
+
+## 0.23.0 (2021-03-23)
+- Add support for opening the preview panel with keyboard shortcuts.
+- Add support for autocompleting `source:` and `site:` items.
+- Improve rendering of MathLingua documents.
 
 ## 0.22.0 (2021-03-01)
 Incorporate MathLingua changes in pull requests:
