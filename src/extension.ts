@@ -335,7 +335,6 @@ async function updateHtmlView(panel: vscode.WebviewPanel, textDoc: vscode.TextDo
     '-jar',
     MATHLINGUA_JAR,
     'render',
-    '--format', 'html',
     '--stdout',
     textDoc.uri.fsPath
   ];
