@@ -34,6 +34,10 @@ A Java virtual machine supporting Java 1.8 or higher is required to use this ext
 
 ## Release Notes
 
+## 0.25.0 (2021-04-13)
+- Fix a bug where autocompletions were not working.
+- Update the mathlingua language support up to [mathlingua PR#353](https://github.com/DominicKramer/mathlingua/pull/353).
+
 ## 0.24.0 (2021-04-07)
 - Remove the internal use of the `--format` option when rendering since it is no longer supported (see [mathlingua PR#345](https://github.com/DominicKramer/mathlingua/pull/345)).
 

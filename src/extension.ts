@@ -18,7 +18,7 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 
-import {MathlinguaProvider } from './mathlingua_provider';
+import {MathlinguaProvider, getAllDocContents} from './mathlingua_provider';
 
 import * as cp from 'child_process';
 
@@ -243,6 +243,10 @@ function buildIndentedCompletion(completion: StaticCompletion,
 function getVariableAnnotatedVersion(id: string): string {
   const trimmed = id.trim();
 
+  if (!trimmed.startsWith('\\')) {
+    return trimmed;
+  }
+
   const lhsExec = /^[a-zA-Z]+/.exec(trimmed);
   const lhs = !!lhsExec ? lhsExec[0] : '';
 
@@ -295,6 +299,18 @@ function getVariableAnnotatedVersion(id: string): string {
   return result;
 }
 
+function getIdSnippet(id: string): vscode.CompletionItem {
+  const snippet = new vscode.CompletionItem(id);
+  // replace the first \ character from the text to insert.
+  // Otherwise, for the text `\som` the autocomplete will
+  // replace it with `\\something' with two \ characters.
+  let toInsert = getVariableAnnotatedVersion(id).replace(/\\/, '');
+  snippet.insertText = new vscode.SnippetString(toInsert);
+  snippet.keepWhitespace = true;
+  snippet.commitCharacters = ['\\'];
+  return snippet;
+}
+
 function getDynamicIdCompletions(text: string): vscode.CompletionItem[] {
   const result: vscode.CompletionItem[] = [];
 
@@ -302,17 +318,13 @@ function getDynamicIdCompletions(text: string): vscode.CompletionItem[] {
     const trimmed = line.trim();
     if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
       const id = trimmed.substring(1, trimmed.length - 1).trim();
+      result.push(getIdSnippet(id));
 
-      const snippet = new vscode.CompletionItem(id);
-      // replace the first \ character from the text to insert.
-      // Otherwise, for the text `\som` the autocomplete will
-      // replace it with `\\something' with two \ characters.
-      let toInsert = getVariableAnnotatedVersion(id).replace(/\\/, '');
-      snippet.insertText = new vscode.SnippetString(toInsert);
-      snippet.keepWhitespace = true;
-      snippet.commitCharacters = ['\\'];
-
-      result.push(snippet);
+      // if the id doesn't contain a backslash then it is associated
+      // with a resource and can be specified in a reference as `@id`
+      if (id.indexOf('\\') === -1) {
+        result.push(getIdSnippet(`@${id}`));
+      }
     }
   }
 
@@ -435,7 +447,7 @@ export function activate(context: vscode.ExtensionContext) {
   mathlinguaProvider.activate(context.subscriptions, MATHLINGUA_JAR);
 
   const staticCompletionProvider = vscode.languages.registerCompletionItemProvider('mathlingua', {
-    provideCompletionItems(document: vscode.TextDocument,
+    async provideCompletionItems(document: vscode.TextDocument,
                            position: vscode.Position,
                            token: vscode.CancellationToken,
                            context: vscode.CompletionContext) {
@@ -443,7 +455,11 @@ export function activate(context: vscode.ExtensionContext) {
         buildIndentedCompletion(it, document, position))
           .filter(it => !!it) as vscode.CompletionItem[];
 
-      const dynamicCompletions = getDynamicIdCompletions(document.getText());
+      let dynamicCompletions: vscode.CompletionItem[] = [];
+      const contents = await getAllDocContents(fullPath => fullPath.endsWith('.math'));
+      for (const content of contents) {
+        dynamicCompletions = dynamicCompletions.concat(getDynamicIdCompletions(content));
+      }
 
       return staticCompletions.concat(dynamicCompletions);
     }
