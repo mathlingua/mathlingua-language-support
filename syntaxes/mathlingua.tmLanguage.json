@@ -12,6 +12,9 @@
     },
     {
       "include": "#ids"
+    },
+    {
+      "include": "#comments"
     }
   ],
   "repository": {
@@ -40,6 +43,15 @@
         {
           "name": "keyword.control.mathlingua",
           "match": "[a-zA-Z]+:"
+        }
+      ]
+    },
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment",
+          "begin": "--",
+          "end": "\n"
         }
       ]
     },

@@ -34,6 +34,9 @@ A Java virtual machine supporting Java 1.8 or higher is required to use this ext
 
 ## Release Notes
 
+## 0.26.0 (2021-04-14)
+- Add syntax highlighting support for comments.
+
 ## 0.25.0 (2021-04-13)
 - Fix a bug where autocompletions were not working.
 - Update the mathlingua language support up to [mathlingua PR#353](https://github.com/DominicKramer/mathlingua/pull/353).
