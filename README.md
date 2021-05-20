@@ -34,6 +34,10 @@ A Java virtual machine supporting Java 1.8 or higher is required to use this ext
 
 ## Release Notes
 
+## 0.27.0 (2021-05-19)
+- Fix autocompletion issues.
+- Support text blocks.
+
 ## 0.26.0 (2021-04-14)
 - Add syntax highlighting support for comments.
 
