@@ -299,31 +299,52 @@ function getVariableAnnotatedVersion(id: string): string {
   return result;
 }
 
-function getIdSnippet(id: string): vscode.CompletionItem {
-  const snippet = new vscode.CompletionItem(id);
+// `commandPrefix` is the string that occurs prior to the index where the
+// completion should occur.  That is if the text on the current line is
+// `x + \some.text` and the cursor is between the `e` and `x` then
+// `commandPrefix` is `\some.te`.
+function getIdSnippet(id: string, commandPrefix: string): vscode.CompletionItem {
+  const snippet = new vscode.CompletionItem(id, vscode.CompletionItemKind.Module);
   // replace the first \ character from the text to insert.
   // Otherwise, for the text `\som` the autocomplete will
   // replace it with `\\something' with two \ characters.
   let toInsert = getVariableAnnotatedVersion(id).replace(/\\/, '');
+  if (toInsert.startsWith(commandPrefix)) {
+    let toIgnore = '';
+    const index = commandPrefix.lastIndexOf('.');
+    if (index >= 0) {
+      // If the text to insert starts with `commandPrefix` and also contains
+      // a dot, then only actually insert the text after the last dot.
+      // That is, if `commandPrefix` is `\some.text` and the cursor is
+      // between `e` and `x` then only insert `text` and not `some.text`.
+      // Otherwise, the inserted text in the document will be
+      // `\some.some.text`.  That is, the text before the last dot will be
+      // repeated.
+      // This also works if the cursor is, for example, between `o` and `m`.
+      // Then the inserted text is still `\some.text` as it should be.
+      toIgnore = commandPrefix.substring(0, index + 1);
+    }
+    toInsert = toInsert.substr(toIgnore.length);
+  }
   snippet.insertText = new vscode.SnippetString(toInsert);
   snippet.keepWhitespace = true;
   snippet.commitCharacters = ['\\'];
   return snippet;
 }
 
-function getDynamicIdCompletions(text: string): vscode.CompletionItem[] {
+function getDynamicIdCompletions(text: string, prefix: string): vscode.CompletionItem[] {
   const result: vscode.CompletionItem[] = [];
 
   for (const line of text.split('\n')) {
     const trimmed = line.trim();
     if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
       const id = trimmed.substring(1, trimmed.length - 1).trim();
-      result.push(getIdSnippet(id));
+      result.push(getIdSnippet(id, prefix));
 
       // if the id doesn't contain a backslash then it is associated
       // with a resource and can be specified in a reference as `@id`
       if (id.indexOf('\\') === -1) {
-        result.push(getIdSnippet(`@${id}`));
+        result.push(getIdSnippet(`@${id}`, ''));
       }
     }
   }
@@ -455,10 +476,20 @@ export function activate(context: vscode.ExtensionContext) {
         buildIndentedCompletion(it, document, position))
           .filter(it => !!it) as vscode.CompletionItem[];
 
+      const curLine = document.getText(new vscode.Range(
+        new vscode.Position(position.line, 0),
+        position
+      ));
+      const lastSlashIndex = curLine.lastIndexOf('\\');
+      let commandPrefix = '';
+      if (lastSlashIndex >= 0) {
+        commandPrefix = curLine.substring(lastSlashIndex + 1);
+      }
+
       let dynamicCompletions: vscode.CompletionItem[] = [];
       const contents = await getAllDocContents(fullPath => fullPath.endsWith('.math'));
       for (const content of contents) {
-        dynamicCompletions = dynamicCompletions.concat(getDynamicIdCompletions(content));
+        dynamicCompletions = dynamicCompletions.concat(getDynamicIdCompletions(content, commandPrefix));
       }
 
       return staticCompletions.concat(dynamicCompletions);
