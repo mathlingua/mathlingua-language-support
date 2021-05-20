@@ -52,6 +52,11 @@
           "name": "comment",
           "begin": "--",
           "end": "\n"
+        },
+        {
+          "name": "comment",
+          "begin": "::",
+          "end": "::"
         }
       ]
     },
