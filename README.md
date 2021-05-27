@@ -34,6 +34,9 @@ A Java virtual machine supporting Java 1.8 or higher is required to use this ext
 
 ## Release Notes
 
+## 0.28.0 (2021-05-26)
+- Rename `reference:` autocompletion to `resources:`.
+
 ## 0.27.0 (2021-05-19)
 - Fix autocompletion issues.
 - Support text blocks.

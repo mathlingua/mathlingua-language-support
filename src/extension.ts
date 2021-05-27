@@ -182,7 +182,7 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
   {
     name: 'Metadata:source:',
     documentation: 'Specifies additional metadata for a mathematical item with a book or article reference.',
-    text: 'Metadata:\n. reference:\n  . source: "@${1}"\n    page: "${2}"\n    offset: "${3}"\n    content: "${4}"'
+    text: 'Metadata:\n. resources:\n  . source: "@${1}"\n    page: "${2}"\n    offset: "${3}"\n    content: "${4}"'
   },
   {
     name: 'site:',
@@ -192,7 +192,7 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
   {
     name: 'Metadata:site:',
     documentation: 'Specifies additional metadata for a mathematical item with a website reference.',
-    text: 'Metadata:\n. reference:\n  . site: "${1}"\n    name: "${2}"'
+    text: 'Metadata:\n. resources:\n  . site: "${1}"\n    name: "${2}"'
   },
 ];
 
