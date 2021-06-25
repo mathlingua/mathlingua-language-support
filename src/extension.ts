@@ -37,12 +37,12 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
   {
     name: 'Defines:satisfying:',
     documentation: 'Makes an abstract definition.',
-    text: '[${1}]\nDefines: ${2}\nrequiring: ${3}\nwhen: ${4}\nmeans: ${5}\nsatisfying: ${6}\nviewed:\n. as: ${7}\n  via: ${8}\n. membership:\n  through: ${9}\nusing: ${10}\nwritten: "${11}"'
+    text: '[${1}]\nDefines: ${2}\nrequiring: ${3}\nwhen: ${4}\nmeans: ${5}\nsatisfying: ${6}\nviewing:\n. as: ${7}\n  via: ${8}\n. membership:\n  through: ${9}\nusing: ${10}\nwritten: "${11}"'
   },
   {
     name: 'Defines:maps:',
     documentation: 'Specifies a map.',
-    text: '[${1}]\nDefines: ${2}\nrequiring: ${3}\nwhen: ${4}\nmeans: ${5}\nmaps: ${6}\n. from: ${7}\n  to: ${8}\nviewed:\n. as: ${9}\n  via: ${10}\n. membership:\n  through: ${11}\nusing: ${12}\nwritten: "${13}"'
+    text: '[${1}]\nDefines: ${2}\nrequiring: ${3}\nwhen: ${4}\nmeans: ${5}\nmaps: ${6}\n. from: ${7}\n  to: ${8}\nsatisfying: ${9}\nviewing:\n. as: ${10}\n  via: ${11}\n. membership:\n  through: ${12}\nusing: ${13}\nwritten: "${14}"'
   },
   {
     name: 'from:to:',
@@ -50,24 +50,14 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
     text: 'from: ${1}\nto: ${2}'
   },
   {
-    name: 'Defines:instantiated:',
-    documentation: 'Creates an instance of an abstract definition.',
-    text: '[${1}]\nDefines: ${2}\ninstantiated: ${3}\nviewed:\n. as: ${4}\n  via: ${5}\n. membership:\n  through: ${6}\nusing: ${7}\nwritten: "${8}"'
-  },
-  {
-    name: 'Defines:generated:',
-    documentation: 'Specifies a generated structure.',
-    text: '[${1}]\nDefines: ${2}\nwhere: ${3}\nwhen: ${4}\ngenerated:\n. inductively:\n  from:\n  . constant: ${5}\n  . constructor: ${6}\n    from: ${7}\nviewed:\n. as: ${8}\n  via: ${9}\n. membership:\n  through: ${10}\nusing: ${11}\nwritten: "${12}"'
-  },
-  {
     name: 'Defines:collects:',
     documentation: 'Specifies a collection of objects.',
-    text: '[${1}]\nDefines: ${2}\nrequiring: ${3}\nwhen: ${4}\nmeans: ${5}\ncollects:\n. given: ${6}\n  where: ${7}\n  all: ${8}\n  suchThat: ${9}\nviewed:\n. as: ${10}\n  via: ${11}\n. membership:\n  through: ${12}\nusing: ${13}\nwritten: "${14}"'
+    text: '[${1}]\nDefines: ${2}\nrequiring: ${3}\nwhen: ${4}\nmeans: ${5}\ncollects:\n. given: ${6}\n  where: ${7}\n  all: ${8}\n  suchThat: ${9}\nviewing:\n. as: ${10}\n  via: ${11}\n. membership:\n  through: ${12}\nusing: ${13}\nwritten: "${14}"'
   },
   {
     name: 'Defines:evaluated:',
     documentation: 'Defines a function.',
-    text: '[${1}]\nDefines: ${1}\nrequiring: ${2}\nwhen: ${3}\nmeans: ${4}\nevaluated:\n. ${5}\nviewed:\n. as: ${6}\n  via: ${7}\n. membership:\n  through: ${8}\nusing: ${9}\nwritten: ${10}'
+    text: '[${1}]\nDefines: ${1}\nrequiring: ${2}\nwhen: ${3}\nmeans: ${4}\nevaluated:\n. ${5}\nviewing:\n. as: ${6}\n  via: ${7}\n. membership:\n  through: ${8}\nusing: ${9}\nwritten: ${10}'
   },
   {
     name: 'States:',
@@ -80,19 +70,14 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
     text: '[${1}]\nEvaluates:\nwhen: ${2}\nthen: ${3}\nelse: ${4}\nusing: ${5}\nwritten: "${6}"'
   },
   {
-    name: 'Mutually',
-    documentation: 'Used to define two constructs that are mutually related',
-    text: 'Mutually:\n. ${1}'
-  },
-  {
     name: 'Foundation',
     documentation: 'Describes a definition that is foundationally true',
     text: 'Foundation:\n. ${1}'
   },
   {
-    name: 'Entry',
-    documentation: 'Used to give a description of a mathematical concept informally.',
-    text: 'Entry:\ntype: "${1}"\ncontent: "${2}"'
+    name: 'Topic',
+    documentation: 'Used to give a description of a mathematical topic.',
+    text: '[]\nTopic:\ncontent: "${1}"'
   },
   {
     name: 'Theorem:',
@@ -118,6 +103,11 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
     name: 'exists:',
     documentation: 'Introduces a statement that mathematical object exists.',
     text: 'exists: ${1}\nwhere: ${2}\nsuchThat: ${3}'
+  },
+  {
+    name: 'existsUnique:',
+    documentation: 'Introduces a statement that unique mathematical object exists.',
+    text: 'existsUnique: ${1}\nwhere: ${2}\nsuchThat: ${3}'
   },
   {
     name: 'if:',
@@ -148,26 +138,6 @@ const STATIC_COMPLETIONS: StaticCompletion[] = [
     name: 'expands:',
     documentation: 'Specifies how a variadic argument should be expanded in a definition.',
     text: 'expands: ${1}\nas: ${2}'
-  },
-  {
-    name: 'constructor',
-    documentation: 'Describes a constructor of an inductively defined construct.',
-    text: 'constructor: ${1}\nfrom: ${2}'
-  },
-  {
-    name: 'constant',
-    documentation: 'Describes a constant of an inductively defined construct.',
-    text: 'constant: ${1}'
-  },
-  {
-    name: 'inductively',
-    documentation: 'Used in a Defines to inductively define a concept.',
-    text: 'inductively:\nfrom:\n. ${1}'
-  },
-  {
-    name: 'matching',
-    documentation: 'Used to define a function through pattern matching',
-    text: 'matching:\n. ${1}'
   },
   {
     name: 'piecewise',
@@ -377,14 +347,10 @@ async function updateHtmlView(panel: vscode.WebviewPanel, textDoc: vscode.TextDo
       panel.webview.html = err.message;
     } else {
       panel.webview.html = stdout
-        .replace(/font-size: 1em;/g, `font-size: ${scale}em;`) // scale the main font
-        .replace(/font-size: 0\.9em;/g, `font-size: ${scale*0.9}em;`) // scale the latex font
-        .replace(/font-size: 80%;/g, `font-size: ${scale*80}%;`)
+        .replace(/class="content"/g, `style="background-color: #ffffff; font-size: ${scale}em"`)
+        .replace(/background-color: #dddddd;/g, 'background-color: #ffffff;')
         .replace(/font-family: monospace;/g, `font-family: ${fontFamily};`)
         .replace(/font-weight: bold;/g, `font-weight: ${weight};`)
-        .replace(/width: 50%;/g, 'width: 100%;')
-        .replace(/margin-left: auto; \/\* for centering content \*\//g, 'margin-left: unset;')
-        .replace(/margin-right: auto; \/\* for centering content \*\//g, 'margin-right: unset;')
         .replace(/\\term\{(.*)\}/g, '$\\textit{$1}$');
     }
   });
