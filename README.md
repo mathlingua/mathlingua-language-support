@@ -34,6 +34,9 @@ A Java virtual machine supporting Java 1.8 or higher is required to use this ext
 
 ## Release Notes
 
+## 0.29.0 (2021-06-25)
+- Single page rendering works correctly.
+
 ## 0.28.0 (2021-05-26)
 - Rename `reference:` autocompletion to `resources:`.
 
