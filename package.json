@@ -56,16 +56,6 @@
                     "dark": "./vscode-icons/icons/dark/preview.svg",
                     "light": "./vscode-icons/icons/light/preview.svg"
                 }
-            },
-            {
-                "command": "mathlingua.duplicates",
-                "title": "Identify duplicate content and defined signatures.",
-                "category": "mathlingua"
-            },
-            {
-                "command": "mathlingua.undefined",
-                "title": "Identify undefined signatures (those used but not defined).",
-                "category": "mathlingua"
             }
         ],
         "menus": {
@@ -90,21 +80,6 @@
         "configuration": {
             "title": "MathLingua",
             "properties": {
-                "mathlingua.useBoldHeaders": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Use bold fonts when rendering MathLingua headers."
-                },
-                "mathlingua.fontFamily": {
-                    "type": "string",
-                    "default": null,
-                    "description": "The font to use when rendering MathLingua code.  Defaults to the editor font."
-                },
-                "mathlingua.scale": {
-                    "type": "number",
-                    "default": "1.5",
-                    "description": "The font scale to use when rendering MathLingua code."
-                },
                 "mathlingua.autoOpenPreview": {
                     "type": "boolean",
                     "default": false,

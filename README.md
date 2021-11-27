@@ -1,10 +1,24 @@
 # Mathlingua Language Support
 
-This is the official Visual Studio Code extension to provide language support for the [Mathlingua](https://www.mathlingua.org/) language.  It is the recommended tool for contributing math knowledge to the [Mathlore Vault](https://github.com/DominicKramer/mathlore-vault) or the [Math Codex](https://github.com/DominicKramer/codex).
+This extension provides language support for the [Mathlingua](https://www.mathlingua.org/) language.
+
+However, the recommended way to work with MathLingua documents is to use the official MathLingua command line tool `mlg` directly via `mlg edit`.  See [www.mathlingua.org](https://www.mathlingua.org/) for more information.
+
+In particular, running `mlg edit` opens a MathLingua IDE in your browser with more features and better performance compared to this extension.
+
+## Requirements
+
+This extension requires the `mlg` command line tool to be installed.
+
+In particular, if the root of your MathLingua project is `/some/directory/`, then `mlg` should be saved at `/some/directory/mlg` and your MathLingua documents should be stored in `/some/directory/content`.
+
+In addition, a Java virtual machine supporting Java 1.8 or higher is required to use this extension.
 
 ## Features
 
-Supports syntax highlighting, auto-analysis, autocomplete, rendering of MathLingua documents (with a `.math` extension), and identifying errors such as duplicate definitions, usage of undefined definitions, or invalid use of definitions.  Any parse errors are displayed within the current file on save.
+Supports syntax highlighting, auto-analysis, basic autocomplete, and identifying errors in MathLingua documents.
+
+Documents are analyzed and a preview of the document is rendered on each file save.  However, for a more performant way to interact with MathLingua documents and view previews, use `mlg edit`.
 
 Furthermore, the follow command palette commands are supported:
 - **mathlingua.preview**
@@ -13,24 +27,9 @@ Furthermore, the follow command palette commands are supported:
     `Ctrl+Shift+R` or `Cmd+Shift+R`.
 
 The following configuration options are also supported:
-- **mathlingua.fontFamily**
-  - The font used when rendering MathLingua code.
-  - Defaults to the editor's font family.
-- **mathlingua.scale**
-  - The amount to scale the rendered MathLingua code's font.
-  - Defaults to `1.5`.
-- **useBoldHeaders**
-  - Specifies whether or not headers in MathLingua are rendered as bold.
-  - Defaults to `false`.
 - **autoOpenPreview**
   - Specifies whether the preview panel should be automatically displayed when opening a `.math` file.
   - Defaults to `false`.
-
-## Requirements
-
-A Java virtual machine supporting Java 1.8 or higher is required to use this extension.
-
-![Preview image of the extension](images/preview.png)
 
 ## Release Notes
 

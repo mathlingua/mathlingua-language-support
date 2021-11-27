@@ -30,11 +30,11 @@ interface MathlinguaDiagnostic {
 
 interface ParseResult {
   file: string;
-  type: 'Error',
-  message: string,
-  failedLine: string,
-  row: number,
-  column: number
+  type: 'Error';
+  message: string;
+  failedLine: string;
+  row: number;
+  column: number;
 }
 
 interface PathLocation {

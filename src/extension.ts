@@ -327,32 +327,17 @@ async function updateHtmlView(panel: vscode.WebviewPanel, textDoc: vscode.TextDo
     return;
   }
 
-  const config = vscode.workspace.getConfiguration();
-  const editorFontFamily = config.editor.fontFamily || 'monospace';
-
-  const fontFamily = config.mathlingua.fontFamily || editorFontFamily;
-  const scale = config.mathlingua.scale || 1.5;
-  const weight = config.mathlingua.useBoldHeaders ? 'bold' : 'plain';
-
   const args = [
     '-jar',
-    MATHLINGUA_JAR,
-    'render',
-    '--stdout',
-    textDoc.uri.fsPath
+    MATHLINGUA_JAR_PATH,
+    'document'
   ];
   const cwd = vscode.workspace.getWorkspaceFolder(textDoc.uri)?.uri.fsPath;
-  cp.execFile('java', args, { cwd }, (err, stdout, stderr) => {
-    if (err) {
-      panel.webview.html = err.message;
-    } else {
-      panel.webview.html = stdout
-        .replace(/class="content"/g, `style="background-color: #ffffff; font-size: ${scale}em"`)
-        .replace(/background-color: #dddddd;/g, 'background-color: #ffffff;')
-        .replace(/font-family: monospace;/g, `font-family: ${fontFamily};`)
-        .replace(/font-weight: bold;/g, `font-weight: ${weight};`)
-        .replace(/\\term\{(.*)\}/g, '$\\textit{$1}$');
-    }
+  cp.execFile('java', args, { cwd }, async (err, stdout, stderr) => {
+    const sep = path.sep;
+    const outFile = textDoc.uri.fsPath.replace(`${sep}content${sep}`, `${sep}docs${sep}content${sep}`)
+                                      .replace('.math', '.html');
+    panel.webview.html = (await fs.promises.readFile(outFile)).toString();
   });
 }
 
@@ -409,29 +394,34 @@ function maybeCreateHtmlView(document: vscode.TextDocument|null, force: boolean)
   }
 }
 
-const MATHLINGUA_JAR_NAME = 'mathlingua.jar';
-export let MATHLINGUA_JAR = path.join(__dirname, '..', 'jar', MATHLINGUA_JAR_NAME);
+export let MATHLINGUA_JAR_PATH = '';
 
 export function activate(context: vscode.ExtensionContext) {
 
   const workspaceFolders = vscode.workspace.workspaceFolders ?? [];
+  let workspaceFolder = '';
+  let mlgPath = '';
   for (const f of workspaceFolders) {
-    const binJarPath = path.join(f.uri.fsPath, 'bin', MATHLINGUA_JAR_NAME);
-    if (fs.existsSync(binJarPath)) {
-      MATHLINGUA_JAR = binJarPath;
-      break;
-    }
-
-    const dotBinJarPath = path.join(f.uri.fsPath, '.bin', MATHLINGUA_JAR_NAME);
-    if (fs.existsSync(dotBinJarPath)) {
-      MATHLINGUA_JAR = dotBinJarPath;
+    workspaceFolder = f.uri.fsPath;
+    const possibleMlgPath = path.join(workspaceFolder, 'mlg');
+    if (fs.existsSync(possibleMlgPath)) {
+      mlgPath = possibleMlgPath;
+      MATHLINGUA_JAR_PATH = path.join(workspaceFolder, '.bin', 'mathlingua.jar');
       break;
     }
   }
 
+  if (!mlgPath) {
+    vscode.window.showErrorMessage(`Could not find the 'mlg' executable in ${workspaceFolder}.  ` +
+      `Please follow the instructions at www.mathlingua.org to install the 'mlg' tool in that directory.`);
+  } else {
+    // invoke mlg so that if the mathlingua.jar file doesn't exist, mlg will download it
+    cp.execFile(mlgPath, ['version']);
+  }
+
   const mathlinguaProvider = new MathlinguaProvider();
   vscode.languages.registerCodeActionsProvider('mathlingua', mathlinguaProvider);
-  mathlinguaProvider.activate(context.subscriptions, MATHLINGUA_JAR);
+  mathlinguaProvider.activate(context.subscriptions, MATHLINGUA_JAR_PATH);
 
   const staticCompletionProvider = vscode.languages.registerCompletionItemProvider('mathlingua', {
     async provideCompletionItems(document: vscode.TextDocument,
