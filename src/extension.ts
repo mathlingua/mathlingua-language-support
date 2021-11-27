@@ -24,147 +24,9 @@ import * as cp from 'child_process';
 
 interface StaticCompletion {
   name: string;
-  documentation: string;
   text: string;
+  documentation: string;
 }
-
-const STATIC_COMPLETIONS: StaticCompletion[] = [
-  {
-    name: 'Resource:',
-    documentation: 'Describes a mathematical resource (a book, website, article, etc.)',
-    text: '[${1}]\nResource:\n. type: "${2}"\n. name: "${3}"\n. author: "${4}"\n. homepage: "${5}"\n. url: "${6}"\n. offset: "${7}"\nMetadata: ${8}'
-  },
-  {
-    name: 'Defines:satisfying:',
-    documentation: 'Makes an abstract definition.',
-    text: '[${1}]\nDefines: ${2}\nrequiring: ${3}\nwhen: ${4}\nmeans: ${5}\nsatisfying: ${6}\nviewing:\n. as: ${7}\n  via: ${8}\n. membership:\n  through: ${9}\nusing: ${10}\nwritten: "${11}"'
-  },
-  {
-    name: 'Defines:maps:',
-    documentation: 'Specifies a map.',
-    text: '[${1}]\nDefines: ${2}\nrequiring: ${3}\nwhen: ${4}\nmeans: ${5}\nmaps: ${6}\n. from: ${7}\n  to: ${8}\nsatisfying: ${9}\nviewing:\n. as: ${10}\n  via: ${11}\n. membership:\n  through: ${12}\nusing: ${13}\nwritten: "${14}"'
-  },
-  {
-    name: 'from:to:',
-    documentation: 'Specifies the domain and range of a mapping.',
-    text: 'from: ${1}\nto: ${2}'
-  },
-  {
-    name: 'Defines:collects:',
-    documentation: 'Specifies a collection of objects.',
-    text: '[${1}]\nDefines: ${2}\nrequiring: ${3}\nwhen: ${4}\nmeans: ${5}\ncollects:\n. given: ${6}\n  where: ${7}\n  all: ${8}\n  suchThat: ${9}\nviewing:\n. as: ${10}\n  via: ${11}\n. membership:\n  through: ${12}\nusing: ${13}\nwritten: "${14}"'
-  },
-  {
-    name: 'Defines:evaluated:',
-    documentation: 'Defines a function.',
-    text: '[${1}]\nDefines: ${1}\nrequiring: ${2}\nwhen: ${3}\nmeans: ${4}\nevaluated:\n. ${5}\nviewing:\n. as: ${6}\n  via: ${7}\n. membership:\n  through: ${8}\nusing: ${9}\nwritten: ${10}'
-  },
-  {
-    name: 'States:',
-    documentation: 'Describes a mathematical statement such `x \\in y` or `x < y`.',
-    text: '[${1}]\nStates:\nrequiring: ${2}\nwhen: ${3}\nthat: ${4}\nusing: ${5}\nwritten: "${6}"'
-  },
-  {
-    name: 'Evaluates',
-    documentation: 'Describes how an infix operator should be evaluated based on the input',
-    text: '[${1}]\nEvaluates:\nwhen: ${2}\nthen: ${3}\nelse: ${4}\nusing: ${5}\nwritten: "${6}"'
-  },
-  {
-    name: 'Foundation',
-    documentation: 'Describes a definition that is foundationally true',
-    text: 'Foundation:\n. ${1}'
-  },
-  {
-    name: 'Topic',
-    documentation: 'Used to give a description of a mathematical topic.',
-    text: '[]\nTopic:\ncontent: "${1}"'
-  },
-  {
-    name: 'Theorem:',
-    documentation: 'Describes a proven mathematical result such as a theorem, proposition, corollary, or lemma.',
-    text: 'Theorem: ${1}\ngiven: ${2}\nwhere: ${3}\nthen: ${4}\nusing: ${5}'
-  },
-  {
-    name: 'Axiom:',
-    documentation: 'Describes a mathematical axiom.',
-    text: 'Axiom: ${1}\ngiven: ${2}\nwhere: ${3}\nthen: ${4}\nusing: ${5}'
-  },
-  {
-    name: 'Conjecture:',
-    documentation: 'Describe a mathematical conjecture.',
-    text: 'Conjecture: ${1}\ngiven: ${2}\nwhere: ${3}\nthen: ${4}\nusing: ${5}'
-  },
-  {
-    name: 'forAll:',
-    documentation: 'Introduces a new mathematical object satisfying some properties.',
-    text: 'forAll: ${1}\nwhere: ${2}\nthen: ${3}'
-  },
-  {
-    name: 'exists:',
-    documentation: 'Introduces a statement that mathematical object exists.',
-    text: 'exists: ${1}\nwhere: ${2}\nsuchThat: ${3}'
-  },
-  {
-    name: 'existsUnique:',
-    documentation: 'Introduces a statement that unique mathematical object exists.',
-    text: 'existsUnique: ${1}\nwhere: ${2}\nsuchThat: ${3}'
-  },
-  {
-    name: 'if:',
-    documentation: 'Introduces and if-then structure.',
-    text: 'if: ${1}\nthen: ${2}'
-  },
-  {
-    name: 'iff:',
-    documentation: 'Introduces an (if and only if)-then structure.',
-    text: 'iff: ${1}\nthen: ${2}'
-  },
-  {
-    name: 'not:',
-    documentation: 'Introduces a negation.',
-    text: 'not: ${1}'
-  },
-  {
-    name: 'or:',
-    documentation: 'Specifies that at least one of the given properties is true.',
-    text: 'or: ${1}'
-  },
-  {
-    name: 'and:',
-    documentation: 'Specifies that all of the properties are true.',
-    text: 'and: ${1}'
-  },
-  {
-    name: 'expands:',
-    documentation: 'Specifies how a variadic argument should be expanded in a definition.',
-    text: 'expands: ${1}\nas: ${2}'
-  },
-  {
-    name: 'piecewise',
-    documentation: 'Used to define a function piecewise',
-    text: 'piecewise:\nwhen: ${1}\nthen: ${2}\nelse: ${3}'
-  },
-  {
-    name: 'source:',
-    documentation: 'Specifies a source such as a book or an article.',
-    text: 'source: "@${1}"\npage: "${2}"\noffset: "${3}"\ncontent: "${4}"'
-  },
-  {
-    name: 'Metadata:source:',
-    documentation: 'Specifies additional metadata for a mathematical item with a book or article reference.',
-    text: 'Metadata:\n. resources:\n  . source: "@${1}"\n    page: "${2}"\n    offset: "${3}"\n    content: "${4}"'
-  },
-  {
-    name: 'site:',
-    documentation: 'Specifies a website source URL.',
-    text: 'site: "${1}"\nname: "${2}"'
-  },
-  {
-    name: 'Metadata:site:',
-    documentation: 'Specifies additional metadata for a mathematical item with a website reference.',
-    text: 'Metadata:\n. resources:\n  . site: "${1}"\n    name: "${2}"'
-  },
-];
 
 function buildIndentedCompletion(completion: StaticCompletion,
                                  document: vscode.TextDocument,
@@ -416,47 +278,57 @@ export function activate(context: vscode.ExtensionContext) {
       `Please follow the instructions at www.mathlingua.org to install the 'mlg' tool in that directory.`);
   } else {
     // invoke mlg so that if the mathlingua.jar file doesn't exist, mlg will download it
-    cp.execFile(mlgPath, ['version']);
+    cp.execFile('java', ['-D__MATHLINGUA_SHOW_COMPLETIONS__=true',
+                         '-jar', MATHLINGUA_JAR_PATH,
+                         'help'], (err, stdout, stderr) => {
+      const completions: { items: Array<{ name: string; value: string; }> } = JSON.parse(stdout);
+
+      const staticCompletionProvider = vscode.languages.registerCompletionItemProvider('mathlingua', {
+        async provideCompletionItems(document: vscode.TextDocument,
+                               position: vscode.Position,
+                               _: vscode.CancellationToken,
+                               __: vscode.CompletionContext) {
+          const staticCompletions = completions.items.map(item => {
+            return {
+              name: item.name,
+              text: item.value,
+              documentation: item.name
+            };
+          }).map(it =>
+            buildIndentedCompletion(it, document, position))
+              .filter(it => !!it) as vscode.CompletionItem[];
+
+            const curLine = document.getText(new vscode.Range(
+            new vscode.Position(position.line, 0),
+            position
+          ));
+          const lastSlashIndex = curLine.lastIndexOf('\\');
+          let commandPrefix = '';
+          if (lastSlashIndex >= 0) {
+            commandPrefix = curLine.substring(lastSlashIndex + 1);
+          }
+
+          let dynamicCompletions: vscode.CompletionItem[] = [];
+          const contents = await getAllDocContents(fullPath => fullPath.endsWith('.math'));
+          for (const content of contents) {
+            dynamicCompletions = dynamicCompletions.concat(getDynamicIdCompletions(content, commandPrefix));
+          }
+
+          return staticCompletions.concat(dynamicCompletions);
+        }
+      });
+
+      const previewCommand = vscode.commands.registerCommand('mathlingua.preview', () => {
+        maybeCreateHtmlView(null, true);
+      });
+
+      context.subscriptions.push(staticCompletionProvider, previewCommand);
+    });
   }
 
   const mathlinguaProvider = new MathlinguaProvider();
   vscode.languages.registerCodeActionsProvider('mathlingua', mathlinguaProvider);
   mathlinguaProvider.activate(context.subscriptions, MATHLINGUA_JAR_PATH);
-
-  const staticCompletionProvider = vscode.languages.registerCompletionItemProvider('mathlingua', {
-    async provideCompletionItems(document: vscode.TextDocument,
-                           position: vscode.Position,
-                           token: vscode.CancellationToken,
-                           context: vscode.CompletionContext) {
-      const staticCompletions = STATIC_COMPLETIONS.map(it =>
-        buildIndentedCompletion(it, document, position))
-          .filter(it => !!it) as vscode.CompletionItem[];
-
-      const curLine = document.getText(new vscode.Range(
-        new vscode.Position(position.line, 0),
-        position
-      ));
-      const lastSlashIndex = curLine.lastIndexOf('\\');
-      let commandPrefix = '';
-      if (lastSlashIndex >= 0) {
-        commandPrefix = curLine.substring(lastSlashIndex + 1);
-      }
-
-      let dynamicCompletions: vscode.CompletionItem[] = [];
-      const contents = await getAllDocContents(fullPath => fullPath.endsWith('.math'));
-      for (const content of contents) {
-        dynamicCompletions = dynamicCompletions.concat(getDynamicIdCompletions(content, commandPrefix));
-      }
-
-      return staticCompletions.concat(dynamicCompletions);
-    }
-  });
-
-  const previewCommand = vscode.commands.registerCommand('mathlingua.preview', () => {
-    maybeCreateHtmlView(null, true);
-  });
-
-  context.subscriptions.push(staticCompletionProvider, previewCommand);
 
   const config = vscode.workspace.getConfiguration();
   const showPreview = !!config && !!config.mathlingua && config.mathlingua.autoOpenPreview === true;
