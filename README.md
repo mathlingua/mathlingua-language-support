@@ -33,6 +33,10 @@ The following configuration options are also supported:
 
 ## Release Notes
 
+## 0.30.0 (2021-11-26)
+- Updated to use version `0.13.0` of MathLingua.
+- Removed several configurations that are not supported by the new version of `mlg`.
+
 ## 0.29.0 (2021-06-25)
 - Single page rendering works correctly.
 
