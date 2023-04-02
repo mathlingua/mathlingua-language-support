@@ -22,34 +22,29 @@ import * as vscode from 'vscode';
 
 const commandId = 'mathlingua.runCodeAction';
 
-interface MathlinguaDiagnostic {
-  message: string;
-  row: number;
-  column: number;
+interface CheckDiagnostic {
+  Type: string;
+  Origin: string;
+  Message: string;
+  Path: string;
+  Position: {
+    Offset: number;
+    Row: number;
+    Column: number;
+  };
 }
 
-interface ParseResult {
-  file: string;
-  type: 'Error';
-  message: string;
-  failedLine: string;
-  row: number;
-  column: number;
-}
-
-interface PathLocation {
-  path: string;
-  row: number;
-  column: number;
+interface CheckResult {
+  Diagnostics: CheckDiagnostic[];
 }
 
 function toVscodeDiagnostics(lines: string[],
-                             mathDiagnostics: MathlinguaDiagnostic[]): vscode.Diagnostic[] {
+                             mathDiagnostics: CheckDiagnostic[]): vscode.Diagnostic[] {
     const diagnostics: vscode.Diagnostic[] = [];
     for (const diag of mathDiagnostics) {
-      const message = diag.message;
-      const row = diag.row;
-      const col = diag.column;
+      const message = diag.Message;
+      const row = diag.Position.Row;
+      const col = diag.Position.Column;
 
       const line = lines[row] || '';
       const range = new vscode.Range(row, col, row, line.length);
@@ -87,13 +82,10 @@ export async function getAllDocContents(shouldProcess: (fullPath: string) => boo
 }
 
 export class MathlinguaProvider implements vscode.CodeActionProvider {
-  private mlgJarPath = '';
-
   private command!: vscode.Disposable;
   private diagnosticCollection!: vscode.DiagnosticCollection;
 
-  async activate(subscriptions: vscode.Disposable[], mlgJarPath: string) {
-    this.mlgJarPath = mlgJarPath;
+  async activate(subscriptions: vscode.Disposable[]) {
     this.command = vscode.commands.registerCommand(commandId, () => {}, this);
     subscriptions.push(this);
     this.diagnosticCollection = vscode.languages.createDiagnosticCollection();
@@ -138,39 +130,23 @@ export class MathlinguaProvider implements vscode.CodeActionProvider {
                         .toString().split('\n');
 
     const allDiagnostics: vscode.Diagnostic[] = [];
-    const diagnosticsForCheck = await this.check(this.mlgJarPath, lines, textDocument);
+    const diagnosticsForCheck = await this.check(textDocument);
     for (const d of toVscodeDiagnostics(lines, diagnosticsForCheck)) {
       allDiagnostics.push(d);
     }
     this.diagnosticCollection.set(textDocument.uri, allDiagnostics);
   }
 
-  private async check(mlgJarPath: string, lines: string[], textDocument: vscode.TextDocument): Promise<MathlinguaDiagnostic[]> {
+  private async check(textDocument: vscode.TextDocument): Promise<CheckDiagnostic[]> {
     const cwd = vscode.workspace.getWorkspaceFolder(textDocument.uri)?.uri.fsPath;
     return new Promise((resolve, reject) => {
-      cp.execFile('java', [
-        '-jar',
-        mlgJarPath,
+      cp.execFile('mlg', [
         'check',
         '--json'
       ], { cwd }, async (err, stdout, stderr) => {
-        const parseResults: ParseResult[] = JSON.parse(stdout);
-        const diagnostics: MathlinguaDiagnostic[] = [];
-        for (const err of parseResults) {
-          if (err.file !== textDocument.uri.fsPath) {
-            continue;
-          }
-
-          const message = err.message;
-          const row = Math.max(0, err.row);
-          // there seems to be a bug in the Mathlingua parser
-          // where the column is off by 1
-          const column = Math.max(0, err.column - 1);
-          const diag: MathlinguaDiagnostic = {
-            message, row, column
-          };
-          diagnostics.push(diag);
-        }
+        const parseResults: CheckResult = JSON.parse(stdout);
+        const diagnostics = parseResults.Diagnostics.filter(diag =>
+          path.resolve(cwd ?? '', diag.Path) === path.resolve(textDocument.uri.fsPath));
         resolve(diagnostics);
       });
     });

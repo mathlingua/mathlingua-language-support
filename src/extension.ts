@@ -22,6 +22,14 @@ import {MathlinguaProvider, getAllDocContents} from './mathlingua_provider';
 
 import * as cp from 'child_process';
 
+interface MlgCompletion {
+  Completion: string;
+}
+
+interface CompletionResult {
+  Completions: string[];
+}
+
 interface StaticCompletion {
   name: string;
   text: string;
@@ -184,158 +192,77 @@ function getDynamicIdCompletions(text: string, prefix: string): vscode.Completio
   return result;
 }
 
-async function updateHtmlView(panel: vscode.WebviewPanel, textDoc: vscode.TextDocument) {
-  if (!textDoc.uri.path.endsWith('.math')) {
-    return;
-  }
-
-  const args = [
-    '-jar',
-    MATHLINGUA_JAR_PATH,
-    'document'
-  ];
-  const cwd = vscode.workspace.getWorkspaceFolder(textDoc.uri)?.uri.fsPath;
-  cp.execFile('java', args, { cwd }, async (err, stdout, stderr) => {
-    const sep = path.sep;
-    const outFile = textDoc.uri.fsPath.replace(`${sep}content${sep}`, `${sep}docs${sep}content${sep}`)
-                                      .replace('.math', '.html');
-    panel.webview.html = (await fs.promises.readFile(outFile)).toString();
-  });
-}
-
-let prevPanel: vscode.WebviewPanel|null = null;
-function maybeCreateHtmlView(document: vscode.TextDocument|null, force: boolean) {
-  const doc = document || vscode.window.activeTextEditor?.document;
-  if ((!doc || !doc.uri.path.endsWith('.math')) && !force) {
-    return;
-  }
-
-  if (prevPanel != null) {
-    if (!force) {
-      return;
-    }
-
-    prevPanel.dispose();
-    prevPanel = null;
-  }
-
-  const panel = vscode.window.createWebviewPanel(
-    'mathlingua',
-    'MathLingua Preview',
-    vscode.ViewColumn.Beside,
-    {
-      enableScripts: true
-    }
-  );
-  prevPanel = panel;
-  var isDisposed = false;
-  prevPanel.onDidDispose(() => {
-    isDisposed = true;
-    prevPanel = null;
-  });
-
-  vscode.workspace.onDidSaveTextDocument(textDoc => {
-    if (isDisposed) {
-      return;
-    }
-    return updateHtmlView(panel, textDoc);
-  });
-
-  vscode.workspace.onDidOpenTextDocument(doc => {
-    if (isDisposed) {
-      return;
-    }
-    return updateHtmlView(panel, doc);
-  });
-
-  if (doc) {
-    updateHtmlView(panel, doc);
-  } else {
-    panel.webview.html = '<html><body><span style="font-size: 1.5em; margin-top: 2em;">' +
-      'Whenever a MathLingua (.math) document is saved, its contents will be displayed here.</span></body></html>';
-  }
-}
-
-export let MATHLINGUA_JAR_PATH = '';
-
-export function activate(context: vscode.ExtensionContext) {
-
-  const workspaceFolders = vscode.workspace.workspaceFolders ?? [];
-  let workspaceFolder = '';
-  let mlgPath = '';
-  for (const f of workspaceFolders) {
-    workspaceFolder = f.uri.fsPath;
-    const possibleMlgPath = path.join(workspaceFolder, 'mlg');
-    if (fs.existsSync(possibleMlgPath)) {
-      mlgPath = possibleMlgPath;
-      MATHLINGUA_JAR_PATH = path.join(workspaceFolder, '.bin', 'mathlingua.jar');
-      break;
-    }
-  }
-
-  if (!mlgPath) {
-    vscode.window.showErrorMessage(`Could not find the 'mlg' executable in ${workspaceFolder}.  ` +
-      `Please follow the instructions at www.mathlingua.org to install the 'mlg' tool in that directory.`);
-  } else {
-    // invoke mlg so that if the mathlingua.jar file doesn't exist, mlg will download it
-    cp.execFile('java', ['-D__MATHLINGUA_SHOW_COMPLETIONS__=true',
-                         '-jar', MATHLINGUA_JAR_PATH,
-                         'help'], (err, stdout, stderr) => {
-      const completions: { items: Array<{ name: string; value: string; }> } = JSON.parse(stdout);
-
-      const staticCompletionProvider = vscode.languages.registerCompletionItemProvider('mathlingua', {
-        async provideCompletionItems(document: vscode.TextDocument,
-                               position: vscode.Position,
-                               _: vscode.CancellationToken,
-                               __: vscode.CompletionContext) {
-          const staticCompletions = completions.items.map(item => {
-            return {
-              name: item.name,
-              text: item.value,
-              documentation: item.name
-            };
-          }).map(it =>
-            buildIndentedCompletion(it, document, position))
-              .filter(it => !!it) as vscode.CompletionItem[];
-
-            const curLine = document.getText(new vscode.Range(
-            new vscode.Position(position.line, 0),
-            position
-          ));
-          const lastSlashIndex = curLine.lastIndexOf('\\');
-          let commandPrefix = '';
-          if (lastSlashIndex >= 0) {
-            commandPrefix = curLine.substring(lastSlashIndex + 1);
-          }
-
-          let dynamicCompletions: vscode.CompletionItem[] = [];
-          const contents = await getAllDocContents(fullPath => fullPath.endsWith('.math'));
-          for (const content of contents) {
-            dynamicCompletions = dynamicCompletions.concat(getDynamicIdCompletions(content, commandPrefix));
-          }
-
-          return staticCompletions.concat(dynamicCompletions);
-        }
-      });
-
-      const previewCommand = vscode.commands.registerCommand('mathlingua.preview', () => {
-        maybeCreateHtmlView(null, true);
-      });
-
-      context.subscriptions.push(staticCompletionProvider, previewCommand);
+function checkForMlgExecutable(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    cp.execFile('mlg', ['help']).on('exit', code => {
+      if (code !== 0) {
+        vscode.window.showErrorMessage(
+          `Could not find the 'mlg' executable. Please ensure it is in your PATH.`);
+      }
+      resolve();
     });
-  }
+  });
+}
+
+async function loadMlgCompletions(): Promise<string[]> {
+  return new Promise((resolve, reject) => {
+    cp.execFile('mlg', ['completions'], (err, stdout, stderr) => {
+      try {
+        const completionResult: CompletionResult = JSON.parse(stdout);
+        resolve(completionResult.Completions);
+      } catch (err) {
+        reject(err);
+      }
+    });
+  });
+}
+
+async function setupCompletions(context: vscode.ExtensionContext) {
+  const completions = await loadMlgCompletions();
+
+  const staticCompletionProvider = vscode.languages.registerCompletionItemProvider('mathlingua', {
+    async provideCompletionItems(document: vscode.TextDocument,
+                           position: vscode.Position,
+                           _: vscode.CancellationToken,
+                           __: vscode.CompletionContext) {
+      const staticCompletions = completions.map(item => {
+        return {
+          name: item,
+          text: item,
+          documentation: item,
+        };
+      }).map(it =>
+        buildIndentedCompletion(it, document, position))
+          .filter(it => !!it) as vscode.CompletionItem[];
+
+        const curLine = document.getText(new vscode.Range(
+        new vscode.Position(position.line, 0),
+        position
+      ));
+      const lastSlashIndex = curLine.lastIndexOf('\\');
+      let commandPrefix = '';
+      if (lastSlashIndex >= 0) {
+        commandPrefix = curLine.substring(lastSlashIndex + 1);
+      }
+
+      let dynamicCompletions: vscode.CompletionItem[] = [];
+      const contents = await getAllDocContents(fullPath => fullPath.endsWith('.math'));
+      for (const content of contents) {
+        dynamicCompletions = dynamicCompletions.concat(getDynamicIdCompletions(content, commandPrefix));
+      }
+
+      return staticCompletions.concat(dynamicCompletions);
+    }
+  });
+
+  context.subscriptions.push(staticCompletionProvider);
+}
+
+export async function activate(context: vscode.ExtensionContext) {
+  await checkForMlgExecutable();
+  await setupCompletions(context);
 
   const mathlinguaProvider = new MathlinguaProvider();
   vscode.languages.registerCodeActionsProvider('mathlingua', mathlinguaProvider);
-  mathlinguaProvider.activate(context.subscriptions, MATHLINGUA_JAR_PATH);
-
-  const config = vscode.workspace.getConfiguration();
-  const showPreview = !!config && !!config.mathlingua && config.mathlingua.autoOpenPreview === true;
-  if (showPreview) {
-    maybeCreateHtmlView(null, false);
-    vscode.workspace.onDidOpenTextDocument(async doc => {
-      maybeCreateHtmlView(doc, false);
-    });
-  }
+  mathlinguaProvider.activate(context.subscriptions);
 }
