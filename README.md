@@ -1,37 +1,19 @@
 # Mathlingua Language Support
 
-This extension provides language support for the [Mathlingua](https://www.mathlingua.org/) language.
-
-However, the recommended way to work with MathLingua documents is to use the official MathLingua command line tool `mlg` directly via `mlg edit`.  See [www.mathlingua.org](https://www.mathlingua.org/) for more information.
-
-In particular, running `mlg edit` opens a MathLingua IDE in your browser with more features and better performance compared to this extension.
+This is the official extension that provides language support for the [Mathlingua](https://www.mathlingua.org/) language.
 
 ## Requirements
 
-This extension requires the `mlg` command line tool to be installed.
-
-In particular, if the root of your MathLingua project is `/some/directory/`, then `mlg` should be saved at `/some/directory/mlg` and your MathLingua documents should be stored in `/some/directory/content`.
-
-In addition, a Java virtual machine supporting Java 1.8 or higher is required to use this extension.
+This extension requires the `mlg` command line tool to be installed.  To install it, download the latest version from the [Mathlingua release page](https://github.com/mathlingua/mathlingua/releases), rename it to `mlg`, and ensure it is in your `PATH`.
 
 ## Features
 
-Supports syntax highlighting, auto-analysis, basic autocomplete, and identifying errors in MathLingua documents.
-
-Documents are analyzed and a preview of the document is rendered on each file save.  However, for a more performant way to interact with MathLingua documents and view previews, use `mlg edit`.
-
-Furthermore, the follow command palette commands are supported:
-- **mathlingua.preview**
-  - Open a preview panel that renders the current MathLingua document.
-  - This command can also be activated with the keyboard shortcut
-    `Ctrl+Shift+R` or `Cmd+Shift+R`.
-
-The following configuration options are also supported:
-- **autoOpenPreview**
-  - Specifies whether the preview panel should be automatically displayed when opening a `.math` file.
-  - Defaults to `false`.
+Supports syntax highlighting, basic autocomplete, and identifying syntax errors in Mathlingua documents.  Documents are analyzed on each file save.
 
 ## Release Notes
+
+## 0.31.0 (2023-04-04)
+- Updated to support Mathlingua version 0.20.0 that is a major change in the language designed to support operator overloading (ad-hoc polymorphism).
 
 ## 0.30.0 (2021-11-26)
 - Updated to use version `0.13.0` of MathLingua.

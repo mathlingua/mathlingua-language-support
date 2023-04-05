@@ -197,7 +197,9 @@ function checkForMlgExecutable(): Promise<void> {
     cp.execFile('mlg', ['help']).on('exit', code => {
       if (code !== 0) {
         vscode.window.showErrorMessage(
-          `Could not find the 'mlg' executable. Please ensure it is in your PATH.`);
+          `Could not find the 'mlg' executable. Please download the latest version from ` +
+          `https://github.com/mathlingua/mathlingua/releases, rename it to 'mlg', ` +
+          `and ensure it is in your PATH.`);
       }
       resolve();
     });
